@@ -117,13 +117,13 @@ Transparent reasoning, no hidden agendas. Like a scholar's integrity.
 
 ### Tone Spectrum
 
-| Context | Tone | Example |
-|---------|------|---------|
-| Market neutral | Informative, steady | "Samsung closed at 72,400 won, up 0.8% on moderate volume." |
-| Market volatile | Calm, reassuring | "The market is moving sharply. Let me walk you through what's driving this." |
-| About to trade | Careful, guiding | "Before confirming, let's review the risk factors together." |
-| Educational | Warm, encouraging | "Great observation. This pattern is called a golden cross -- here is why it matters." |
-| Achievement | Quietly proud | "Your portfolio is up 12% this quarter. Let's review what worked." |
+<FeatureGrid columns={1}>
+  <FeatureCard icon="chart" title="Market neutral — Informative, steady" description={`"Samsung closed at 72,400 won, up 0.8% on moderate volume."`} />
+  <FeatureCard icon="shield" title="Market volatile — Calm, reassuring" description={`"The market is moving sharply. Let me walk you through what's driving this."`} />
+  <FeatureCard icon="target" title="About to trade — Careful, guiding" description={`"Before confirming, let's review the risk factors together."`} />
+  <FeatureCard icon="light" title="Educational — Warm, encouraging" description={`"Great observation. This pattern is called a golden cross — here is why it matters."`} />
+  <FeatureCard icon="award" title="Achievement — Quietly proud" description={`"Your portfolio is up 12% this quarter. Let's review what worked."`} />
+</FeatureGrid>
 
 <InfoBox type="danger" title="Voice Don'ts">
 Never use urgency language ("Act now", "Don't miss out"). No gambling metaphors ("bet", "hot tip", "moonshot"). No oversimplification that removes context. No promises of returns. No exclamation marks in UI copy.
@@ -168,12 +168,12 @@ Like an LLM's attention mechanism focusing on relevant tokens, BARO's AI focuses
 
 ### Tagline & Messaging
 
-| Level | Message | Used For |
-|-------|---------|----------|
-| **Elevator pitch** | "AI that teaches you the correct way to invest, not just trade" | PR, press |
-| **Product** | "Korea's AI robo-advisor for rational, guided investing" | App store |
-| **Emotional** | "Your market. Your pace. Your mentor." | Campaigns |
-| **Technical** | "AI-narrated market analysis with real-time UI orchestration" | Dev docs |
+<FeatureGrid columns={2}>
+  <FeatureCard icon="mic" title="Elevator pitch" description={`"AI that teaches you the correct way to invest, not just trade" — PR, press`} />
+  <FeatureCard icon="smartphone" title="Product" description={`"Korea's AI robo-advisor for rational, guided investing" — App store`} />
+  <FeatureCard icon="heart" title="Emotional" description={`"Your market. Your pace. Your mentor." — Campaigns`} />
+  <FeatureCard icon="code" title="Technical" description={`"AI-narrated market analysis with real-time UI orchestration" — Dev docs`} />
+</FeatureGrid>
 
 ---
 
@@ -272,11 +272,11 @@ The mark is rendered programmatically using SwiftUI `Canvas` in `BAROMarkView.sw
   <img src="/images/brand/clear-space.svg" alt="Clear space rules" style={{ maxWidth: '100%', borderRadius: '12px', border: 'none', boxShadow: 'none' }} />
 </div>
 
-| Rule | Value |
-|------|-------|
-| **Clear space** | 1x mark height on all sides |
-| **Minimum digital size (full logo)** | 80px |
-| **Minimum digital size (icon only)** | 24px |
+<StatGrid columns={3}>
+  <StatCard value="1x" label="Clear space — mark height on all sides" />
+  <StatCard value="80px" label="Minimum digital size — full logo" />
+  <StatCard value="24px" label="Minimum digital size — icon only" />
+</StatGrid>
 
 <div style={{ margin: '24px 0', textAlign: 'center' }}>
   <img src="/images/brand/minimum-sizes.svg" alt="Minimum size comparison" style={{ maxWidth: '100%', borderRadius: '12px', border: 'none', boxShadow: 'none' }} />
@@ -330,23 +330,23 @@ The mark is rendered programmatically using SwiftUI `Canvas` in `BAROMarkView.sw
 
 <img src="/images/brand/color-603010.svg" alt="60-30-10 color architecture showing neutrals, primary indigo, and accent distribution" style={{ maxWidth: '100%', borderRadius: '12px', border: 'none', boxShadow: 'none' }} />
 
-| Tier | Colors | Usage | Ratio |
-|------|--------|-------|-------|
-| **Neutrals** | Slate 900 to Slate 50 | Canvas, text, borders | 60% |
-| **Primary** | Indigo + Indigo Light | AI presence, brand elements, navigation | 30% |
-| **Accents** | Gold + Teal | Signal points, data viz, secondary actions | 10% |
+<FeatureGrid columns={3}>
+  <FeatureCard icon="layers" title="60% — Neutrals" description="Slate 900 to Slate 50. Canvas, text, borders — the calm foundation." />
+  <FeatureCard icon="eye" title="30% — Primary" description="Indigo + Indigo Light. AI presence, brand elements, navigation." />
+  <FeatureCard icon="zap" title="10% — Accents" description="Gold + Teal. Signal points, data viz, secondary actions." />
+</FeatureGrid>
 
 <Accordion>
 <AccordionItem title="Color Psychology & Roles" icon="eye" defaultOpen={false}>
 
-| Color | Hex | Token | Role | Psychological Basis |
-|-------|-----|-------|------|---------------------|
-| <span style={{ display: 'inline-block', width: 14, height: 14, borderRadius: 4, background: '#3B3F8C', verticalAlign: 'middle', marginRight: 6 }} />Indigo | `#3B3F8C` | `baroIndigo` | AI presence / Primary | Contemplation, wisdom, analytical depth. Korean tradition |
-| <span style={{ display: 'inline-block', width: 14, height: 14, borderRadius: 4, background: '#6366A8', verticalAlign: 'middle', marginRight: 6 }} />Indigo Light | `#6366A8` | `baroIndigoLight` | Hover, secondary emphasis | Softer variant for interactive states |
-| <span style={{ display: 'inline-block', width: 14, height: 14, borderRadius: 4, background: '#D4A843', verticalAlign: 'middle', marginRight: 6 }} />Gold | `#D4A843` | `baroGold` | Attention / signal | Wealth, prestige, premium quality. Bloomberg-grade warm accent |
-| <span style={{ display: 'inline-block', width: 14, height: 14, borderRadius: 4, background: '#3AAFA8', verticalAlign: 'middle', marginRight: 6 }} />Teal | `#3AAFA8` | `baroTeal` | Data visualization, AI/tech | Modernity, clarity. Complements indigo |
-| <span style={{ display: 'inline-block', width: 14, height: 14, borderRadius: 4, background: '#0F1018', verticalAlign: 'middle', marginRight: 6 }} />Slate 900 | `#0F1018` | `baroSlate900` | Dark mode canvas | Indigo-tinted near-black. More premium than warm charcoal |
-| <span style={{ display: 'inline-block', width: 14, height: 14, borderRadius: 4, background: '#F8F9FC', border: '1px solid #E2E4ED', verticalAlign: 'middle', marginRight: 6 }} />Slate 50 | `#F8F9FC` | `baroSlate50` | Light mode canvas | Cool-tinted white, subtle blue undertone |
+<FeatureGrid columns={2}>
+  <FeatureCard icon="🟦" title="Indigo #3B3F8C — baroIndigo" description="AI presence / Primary. Contemplation, wisdom, analytical depth. Korean tradition of scholarly authority." />
+  <FeatureCard icon="🟪" title="Indigo Light #6366A8 — baroIndigoLight" description="Hover, secondary emphasis. Softer variant for interactive states." />
+  <FeatureCard icon="🟨" title="Gold #D4A843 — baroGold" description="Attention / signal. Wealth, prestige, premium quality. Bloomberg-grade warm accent." />
+  <FeatureCard icon="🟩" title="Teal #3AAFA8 — baroTeal" description="Data visualization, AI/tech. Modernity, clarity. Complements indigo." />
+  <FeatureCard icon="⬛" title="Slate 900 #0F1018 — baroSlate900" description="Dark mode canvas. Indigo-tinted near-black. More premium than warm charcoal." />
+  <FeatureCard icon="⬜" title="Slate 50 #F8F9FC — baroSlate50" description="Light mode canvas. Cool-tinted white, subtle blue undertone." />
+</FeatureGrid>
 
 </AccordionItem>
 <AccordionItem title="Semantic Color Rules" icon="alert-circle" defaultOpen={false}>
@@ -366,23 +366,23 @@ The mark is rendered programmatically using SwiftUI `Canvas` in `BAROMarkView.sw
 
 <img src="/images/brand/type-families.svg" alt="BARO font families: Inter, JetBrains Mono, and Noto Sans KR with weight samples" style={{ maxWidth: '100%', borderRadius: '12px', border: 'none', boxShadow: 'none' }} />
 
-| Role | Font | Weights | Usage |
-|------|------|---------|-------|
-| Primary | Inter | 300--900 | All UI text |
-| Code/Data | JetBrains Mono | 400--600 | Prices, charts, data |
-| Korean | Noto Sans KR | 400--700 | Korean language text |
+<FeatureGrid columns={3}>
+  <FeatureCard icon="type" title="Inter — Primary" description="Weights 300–900. All UI text across the platform." />
+  <FeatureCard icon="hash" title="JetBrains Mono — Code/Data" description="Weights 400–600. Prices, charts, financial data." />
+  <FeatureCard icon="globe" title="Noto Sans KR — Korean" description="Weights 400–700. Korean language text and labels." />
+</FeatureGrid>
 
 ### Type Scale
 
 <img src="/images/brand/type-scale.svg" alt="BARO type scale from 32px Display down to 12px Caption" style={{ maxWidth: '100%', borderRadius: '12px', border: 'none', boxShadow: 'none' }} />
 
-| Size | Weight | Role |
-|------|--------|------|
-| 32px | Light (300) | Display |
-| 24px | Regular (400) | Heading |
-| 18px | Medium (500) | Subheading |
-| 14px | Regular (400) | Body text (default) |
-| 12px | Regular (400) | Caption, labels, metadata |
+<StatGrid columns={5}>
+  <StatCard value="32px" label="Light 300 — Display" />
+  <StatCard value="24px" label="Regular 400 — Heading" />
+  <StatCard value="18px" label="Medium 500 — Subheading" />
+  <StatCard value="14px" label="Regular 400 — Body (default)" />
+  <StatCard value="12px" label="Regular 400 — Caption, labels" />
+</StatGrid>
 
 ### Typography Principles
 
@@ -402,13 +402,13 @@ The mark is rendered programmatically using SwiftUI `Canvas` in `BAROMarkView.sw
   <FeatureCard icon="layers" title="Usage" description="AI-related icons use indigo accent. The crosshair icon (cross + gold signal) marks AI-highlighted data points. Icons at 20px default, 16px compact, 24px for navigation." />
 </FeatureGrid>
 
-| Category | Examples | Color |
-|----------|----------|-------|
-| Navigation | Home, Search, Portfolio, Settings | Slate 500 (inactive), Indigo (active) |
-| AI / Narration | Mic, Brain, Sparkle, Lightbulb | Indigo |
-| Financial | Chart, Candle, TrendUp, TrendDown | Contextual (Red/Blue for price) |
-| Signal | Crosshair, Target, AlertCircle | Gold |
-| Actions | Plus, Filter, Share, Bookmark | Slate 800 |
+<FeatureGrid columns={1}>
+  <FeatureCard icon="search" title="Navigation — Slate 500 / Indigo" description="Home, Search, Portfolio, Settings. Slate 500 when inactive, Indigo when active." />
+  <FeatureCard icon="brain" title="AI / Narration — Indigo" description="Mic, Brain, Sparkle, Lightbulb. Always rendered in brand indigo." />
+  <FeatureCard icon="trending-up" title="Financial — Contextual" description="Chart, Candle, TrendUp, TrendDown. Red for price up, Blue for price down (Korean convention)." />
+  <FeatureCard icon="crosshair" title="Signal — Gold" description="Crosshair, Target, AlertCircle. Gold accent draws attention to AI signal points." />
+  <FeatureCard icon="plus" title="Actions — Slate 800" description="Plus, Filter, Share, Bookmark. Neutral dark for standard interactive actions." />
+</FeatureGrid>
 
 ## Imagery Direction
 
@@ -451,12 +451,12 @@ In Korean financial markets, **red indicates price increases** and **blue indica
 
 ### Korean Language Guidelines
 
-| Rule | Detail |
-|------|--------|
-| **Financial terms** | Use Korean industry-standard terms (시가총액, 거래량, 이동평균선) |
-| **Numbers** | Korean number formatting -- 10,000 won with comma separators |
-| **Honorifics** | Use polite formal style (합니다/입니다) in all UI copy |
-| **Mixed script** | English for brand name (BARO) and technical terms, Korean for UI labels |
+<FeatureGrid columns={2}>
+  <FeatureCard icon="book" title="Financial terms" description="Use Korean industry-standard terms: 시가총액, 거래량, 이동평균선" />
+  <FeatureCard icon="hash" title="Numbers" description="Korean number formatting — 10,000 won with comma separators" />
+  <FeatureCard icon="user" title="Honorifics" description="Use polite formal style (합니다/입니다) in all UI copy" />
+  <FeatureCard icon="globe" title="Mixed script" description="English for brand name (BARO) and technical terms, Korean for UI labels" />
+</FeatureGrid>
 
 ---
 
@@ -469,12 +469,12 @@ In Korean financial markets, **red indicates price increases** and **blue indica
 
 ### Naming Convention
 
-| Correct | Incorrect |
-|---------|-----------|
-| **BARO** | ~~Baro~~, ~~baro~~, ~~BaRo~~ |
-| **바로** | ~~BARO~~ in Korean contexts |
-| **AI robo-advisor** | ~~trading app~~, ~~stock app~~ |
-| **Guided investing** | ~~Automated trading~~ |
+<FeatureGrid columns={2}>
+  <FeatureCard icon="check" title="BARO" description="Always uppercase. Never 'Baro', 'baro', or 'BaRo'." />
+  <FeatureCard icon="check" title="바로" description="Use hangeul in Korean contexts. Never romanized BARO in Korean copy." />
+  <FeatureCard icon="check" title="AI robo-advisor" description="The correct product category. Never 'trading app' or 'stock app'." />
+  <FeatureCard icon="check" title="Guided investing" description="Describes the experience. Never 'automated trading'." />
+</FeatureGrid>
 
 ## Brand Applications
 
