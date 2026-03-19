@@ -1495,11 +1495,12 @@ html[class~='dark'] .kl-flow-node-vm { color: var(--kl-amber); }
    27. PAGE META BANNER
    ================================================================ */
 .kl-page-meta {
-  display: inline-flex;
+  display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
-  margin: 0 0 28px 0;
+  margin: 0 0 20px 0;
   padding: 0;
   background: transparent;
   border-radius: 0;
@@ -2116,17 +2117,26 @@ article.nextra-content {
   .kl-file-link { font-size: 12px; padding: 4px 10px; }
   .kl-file-link code { font-size: 11px; }
 
-  /* Nextra heading overrides */
-  .nextra-content { padding: 0 4px !important; }
-  article { padding: 0 !important; }
-  .nextra-content h1 { font-size: 26px !important; letter-spacing: -0.5px; }
-  .nextra-content h2 { font-size: 22px !important; }
-  .nextra-content h3 { font-size: 18px !important; }
-  .nextra-content h4 { font-size: 16px !important; }
-  .nextra-content p, .nextra-content li { font-size: 14px; line-height: 1.75; }
+  /* Nextra content area: 20px safe zone on each side (Apple HIG = 16px min, Stripe = 24px) */
+  .nextra-content { padding: 0 20px !important; }
+  article { padding: 0 8px !important; }
+
+  /* Nextra heading overrides — mobile proportional scale */
+  .nextra-content h1:first-child { font-size: 28px !important; letter-spacing: -0.8px !important; margin-bottom: 4px !important; }
+  .nextra-content h1 { font-size: 26px !important; letter-spacing: -0.5px !important; }
+  .nextra-content h2 { font-size: 22px !important; margin-top: 40px !important; padding-bottom: 10px !important; }
+  .nextra-content h3 { font-size: 18px !important; margin-top: 28px !important; }
+  .nextra-content h4 { font-size: 16px !important; margin-top: 20px !important; }
+  .nextra-content p, .nextra-content li { font-size: 15px !important; line-height: 1.75 !important; }
+
+  /* Page meta: inline row, compact */
+  .kl-page-meta { margin: 0 0 16px 0 !important; }
 
   /* TOC hidden on mobile */
   nav[class*="toc"] { display: none !important; }
+
+  /* Breadcrumb tighter */
+  nav[class*="nextra-breadcrumb"] { margin-bottom: 4px !important; font-size: 13px !important; }
 }
 
 /* ================================================================
@@ -2226,7 +2236,7 @@ article.nextra-content {
   .kl-infobox-body { padding: 6px 14px 12px; font-size: 12px; }
 
   /* Page meta */
-  .kl-page-meta { flex-direction: column; align-items: flex-start; gap: 4px; padding: 8px 12px; }
+  .kl-page-meta { flex-direction: row; align-items: center; gap: 4px; padding: 0; }
   .kl-meta-detail { margin-left: 0; }
 
   /* Screen map */
@@ -2255,11 +2265,23 @@ article.nextra-content {
   /* Progress */
   .kl-progress-track { height: 5px; }
 
-  /* Nextra headings */
+  /* Nextra content area: 16px minimum safe zone (Apple HIG standard) */
+  .nextra-content { padding: 0 16px !important; }
+  article { padding: 0 4px !important; }
+
+  /* Nextra headings — small phone */
+  .nextra-content h1:first-child { font-size: 24px !important; letter-spacing: -0.5px !important; }
   .nextra-content h1 { font-size: 24px !important; }
-  .nextra-content h2 { font-size: 20px !important; margin-top: 28px !important; }
-  .nextra-content h3 { font-size: 17px !important; }
-  .nextra-content p, .nextra-content li { font-size: 13px; }
+  .nextra-content h2 { font-size: 20px !important; margin-top: 32px !important; }
+  .nextra-content h3 { font-size: 17px !important; margin-top: 24px !important; }
+  .nextra-content p, .nextra-content li { font-size: 14px !important; line-height: 1.7 !important; }
+
+  /* Page meta even more compact */
+  .kl-page-meta { margin: 0 0 12px 0 !important; gap: 4px !important; }
+  .kl-meta-tag { font-size: 9px !important; padding: 1px 6px !important; }
+
+  /* Breadcrumb */
+  nav[class*="nextra-breadcrumb"] { font-size: 12px !important; }
 }
 
 /* ================================================================
