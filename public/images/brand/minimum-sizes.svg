@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="400" height="120">
+  <!-- Minimum size comparison -->
+  <rect width="400" height="120" rx="16" fill="#F8F9FC"/>
+
+  <!-- 80px full logo -->
+  <g transform="translate(40, 20)">
+    <g transform="scale(1)">
+      <line x1="20" y1="8" x2="20" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="60" y1="8" x2="60" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="8" y1="20" x2="72" y2="20" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="8" y1="60" x2="72" y2="60" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="40" y1="8" x2="40" y2="72" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="8" y1="40" x2="72" y2="40" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="40" cy="40" r="8" fill="#D4A843"/>
+    </g>
+    <text x="40" y="94" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#6B7085" font-weight="600">80px</text>
+    <text x="40" y="107" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#9CA3B8" font-weight="500">Full logo min</text>
+  </g>
+
+  <!-- 40px medium -->
+  <g transform="translate(180, 40)">
+    <g transform="scale(0.5)">
+      <line x1="20" y1="8" x2="20" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="60" y1="8" x2="60" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="8" y1="20" x2="72" y2="20" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="8" y1="60" x2="72" y2="60" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="40" y1="8" x2="40" y2="72" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="8" y1="40" x2="72" y2="40" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="40" cy="40" r="8" fill="#D4A843"/>
+    </g>
+    <text x="20" y="54" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#6B7085" font-weight="600">40px</text>
+    <text x="20" y="67" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#9CA3B8" font-weight="500">Header</text>
+  </g>
+
+  <!-- 24px icon only -->
+  <g transform="translate(280, 48)">
+    <g transform="scale(0.3)">
+      <line x1="20" y1="8" x2="20" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="60" y1="8" x2="60" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="8" y1="20" x2="72" y2="20" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="8" y1="60" x2="72" y2="60" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="40" y1="8" x2="40" y2="72" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="8" y1="40" x2="72" y2="40" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="40" cy="40" r="8" fill="#D4A843"/>
+    </g>
+    <text x="12" y="42" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#6B7085" font-weight="600">24px</text>
+    <text x="12" y="55" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#9CA3B8" font-weight="500">Icon min</text>
+  </g>
+</svg>

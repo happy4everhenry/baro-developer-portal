@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 160" width="480" height="160">
+  <!-- Logo misuse examples -->
+  <rect width="480" height="160" rx="16" fill="#F8F9FC"/>
+
+  <!-- 1: Rotated (wrong) -->
+  <g transform="translate(20, 25)">
+    <rect width="100" height="100" rx="12" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
+    <g transform="translate(50, 50) rotate(25) translate(-28, -28) scale(0.7)">
+      <line x1="20" y1="8" x2="20" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="60" y1="8" x2="60" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="8" y1="20" x2="72" y2="20" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="8" y1="60" x2="72" y2="60" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="40" y1="8" x2="40" y2="72" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="8" y1="40" x2="72" y2="40" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="40" cy="40" r="8" fill="#D4A843"/>
+    </g>
+    <!-- Red X overlay -->
+    <line x1="10" y1="10" x2="90" y2="90" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+    <line x1="90" y1="10" x2="10" y2="90" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+    <text x="50" y="142" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#EF4444" font-weight="600">Don't rotate</text>
+  </g>
+
+  <!-- 2: Wrong gold color (changed to red) -->
+  <g transform="translate(135, 25)">
+    <rect width="100" height="100" rx="12" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
+    <g transform="translate(22, 22) scale(0.7)">
+      <line x1="20" y1="8" x2="20" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="60" y1="8" x2="60" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="8" y1="20" x2="72" y2="20" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="8" y1="60" x2="72" y2="60" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="40" y1="8" x2="40" y2="72" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="8" y1="40" x2="72" y2="40" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="40" cy="40" r="8" fill="#EF4444"/>
+    </g>
+    <line x1="10" y1="10" x2="90" y2="90" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+    <line x1="90" y1="10" x2="10" y2="90" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+    <text x="50" y="142" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#EF4444" font-weight="600">Don't recolor</text>
+  </g>
+
+  <!-- 3: Stretched -->
+  <g transform="translate(250, 25)">
+    <rect width="100" height="100" rx="12" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
+    <g transform="translate(10, 25) scale(1.0, 0.6)">
+      <g transform="scale(0.7)">
+        <line x1="20" y1="8" x2="20" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="60" y1="8" x2="60" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="8" y1="20" x2="72" y2="20" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="8" y1="60" x2="72" y2="60" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="40" y1="8" x2="40" y2="72" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="8" y1="40" x2="72" y2="40" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="40" cy="40" r="8" fill="#D4A843"/>
+      </g>
+    </g>
+    <line x1="10" y1="10" x2="90" y2="90" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+    <line x1="90" y1="10" x2="10" y2="90" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+    <text x="50" y="142" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#EF4444" font-weight="600">Don't stretch</text>
+  </g>
+
+  <!-- 4: On busy background -->
+  <g transform="translate(365, 25)">
+    <rect width="100" height="100" rx="12" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
+    <!-- Busy background pattern -->
+    <rect x="5" y="5" width="90" height="90" rx="8" fill="url(#busy)"/>
+    <g transform="translate(22, 22) scale(0.7)">
+      <line x1="20" y1="8" x2="20" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="60" y1="8" x2="60" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="8" y1="20" x2="72" y2="20" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="8" y1="60" x2="72" y2="60" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="40" y1="8" x2="40" y2="72" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="8" y1="40" x2="72" y2="40" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="40" cy="40" r="8" fill="#D4A843"/>
+    </g>
+    <line x1="10" y1="10" x2="90" y2="90" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+    <line x1="90" y1="10" x2="10" y2="90" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+    <text x="50" y="142" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#EF4444" font-weight="600">Don't clash BG</text>
+  </g>
+
+  <defs>
+    <pattern id="busy" patternUnits="userSpaceOnUse" width="12" height="12">
+      <rect width="12" height="12" fill="#E8E0D0"/>
+      <rect x="0" y="0" width="6" height="6" fill="#D4C8B0"/>
+      <rect x="6" y="6" width="6" height="6" fill="#C8BC9C"/>
+    </pattern>
+  </defs>
+</svg>
