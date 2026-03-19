@@ -1,0 +1,468 @@
+# Error Reference
+
+<PageMeta status="live" layer="backend" />
+
+<InfoBox type="info" title="What are error codes?">
+When something goes wrong with a request, the server sends back a number (called a status code) that explains what happened -- kind of like how a teacher marks your test. A "200" means "perfect!" while a "404" means "I can't find what you asked for." Understanding these codes helps you fix problems fast.
+</InfoBox>
+
+---
+
+<Tabs>
+<Tab label="HTTP Errors" icon="🌐">
+
+## HTTP Status Codes
+
+The BARO API uses standard HTTP status codes. All error responses include a JSON body with a `detail` field describing the error.
+
+<Accordion>
+<AccordionItem title="200 OK -- Success" icon="✅" badge="Success" defaultOpen={true}>
+
+The request was processed successfully and the response body contains the requested data.
+
+```json
+{
+  "items": [],
+  "total": 30,
+  "offset": 0,
+  "limit": 5
+}
+```
+
+</AccordionItem>
+<AccordionItem title="400 Bad Request -- Invalid parameters" icon="❌" badge="Client Error">
+
+The request contained invalid parameters. FastAPI automatically validates query parameters and returns detailed validation errors.
+
+```json
+{
+  "detail": [
+    {
+      "type": "greater_than_equal",
+      "loc": ["query", "limit"],
+      "msg": "Input should be greater than or equal to 1",
+      "input": "-1",
+      "ctx": {"ge": 1}
+    }
+  ]
+}
+```
+
+**Common Causes**
+
+| Cause | Example |
+|-------|---------|
+| Invalid `limit` value | `?limit=-1` or `?limit=100` (max 50 for stocks) |
+| Invalid `offset` value | `?offset=-5` (must be >= 0) |
+| Missing required path param | `/api/stocks//detail` (empty code) |
+| Invalid type | `?limit=abc` (expected integer) |
+
+</AccordionItem>
+<AccordionItem title="404 Not Found -- Resource missing" icon="🔍" badge="Client Error">
+
+The requested endpoint does not exist or the resource (stock code) was not found.
+
+```json
+{
+  "detail": "Not Found"
+}
+```
+
+**Common Causes**
+
+| Cause | Example |
+|-------|---------|
+| Unknown endpoint | `GET /api/nonexistent` |
+| Typo in path | `GET /api/stock` instead of `/api/stocks` |
+
+</AccordionItem>
+<AccordionItem title="422 Unprocessable Entity -- Validation failed" icon="📋" badge="Client Error">
+
+FastAPI returns 422 when the request is syntactically valid but fails Pydantic validation. This is the most common validation error code from FastAPI.
+
+```json
+{
+  "detail": [
+    {
+      "type": "missing",
+      "loc": ["query", "exchange"],
+      "msg": "Field required",
+      "input": null
+    }
+  ]
+}
+```
+
+</AccordionItem>
+<AccordionItem title="502 Bad Gateway -- KIS upstream error" icon="🏦" badge="Server Error">
+
+The BARO backend could not get a valid response from the upstream KIS API. This is the most common error during development.
+
+```json
+{
+  "detail": "KIS API error: service temporarily unavailable"
+}
+```
+
+**Common Causes**
+
+| Cause | Detail Message | Resolution |
+|-------|---------------|------------|
+| KIS service down | `service temporarily unavailable` | Wait and retry; check KIS status page |
+| Invalid stock code | `No data found for stock code` | Verify the stock code exists on the specified exchange |
+| Token expired | `unauthorized` | Token auto-refresh should handle; restart server if persistent |
+| Network timeout | `ReadTimeout` | KIS API timed out (15s); retry the request |
+| Rate limit | `Too many requests` | Backend semaphore should throttle; reduce request frequency |
+
+</AccordionItem>
+<AccordionItem title="500 Internal Server Error -- Unhandled exception" icon="💥" badge="Server Error">
+
+An unexpected error occurred in the backend. Check the server logs for a full stack trace.
+
+```json
+{
+  "detail": "Internal Server Error"
+}
+```
+
+</AccordionItem>
+</Accordion>
+
+### Error Response Format
+
+<InfoBox type="note" title="Two formats to know">
+For validation errors (400/422), the `detail` field is an **array** of error objects. For all other errors, it is a simple **string**.
+</InfoBox>
+
+**Standard format:**
+
+```json
+{
+  "detail": "string or array"
+}
+```
+
+**Validation error object:**
+
+```json
+{
+  "type": "value_error",
+  "loc": ["query", "param_name"],
+  "msg": "Human-readable message",
+  "input": "the-invalid-value",
+  "ctx": {"constraint": "value"}
+}
+```
+
+</Tab>
+<Tab label="App Errors" icon="🏦">
+
+## KIS-Specific Error Codes
+
+KIS API responses include an `rt_cd` (return code) field. The backend checks this and raises an error for non-zero values.
+
+### Return Code Check
+
+```python
+# KIS returns rt_cd="0" on success
+data = resp.json()
+rt_cd = data.get("rt_cd")
+if rt_cd and rt_cd != "0":
+    msg = data.get("msg1", "Unknown KIS error")
+    raise RuntimeError(f"KIS API error: {msg}")
+```
+
+### Return Code Reference
+
+| rt_cd | Meaning | Mapped HTTP Status | Description |
+|-------|---------|-------------------|-------------|
+| `"0"` | Success | <StatusBadge status="live">200</StatusBadge> | Request completed successfully. Data in `output` or `output1`/`output2` fields. |
+| `"1"` | Business Error | <StatusBadge status="error">502</StatusBadge> | Request processed but returned a business-level error. Check `msg1` for details. |
+| `"7"` | Auth Error | <StatusBadge status="error">502</StatusBadge> | Token invalid or expired. Backend auto-refreshes tokens; may occur during race conditions. |
+| `"9"` | System Error | <StatusBadge status="error">502</StatusBadge> | KIS internal system error. Retry after a brief delay. |
+
+### KIS Error Response Structure
+
+```json
+{
+  "rt_cd": "1",
+  "msg_cd": "EGW00123",
+  "msg1": "No data found for the requested stock code",
+  "output": null
+}
+```
+
+The `msg_cd` field contains a KIS-specific error code. The `msg1` field provides a human-readable message (often in Korean for domestic endpoints).
+
+### Common KIS Error Messages
+
+<Accordion>
+<AccordionItem title="Data Errors" icon="📊" badge="EGW001xx" defaultOpen={true}>
+
+| msg_cd | Description | Action |
+|--------|-------------|--------|
+| `EGW00123` | No data for the requested parameters | Verify stock code and exchange |
+| `EGW00121` | Invalid transaction ID (tr_id) | Check the tr_id mapping for the endpoint |
+
+</AccordionItem>
+<AccordionItem title="Auth Errors" icon="🔐" badge="EGW002xx">
+
+| msg_cd | Description | Action |
+|--------|-------------|--------|
+| `EGW00201` | Access token expired | Auto-refreshed by backend; retry request |
+| `EGW00202` | Invalid access token | Clear token cache, request new token |
+
+</AccordionItem>
+<AccordionItem title="System Errors" icon="⚙️" badge="EGW003xx+">
+
+| msg_cd | Description | Action |
+|--------|-------------|--------|
+| `EGW00301` | Rate limit exceeded | Wait before retrying; reduce request frequency |
+| `EGW00900` | System maintenance | KIS is in maintenance; wait and retry later |
+| `IGW00003` | Market closed <KoreanLabel>장 종료</KoreanLabel> | Show cached data or "장 종료" message |
+
+</AccordionItem>
+</Accordion>
+
+---
+
+## WebSocket Errors
+
+WebSocket errors are sent as JSON messages with `type: "error"`. These errors do not close the connection -- the client can continue sending messages.
+
+| Error Message | Trigger | Resolution |
+|--------------|---------|------------|
+| `"codes must be a non-empty list"` | Subscribe with empty or missing `codes` array | Include at least one stock code in the `codes` array |
+| `"No valid stock codes provided"` | All codes in the array are non-numeric strings | Stock codes must be strings of digits (e.g. `"005930"`, not `"AAPL"`) |
+| `"Invalid JSON"` | Message is not valid JSON | Ensure proper JSON formatting before sending |
+| `"Unknown action: {action}"` | Unrecognized `action` field | Use one of: `subscribe`, `unsubscribe`, `ping`, `status` |
+
+**Message format:**
+
+```json
+{
+  "type": "error",
+  "message": "codes must be a non-empty list"
+}
+```
+
+### WebSocket Close Codes
+
+| Code | Name | Meaning |
+|------|------|---------|
+| `1000` | Normal Closure | Client intentionally disconnected (e.g. view dismissed) |
+| `1001` | Going Away | Server shutting down or client navigating away |
+| `1006` | Abnormal Closure | Connection lost unexpectedly (network issue). Triggers reconnect. |
+| `1011` | Internal Error | Server encountered an unexpected error |
+
+</Tab>
+<Tab label="Handling Guide" icon="🛠️">
+
+## Retry Strategies
+
+<InfoBox type="fun" title="Think of it like calling a friend">
+If your friend does not pick up the phone, you wait a bit and try again. Each time, you wait a little longer. That is exponential backoff! But if you dialed the wrong number (a 400 error), calling again will never work -- you need to fix the number first.
+</InfoBox>
+
+### Which errors can you retry?
+
+<StatGrid columns={2}>
+  <StatCard value="Yes" label="502, 429, 503 -- Retry with backoff" />
+  <StatCard value="No" label="400, 404, 422 -- Fix the request" />
+</StatGrid>
+
+### Recommended Backoff Settings
+
+| Setting | Value |
+|---------|-------|
+| Strategy | Exponential backoff with jitter |
+| Initial delay | 1 second |
+| Multiplier | 2x |
+| Max delay | 30 seconds |
+| Max retries | 3 |
+| Jitter | Random 0--500ms added to each delay |
+
+### Retry Strategy by Error Type
+
+| Error Type | Strategy | Max Retries | Backoff |
+|-----------|----------|-------------|---------|
+| Network timeout | Automatic retry | 3 | 1s -> 2s -> 4s |
+| 500 / 502 / 503 | Automatic retry | 3 | 1s -> 2s -> 4s + jitter |
+| 429 (Rate limit) | Wait and retry | 3 | 1s -> 2s -> 4s |
+| 400 / 404 / 422 | No retry (client error) | 0 | -- |
+| WebSocket disconnect | Exponential backoff | Unlimited (until success) | 1s -> 2s -> 4s -> ... -> 60s max |
+
+### iOS REST Retry Example
+
+```swift
+func fetchWithRetry<T: Decodable>(
+    url: URL,
+    maxRetries: Int = 3,
+    initialDelay: TimeInterval = 1.0
+) async throws -> T {
+    var delay = initialDelay
+
+    for attempt in 0..<maxRetries {
+        do {
+            let (data, response) = try await session.data(from: url)
+            guard let http = response as? HTTPURLResponse else {
+                throw APIError.invalidResponse
+            }
+
+            switch http.statusCode {
+            case 200:
+                return try decoder.decode(T.self, from: data)
+            case 502, 503, 429:
+                // Retryable -- wait with exponential backoff + jitter
+                if attempt < maxRetries - 1 {
+                    let jitter = Double.random(in: 0...0.5)
+                    try await Task.sleep(for: .seconds(delay + jitter))
+                    delay *= 2
+                    continue
+                }
+                throw APIError.serverError(http.statusCode)
+            case 400, 422:
+                throw APIError.validationError(http.statusCode)
+            default:
+                throw APIError.serverError(http.statusCode)
+            }
+        } catch let error as APIError {
+            throw error
+        } catch {
+            if attempt < maxRetries - 1 {
+                try await Task.sleep(for: .seconds(delay))
+                delay *= 2
+                continue
+            }
+            throw error
+        }
+    }
+    throw APIError.maxRetriesExceeded
+}
+```
+
+---
+
+## Error Handling Best Practices
+
+<Accordion>
+<AccordionItem title="Do These Things" icon="✅" badge="Best Practice" defaultOpen={true}>
+
+- Always check HTTP status codes before parsing the response body
+- Display user-friendly Korean error messages (e.g. <KoreanLabel>데이터 로딩 실패</KoreanLabel>)
+- Always provide a <KoreanLabel>재시도</KoreanLabel> (Retry) button for retryable errors
+- Use exponential backoff for retries with a maximum delay cap
+- Show skeleton loading states during retries
+- Cache successful responses for offline fallback
+- Log errors with stock code, venue, and endpoint context
+- Handle WebSocket disconnections silently -- fall back to REST data
+- Use `disconnectAfterDelay(seconds: 5)` to avoid reconnection churn
+
+</AccordionItem>
+<AccordionItem title="Avoid These Mistakes" icon="🚫" badge="Anti-Pattern">
+
+- Exposing raw KIS error codes (`EGW00123`) to end users
+- Retrying indefinitely on 400/404/422 errors (they will never succeed)
+- Silently swallowing errors without any UI feedback
+- Showing only English error messages to Korean users
+- Blocking the entire UI during error recovery
+- Retrying without backoff (can amplify load on struggling services)
+- Disconnecting WebSocket immediately on view dismissal
+- Ignoring the `rt_cd` field in KIS responses
+
+</AccordionItem>
+</Accordion>
+
+### iOS ViewModel Error Handling Pattern
+
+```swift
+enum ViewState {
+    case idle
+    case loading
+    case loaded
+    case error(String)
+}
+
+@Observable
+class StockListViewModel {
+    var state: ViewState = .idle
+    var stocks: [Stock] = []
+
+    func loadStocks() async {
+        state = .loading
+        do {
+            stocks = try await repository.fetchStocks(
+                exchange: .kospi, filter: .marketCap, limit: 10
+            )
+            state = .loaded
+        } catch let error as APIError {
+            switch error {
+            case .validationError:
+                state = .error("잘못된 요청입니다")
+            case .serverError(502):
+                state = .error("시장 데이터를 불러올 수 없습니다")
+            case .networkError:
+                state = .error("네트워크 연결을 확인해주세요")
+            default:
+                state = .error("데이터 로딩 실패")
+            }
+        } catch {
+            state = .error("데이터 로딩 실패")
+        }
+    }
+}
+```
+
+### Backend Router Error Handling Pattern
+
+```python
+@router.get("", response_model=PaginatedStockResponse)
+async def list_stocks(
+    exchange: str = Query("kospi"),
+    filter: str = Query("marketCap"),
+    limit: int = Query(5, ge=1, le=50),
+    offset: int = Query(0, ge=0),
+    venue: str = Query("combined"),
+):
+    """Fetch ranked stock list with error handling."""
+    try:
+        v = parse_venue(venue)
+        stocks = await svc.fetch_stocks(exchange, filter, limit + offset, venue=v)
+        paginated = stocks[offset:offset + limit]
+        return PaginatedStockResponse(
+            items=paginated, total=len(stocks),
+            offset=offset, limit=limit,
+        )
+    except Exception as e:
+        print(f"[Stock Router] Error listing stocks: {e}")
+        raise HTTPException(status_code=502, detail=str(e))
+```
+
+### WebSocket Reconnection Parameters
+
+| Parameter | iOS Client | Backend to KIS |
+|-----------|-----------|----------------|
+| Initial delay | `1.0s` | `1.0s` |
+| Backoff | `2x` exponential | `2x` exponential |
+| Max delay | `60s` | `60s` |
+| Reset trigger | Successful ping response | Successful connection |
+| Re-subscribe | All (code, venue) pairs | All tr_id:tr_key pairs |
+| Disconnect grace | 5s delay before disconnect | N/A (always stays connected) |
+
+---
+
+## Quick Reference
+
+| Status | Meaning | Retryable | Action |
+|--------|---------|-----------|--------|
+| <StatusBadge status="live">200</StatusBadge> | OK | -- | Parse response normally |
+| <StatusBadge status="warning">400</StatusBadge> | Bad Request | No | Fix request parameters |
+| <StatusBadge status="warning">404</StatusBadge> | Not Found | No | Check endpoint URL |
+| <StatusBadge status="warning">422</StatusBadge> | Unprocessable Entity | No | Fix validation errors |
+| <StatusBadge status="warning">429</StatusBadge> | Rate Limited | Yes | Backoff and retry (2x, max 30s) |
+| <StatusBadge status="error">500</StatusBadge> | Server Error | Maybe | Check server logs; retry once |
+| <StatusBadge status="error">502</StatusBadge> | Bad Gateway | Yes | KIS upstream error; retry with backoff |
+| <StatusBadge status="error">503</StatusBadge> | Service Unavailable | Yes | Server overloaded; retry with backoff |
+
+</Tab>
+</Tabs>

@@ -1,0 +1,841 @@
+# Operations, Audit & One Cockpit
+
+<PageMeta status="in_progress" layer="backend" />
+
+The operational backbone of BARO AI — a 7-stage audit lifecycle that records every action by every actor (human or AI), safe execution rails that prevent AI from going rogue, and One Cockpit to monitor it all in real time. Operations and audit infrastructure is being built alongside Phase 1 agent development.
+
+<InfoBox type="fun" title="Think of it like security cameras">
+  The audit trail is like a building with security cameras in every room. Every door opened, every button pressed, every conversation — recorded and timestamped. If anything ever goes wrong, you can always rewind the tape and see exactly what happened, who did it, and why. No blind spots, no gaps, no "we don't know what happened."
+</InfoBox>
+
+<StatGrid columns={6}>
+  <StatCard value="7" label="Audit Stages" />
+  <StatCard value="5" label="Loop Steps" />
+  <StatCard value="1" label="One Cockpit" />
+  <StatCard value="4" label="Role-Based Views" />
+  <StatCard value="0" label="Blind Spots" />
+  <StatCard value="24/7" label="Live Monitoring" />
+</StatGrid>
+
+---
+
+## The 7-Stage Interaction Lifecycle
+
+This is the centerpiece of BARO's operational integrity. Every single interaction — whether initiated by a human user or an AI agent — passes through these stages.
+
+<StepGuide>
+  <Step number={1} title="Identity Check" icon="🔐">
+
+**JWT + Session + MFA.** The actor is always known before any action proceeds. Whether it's a human user logging in or an AI agent initiating a workflow, identity is verified first. No anonymous actions exist in the system.
+
+</Step>
+
+  <Step number={2} title="History & Context" icon="📋">
+
+**Previous actions, open flags, compliance status, portfolio state.** The system loads the full context of the actor — what they've done before, what flags are active on their account, their current compliance standing, and the state of their portfolio. This prevents actions that conflict with existing conditions.
+
+</Step>
+
+  <Step number={3} title="Summary & Flags" icon="🚩">
+
+**Active flags surfaced, notifications acknowledged.** Before any action is drafted, all active flags (compliance holds, risk warnings, pending reviews) are presented. The actor must acknowledge them. Nothing is hidden.
+
+</Step>
+
+  <Step number={4} title="Draft" icon="📝">
+
+**Action composed but not submitted.** The intended action is drafted with full detail. A compliance pre-check runs automatically. Even **abandoned drafts are recorded** — if someone starts composing a suspicious trade and backs out, we know about it.
+
+</Step>
+
+  <Step number={5} title="Approval" icon="✅">
+
+**Single or Dual approval depending on risk level.**
+- **Single approval:** User confirms the action themselves (standard transactions)
+- **Dual approval:** Compliance officer + user confirmation required (transactions exceeding KRW 50M)
+
+</Step>
+
+  <Step number={6} title="Submit" icon="🚀">
+
+**Order sent to KIS API, database updated.** The action is executed. Every parameter of the submission is logged — the exact payload sent to KIS, timestamps, response codes, and the resulting database state change.
+
+</Step>
+
+  <Step number={7} title="Immutable Record" icon="🔒">
+
+**All events consolidated. Written once, never modified.** The complete interaction is sealed into an append-only audit record. Every stage's data is bundled together. This record cannot be edited or deleted — only new records can be appended.
+
+</Step>
+</StepGuide>
+
+---
+
+## Lifecycle Flow
+
+<Diagram title="7-Stage Audit Lifecycle" caption="Every interaction flows through all 7 stages — no shortcuts, no exceptions">
+  <DiagramRow>
+    <DiagramNode type="view" icon="🔐" label="1. Identity Check" sublabel="JWT + MFA verified" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="actor known" />
+  <DiagramRow>
+    <DiagramNode type="default" icon="📋" label="2. History & Context" sublabel="Load flags, portfolio, compliance" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="context loaded" />
+  <DiagramRow>
+    <DiagramNode type="default" icon="🚩" label="3. Summary & Flags" sublabel="Flags surfaced, acknowledged" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="flags cleared" />
+  <DiagramRow>
+    <DiagramNode type="service" icon="📝" label="4. Draft" sublabel="Pre-check + compose action" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="compliance passed" />
+  <DiagramRow>
+    <DiagramNode type="vm" icon="✅" label="5. Approval" sublabel="Single or Dual (>KRW 50M)" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="approved" />
+  <DiagramRow>
+    <DiagramNode type="repo" icon="🚀" label="6. Submit" sublabel="KIS API call + DB write" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="executed" />
+  <DiagramRow>
+    <DiagramNode type="data" icon="🔒" label="7. Immutable Record" sublabel="Append-only, never modified" />
+  </DiagramRow>
+</Diagram>
+
+---
+
+## Deep Dive
+
+<Tabs>
+  <Tab label="Audit Trail" icon="📜">
+
+### 5-Minute Audit Capability
+
+From a single `interaction_id`, anyone with the right permissions can reconstruct the full story in under 5 minutes:
+
+| Question | Answer Source |
+|----------|-------------|
+| Who initiated? | Stage 1 — Identity Check |
+| What verification passed? | Stage 1 — JWT, session, MFA records |
+| What flags were active? | Stage 3 — Flag snapshot at interaction time |
+| What was shown in draft? | Stage 4 — Full draft content preserved |
+| Who approved? | Stage 5 — Approval actor + timestamp |
+| What was submitted? | Stage 6 — Exact API payload logged |
+| What was the outcome? | Stage 7 — Consolidated immutable record |
+
+<InfoBox type="info" title="No developer required">
+  The 5-minute audit is designed for compliance officers, not engineers. The One Cockpit interface lets authorized users pull up any interaction by ID and walk through every stage visually. No SQL queries, no log files, no asking the dev team.
+</InfoBox>
+
+### AI Agents in the Audit Trail
+
+AI agents are **first-class actors** — they go through the same 7 stages as humans. The stages they touch depend on the action:
+
+| Agent | Action | Stages Used | Human Confirm? | Audit Log Detail |
+|-------|--------|------------|----------------|------------------|
+| CUI | Navigates screen | 1, 4, 6, 7 | No | agent=CUI, action=navigate_to |
+| CUI | Pre-fills order | 1, 4, 6, 7 | No | parameters pre-filled, draft_event |
+| CUI | Submits staged order | **All 7** | Stage 5 HITL mandatory | Full interaction_record + approval_event |
+| Trade Signal | Generates signal | 1, 4, 7 | No (advisory only) | signal generated |
+| Risk Guard | Flags transaction | 1, 2, 3, 4, 5, 7 | Compliance officer at Stage 5 | flag_registry entry |
+| Risk Guard | Freezes account | **All 7** | Compliance officer must approve | Cannot be AI alone |
+| Portfolio Optimizer | Recommends allocation | 1, 4, 7 | No (recommendation only) | recommendation_record |
+| Portfolio Optimizer | Executes rebalance | **All 7** | User must approve full plan | Full record for each leg |
+| Feature Request | Generates spec | 1, 6, 7 | No (document generation) | spec_document_record |
+| Agent 11 | Quarantines agent | 1, 5, 6, 7 | Automated, human notified immediately | quarantine_event + alert |
+
+<InfoBox type="warning" title="HITL = Human-in-the-Loop">
+  Any action that touches money or restricts account access **always** requires human confirmation. An AI agent can draft, recommend, and flag — but it cannot execute financial actions or freeze accounts on its own.
+</InfoBox>
+
+</Tab>
+
+  <Tab label="Safe AI Rails" icon="🛤️">
+
+### Safe AI Execution Rails
+
+Three categories of safety rails ensure AI agents operate within strict boundaries. Each rail addresses a different type of risk.
+
+<Accordion>
+  <AccordionItem title="Rail 1: UI Action Safety" icon="🖥️" defaultOpen={true}>
+
+Controls how AI agents interact with the user interface. Prevents confusing or harmful screen changes.
+
+| Rule | Purpose |
+|------|---------|
+| **Narration before navigation** | AI must announce what it's about to do before changing screens |
+| **Undo always available** | Every AI-initiated screen change can be reversed by the user |
+| **Screen changes audited** | Every navigation event by an AI agent is recorded in the audit trail |
+
+#### Detailed Implementation
+
+| Rail | Implementation | Enforced By |
+|------|---------------|-------------|
+| Narration before navigation | CUI Agent narrates what it will do BEFORE doing it (e.g., "Opening Samsung order form") | `generate_narration` node runs before `execute_actions` node |
+| Undo navigation | Any AI navigation can be undone with "go back." AI-initiated nav tagged in app state. | App state tracks `navigation_source`: AI or user |
+| Screen change audit | Every App Action API call writes to `ai_action_log` with state before and after | App Action API middleware |
+| No UI actions outside session | CUI cannot act after session timeout. Session expiry terminates pending AI actions. | JWT validation on every App Action API call |
+
+<InfoBox type="fun" title="Think of it like a GPS co-pilot">
+  Imagine a friend who grabs the steering wheel without telling you where they are turning. Terrifying, right? Narration before navigation means the AI always says "turning left toward Samsung's order page" before it touches anything. And if you disagree, you can always say "go back" — like pressing undo on your GPS route.
+</InfoBox>
+
+<InfoBox type="tip" title="Why narration matters">
+  If the CUI agent suddenly jumps to a different screen without explanation, the user might think the app is malfunctioning. Narration builds trust: "I'm taking you to Samsung Electronics' detail page to show the chart you asked about."
+</InfoBox>
+
+</AccordionItem>
+
+  <AccordionItem title="Rail 2: Database Action Safety" icon="💾">
+
+Controls how AI agents read from and write to the database. Prevents data leaks and unauthorized modifications.
+
+| Rule | Purpose |
+|------|---------|
+| **RLS enforcement** | Row-Level Security ensures agents only see data they're authorized to access |
+| **Scoped reads/writes per agent** | Each agent has a defined scope — it can only read/write specific tables and columns |
+| **No direct audit table writes** | AI agents cannot write to audit tables directly; only the audit system can |
+| **Redis namespace isolation** | Each agent's cache is isolated in its own Redis namespace — no cross-agent data leakage |
+
+**Read Scope:** RLS-scoped per agent. CUI reads only the current user's portfolio. Enforced at the Supabase RLS level — the agent never sees rows belonging to other users.
+
+**Write Scope:** Each agent writes only to allowed tables. CUI is limited to `ai_action_log` and `draft_events` only. No agent can write outside its designated tables.
+
+**No Direct Audit Writes:** A dedicated audit service writes all immutable records. Agents fire events; the audit service writes. This separation prevents self-falsification — an agent cannot alter its own audit trail.
+
+**DB Logging:** Every AI write is logged with `agent_id`, `table`, `operation`, `row_id`, `old_value`, and `new_value` via a PostgreSQL trigger. Nothing is written silently.
+
+**Redis Namespace Isolation:** Each agent writes only to its own key namespace. For example, CUI uses `cui:session:*` and `cui:action:*`. No cross-agent writes are possible.
+
+</AccordionItem>
+
+  <AccordionItem title="Rail 3: Money Action Safety" icon="💰">
+
+The most critical rail. Controls how financial transactions flow through the system.
+
+**The golden rule: AI stages, human confirms, system executes, audit records.**
+
+This is a non-negotiable principle. No configuration, no override, no admin setting can bypass this flow for financial transactions.
+
+| Phase | Actor | Action |
+|-------|-------|--------|
+| **Stage** | AI Agent | Drafts the transaction, runs pre-checks, calculates parameters |
+| **Confirm** | Human | Reviews and explicitly approves the transaction |
+| **Execute** | System | Sends the order to KIS API (not the AI, not the human) |
+| **Record** | Audit System | Writes the immutable record with all details |
+
+#### Money Action Authority Matrix
+
+Every type of financial action has explicit rules for what the AI can do, what requires human confirmation, and when dual approval kicks in.
+
+| Money Action | AI Authority | Human Required | Dual Approval | Timeout |
+|---|---|---|---|---|
+| Small stock order | Stage only, cannot execute | User tap confirm (HITL) | N/A | 30-min, order cancelled |
+| Large order (above KRW 50M) | Stage only | User + Compliance Officer | Yes, KRW 50M threshold | 60-min, both required |
+| Portfolio rebalancing | Recommendation only | User approves full plan | All rebalancing | 7-day, each leg separate |
+| Conditional/automated order | Stage only, cannot arm | User explicitly enables trigger | All conditional orders | 30-day re-confirmation |
+| Account funding/withdrawal | Cannot initiate, advisory only | User initiates manually | N/A | N/A |
+| AML transaction freeze | Can recommend with evidence | Compliance Officer authorizes | All freezes | 72-hour, escalate if no response |
+
+<InfoBox type="fun" title="Think of it like a restaurant kitchen">
+  The AI is the sous chef who prepares ingredients and plates the dish (stages). The human is the head chef who tastes and approves before it leaves the kitchen (confirms). The waiter (system) delivers it to the table (executes). And the receipt (audit) records the entire order. The sous chef never walks a dish to the table alone — no matter how perfectly it is plated.
+</InfoBox>
+
+<InfoBox type="warning" title="The Golden Rule is non-negotiable">
+  "AI stages. Human confirms. System executes. Audit records." This cannot be shortcut by context, urgency, or any technical mechanism. Even if an AI agent has 99.99% confidence in a trade recommendation, the human must still confirm. This is a regulatory requirement (FSC) and a core BARO design principle.
+</InfoBox>
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+
+  <Tab label="One Cockpit" icon="🖥️">
+
+### One Cockpit — Unified Monitoring Dashboard
+
+A single interface for monitoring all AI operations, audit trails, and system health. Four role-based views ensure each user sees exactly what they need.
+
+<FeatureGrid columns={2}>
+  <FeatureCard icon="📊" title="CEO/CTO View" description="Business KPIs, cost metrics, adoption rates, system health overview. Strategic-level dashboard for leadership." color="green" />
+  <FeatureCard icon="👨‍💼" title="Compliance Officer View" description="Audit trail search, active flags, STR queue, FSC reporting. Full access to all interaction records and dual-approval queue." color="blue" />
+  <FeatureCard icon="🛡️" title="Security Lead View" description="Threat dashboard, agent health, anomaly timeline, incident queue. Real-time security posture across all AI agents." color="red" />
+  <FeatureCard icon="👨‍💻" title="Engineering View" description="Agent performance, error rates, latency, queue depth, model metrics. Operational health for every agent and service." color="purple" />
+</FeatureGrid>
+
+<InfoBox type="info" title="24/7 live monitoring">
+  One Cockpit runs continuously. Alerts are triggered automatically when anomalies are detected — unusual trading patterns, agent errors, compliance threshold breaches, or system performance degradation. No one needs to be watching the screen for the system to raise alarms.
+</InfoBox>
+
+### What One Cockpit Consolidates
+
+| Data Source | What It Shows |
+|-------------|--------------|
+| Audit events | Full 7-stage interaction history for any `interaction_id` |
+| AI action logs | Every decision, recommendation, and tool call by every agent |
+| Flag registry | Active and historical flags on all accounts |
+| Notification log | All system and user notifications with delivery status |
+| System metrics | Agent uptime, latency, error rates, queue depths |
+
+</Tab>
+
+  <Tab label="Database Schema" icon="🗄️">
+
+### Audit Database Schema
+
+All audit data is stored in PostgreSQL with strict retention policies mandated by the FSC (Financial Services Commission of Korea).
+
+<Accordion>
+  <AccordionItem title="audit_events" icon="📜" defaultOpen={true}>
+
+The core audit table. Every stage transition for every interaction is recorded here.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `event_id` | `UUID` | Primary key |
+| `interaction_id` | `UUID` | Links to the parent interaction |
+| `stage` | `INTEGER` | Stage number (1-7) |
+| `actor_id` | `UUID` | Who performed this stage (human or AI agent) |
+| `actor_type` | `ENUM` | `human`, `ai_agent`, `system` |
+| `event_data` | `JSONB` | Full payload of what happened at this stage |
+| `created_at` | `TIMESTAMPTZ` | When this event was recorded |
+
+<StatusBadge status="planned">Retention: 7 years (FSC requirement)</StatusBadge>
+
+</AccordionItem>
+
+  <AccordionItem title="interaction_records" icon="📋">
+
+The consolidated record for a complete interaction. Created at Stage 7 from all audit_events.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `interaction_id` | `UUID` | Primary key |
+| `initiator_id` | `UUID` | Who started the interaction |
+| `initiator_type` | `ENUM` | `human`, `ai_agent` |
+| `action_type` | `VARCHAR` | Type of action (trade, navigation, flag, etc.) |
+| `stages_completed` | `INTEGER[]` | Array of stage numbers that were executed |
+| `outcome` | `JSONB` | Final result of the interaction |
+| `created_at` | `TIMESTAMPTZ` | Interaction start time |
+| `sealed_at` | `TIMESTAMPTZ` | When Stage 7 completed (record became immutable) |
+
+<StatusBadge status="planned">Retention: 7 years (FSC requirement)</StatusBadge>
+
+</AccordionItem>
+
+  <AccordionItem title="ai_action_log" icon="🤖">
+
+Every action taken by every AI agent. More granular than audit_events — includes internal agent reasoning and tool calls.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `log_id` | `UUID` | Primary key |
+| `agent_id` | `VARCHAR` | Which of the 12 agents acted |
+| `action_type` | `VARCHAR` | Tool call, recommendation, navigation, etc. |
+| `input_context` | `JSONB` | What the agent received as input |
+| `output_result` | `JSONB` | What the agent produced |
+| `confidence_score` | `FLOAT` | Agent's confidence in its action (0.0-1.0) |
+| `interaction_id` | `UUID` | Links to parent interaction (if applicable) |
+| `created_at` | `TIMESTAMPTZ` | When the action occurred |
+
+<StatusBadge status="planned">Retention: 7 years (FSC requirement)</StatusBadge>
+
+</AccordionItem>
+
+  <AccordionItem title="flag_registry" icon="🚩">
+
+All flags ever raised on any account. Flags are never deleted — only new status entries are appended.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `flag_id` | `UUID` | Primary key |
+| `account_id` | `UUID` | Which account the flag applies to |
+| `flag_type` | `VARCHAR` | Compliance hold, risk warning, AML alert, etc. |
+| `status` | `ENUM` | `active`, `resolved`, `escalated` |
+| `raised_by` | `UUID` | Actor who raised the flag |
+| `raised_at` | `TIMESTAMPTZ` | When the flag was created |
+| `resolved_by` | `UUID` | Actor who resolved (nullable) |
+| `resolved_at` | `TIMESTAMPTZ` | When resolved (nullable) |
+| `metadata` | `JSONB` | Additional context and evidence |
+
+<StatusBadge status="planned">Retention: Account lifetime + 7 years</StatusBadge>
+
+</AccordionItem>
+
+  <AccordionItem title="notification_log" icon="🔔">
+
+Every notification sent to any user, with delivery tracking.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `notification_id` | `UUID` | Primary key |
+| `recipient_id` | `UUID` | Who received the notification |
+| `channel` | `ENUM` | `push`, `in_app`, `email`, `sms` |
+| `content` | `JSONB` | Notification content (localized) |
+| `triggered_by` | `UUID` | Agent or system that triggered it |
+| `delivered_at` | `TIMESTAMPTZ` | When successfully delivered |
+| `acknowledged_at` | `TIMESTAMPTZ` | When user acknowledged (nullable) |
+
+<StatusBadge status="planned">Retention: 3 years</StatusBadge>
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+</Tabs>
+
+---
+
+## DAGS Continuous Loop
+
+The operational lifecycle follows a continuous **Discover-Assess-Govern-Secure-Audit** loop. This is not a one-time process — it runs perpetually to ensure governance keeps pace with system evolution.
+
+<StepGuide>
+  <Step number={1} title="Discover" icon="🔍">
+
+Identify all AI assets, agents, data flows, and model deployments. Maintain a living inventory of what exists in the system. New agents, new models, new data sources — nothing enters the platform without being discovered and cataloged first.
+
+</Step>
+
+  <Step number={2} title="Assess" icon="📊">
+
+Evaluate risk, compliance posture, and ethical alignment for every discovered asset. Each agent is assessed against the 5 governance pillars, regulatory requirements, and the threat model. Assessment is continuous, not one-time.
+
+</Step>
+
+  <Step number={3} title="Govern" icon="⚖️">
+
+Apply governance controls based on assessment results. This includes updating system prompts, adjusting authorization boundaries, modifying kill switch thresholds, and ensuring the Legal Rules Engine reflects current regulations.
+
+</Step>
+
+  <Step number={4} title="Secure" icon="🔒">
+
+Implement and validate security controls for all assessed risks. Run daily posture scans, monthly red team exercises, and continuous monitoring through Agent 11 (Security Monitor) and Agent 12 (Control Tower).
+
+</Step>
+
+  <Step number={5} title="Audit" icon="📋">
+
+Record everything through the 7-stage audit lifecycle. Generate compliance reports, conduct periodic reviews, and feed findings back into the Discover phase — completing the loop. Every audit finding triggers a new cycle.
+
+</Step>
+</StepGuide>
+
+<InfoBox type="fun" title="Think of it like a health checkup loop">
+  DAGS is like going to the doctor regularly. You discover what is in your body (Discover), check if anything is wrong (Assess), follow the doctor's rules (Govern), take your medicine (Secure), and keep a medical record (Audit). Then you go back next month and do it again. You never stop checking.
+</InfoBox>
+
+### DAGS Step-by-Step Execution Detail
+
+<Accordion>
+  <AccordionItem title="DISCOVER — Threat and Asset Inventory" icon="🔍" defaultOpen={true}>
+
+**What:** Identify all AI assets, agents, data flows, model deployments, shadow AI usage, and dependency vulnerabilities. Maintain a living registry of threats.
+
+**Who/What runs it:** Agent 11 (Security Monitor) + Security Lead
+
+**Output:** Threat registry, shadow AI inventory, dependency vulnerability list
+
+**Schedule:** Hourly automated feeds, daily full scan
+
+</AccordionItem>
+
+  <AccordionItem title="ASSESS — Risk Scoring and Prioritization" icon="📊">
+
+**What:** Score every discovered item for impact and likelihood. Prioritize remediation. Track deadlines for open items.
+
+**Who/What runs it:** Agent 11 + Agent 12 (Control Tower) + Security Lead
+
+**Output:** Impact assessment per item, prioritized remediation backlog, deadline tracker
+
+**Schedule:** Daily automated assessment, weekly human review
+
+</AccordionItem>
+
+  <AccordionItem title="GOVERN — Controls and Compliance" icon="⚖️">
+
+**What:** Apply governance controls. Update the HITL queue. Run bias audits. Produce governance scorecards.
+
+**Who/What runs it:** Compliance Officer + Agent 12
+
+**Output:** Governance scorecard, HITL queue updates, bias audit results
+
+**Schedule:** Continuous automated checks, daily compliance review, monthly full governance audit
+
+<InfoBox type="info" title="Human review required">
+  The GOVERN step always requires human sign-off. Agent 12 prepares the scorecard, but a Compliance Officer must review and approve it before controls are applied. This is enforced in the loop execution record.
+</InfoBox>
+
+</AccordionItem>
+
+  <AccordionItem title="SECURE — Posture Validation" icon="🔒">
+
+**What:** Run posture scans, execute canary tests, conduct penetration tests, rotate secrets.
+
+**Who/What runs it:** Agent 11 + Security Lead
+
+**Output:** Posture scan results, canary test results, pen test findings, secrets rotation log
+
+**Schedule:** Daily posture scan, weekly canary probes, monthly penetration test
+
+</AccordionItem>
+
+  <AccordionItem title="AUDIT — Record and Report" icon="📋">
+
+**What:** Verify audit chain integrity. Produce compliance packages for FSC. Identify gaps and feed back into DISCOVER.
+
+**Who/What runs it:** Agent 12 + Compliance Officer
+
+**Output:** Chain verification results, FSC compliance package, gap list for next cycle
+
+**Schedule:** Daily automated checks, monthly compliance sign-off, quarterly external audit preparation
+
+<InfoBox type="info" title="Human review required">
+  Like GOVERN, the AUDIT step requires human sign-off. Agent 12 produces the compliance package, but a Compliance Officer must review and sign before submission to the FSC.
+</InfoBox>
+
+</AccordionItem>
+</Accordion>
+
+### Loop Execution Record
+
+Every DAGS cycle is tracked in the `loop_execution_log` table — an append-only, tamper-evident record that ensures no step is skipped, delayed, or falsified.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `cycle_id` | `UUID` | Unique identifier for this DAGS cycle |
+| `step` | `VARCHAR` | DISCOVER, ASSESS, GOVERN, SECURE, or AUDIT |
+| `executed_by` | `VARCHAR` | Agent ID or human role that ran this step |
+| `started_at` | `TIMESTAMPTZ` | When this step began |
+| `completed_at` | `TIMESTAMPTZ` | When this step finished |
+| `findings_count` | `INTEGER` | Number of findings produced by this step |
+| `items_resolved` | `INTEGER` | Number of items resolved during this step |
+| `output_document_ids` | `UUID[]` | References to output documents (scorecards, reports, etc.) |
+| `status` | `ENUM` | `COMPLETED`, `PARTIAL`, or `FAILED` |
+| `human_reviewed` | `BOOLEAN` | Required for GOVERN and AUDIT steps |
+| `next_scheduled_run` | `TIMESTAMPTZ` | When the next execution of this step is expected |
+
+<InfoBox type="fun" title="Think of it like a pilot's pre-flight checklist">
+  Pilots do not skip checklist items even if they have flown the same plane a thousand times. The loop execution record is the checklist — every step must be completed, checked off, and signed. If a step says PARTIAL or FAILED, the system flags it immediately, like a co-pilot saying "we missed item 7, we cannot take off yet."
+</InfoBox>
+
+<StatusBadge status="planned">Retention: 7 years (FSC requirement)</StatusBadge>
+
+---
+
+## One Cockpit Core Panels
+
+Six panels are always visible across all One Cockpit views, regardless of role. These provide the universal situational awareness layer.
+
+<FeatureGrid columns={3}>
+  <FeatureCard icon="🟢" title="1. System Health Grid" description="Color-coded status for all 12 agents and 6 infrastructure layers. Refreshes every 30 seconds. RED status triggers an audio alert." color="green" />
+  <FeatureCard icon="🚨" title="2. Active Incident List" description="Open incidents with severity, affected systems, time open, response actions taken, and assigned owner." color="red" />
+  <FeatureCard icon="📜" title="3. Live Audit Feed" description="Last 50 audit events, filterable by agent, user, or action type. Flagged events show in orange, compliance events in red." color="blue" />
+  <FeatureCard icon="✋" title="4. HITL Queue" description="Pending human approvals with waiting time and timeout countdown. Overdue items turn red." color="purple" />
+  <FeatureCard icon="🛡️" title="5. Security Pulse" description="1-hour injection attempt rate, jailbreak attempts, anomaly trend line, overall security posture. Refreshes every 5 minutes." color="red" />
+  <FeatureCard icon="🔄" title="6. DAGS Loop Status" description="Current position in the DAGS cycle, last cycle timestamp. Overdue steps turn yellow, skipped steps turn red." color="green" />
+</FeatureGrid>
+
+<InfoBox type="fun" title="Think of it like a car dashboard">
+  Every car has a speedometer, fuel gauge, temperature, and warning lights that are always visible no matter what screen the infotainment system is on. The 6 core panels work the same way — they are the "always on" gauges that tell you instantly if something needs attention, without clicking through menus.
+</InfoBox>
+
+---
+
+## One Cockpit Role-Based Views — Detail
+
+<Accordion>
+  <AccordionItem title="CEO/CTO View" icon="📊" defaultOpen={true}>
+
+The executive dashboard focuses on strategic metrics and business health.
+
+| Panel | What It Shows |
+|-------|--------------|
+| Business KPIs | AI-driven revenue impact, conversion rates, user growth |
+| Cost Metrics | Token spend per agent, infrastructure cost trends, cost-per-interaction |
+| Adoption Rates | Active AI feature usage, Classic Mode fallback rate, feature engagement |
+| System Health | Uptime, SLA compliance, incident count, overall platform status |
+
+</AccordionItem>
+
+  <AccordionItem title="Compliance Officer View" icon="👨‍💼">
+
+The compliance dashboard provides full regulatory oversight and investigation tools.
+
+| Panel | What It Shows |
+|-------|--------------|
+| Audit Trail Search | Search any interaction by ID, user, agent, date range, or action type |
+| Active Flags | All currently active compliance flags across all accounts |
+| STR Queue | Suspicious Transaction Report queue with priority ranking |
+| FSC Reporting | Pre-built regulatory report templates, submission tracking, deadline alerts |
+
+</AccordionItem>
+
+  <AccordionItem title="Security Lead View" icon="🛡️">
+
+The security dashboard provides real-time threat awareness and incident management.
+
+| Panel | What It Shows |
+|-------|--------------|
+| Threat Dashboard | Active threats mapped to 8 threat vectors, severity levels, mitigation status |
+| Agent Health | Per-agent status, anomaly flags, confidence drift, error spikes |
+| Anomaly Timeline | Chronological view of all detected anomalies across agents and services |
+| Incident Queue | Active security incidents with severity, owner, and resolution status |
+
+</AccordionItem>
+
+  <AccordionItem title="Engineering View" icon="👨‍💻">
+
+The engineering dashboard provides deep operational visibility into every agent and service.
+
+| Panel | What It Shows |
+|-------|--------------|
+| Agent Performance | Per-agent latency (p50/p95/p99), throughput, success rate |
+| Error Rates | Error breakdown by agent, error type, and time window |
+| Latency and Queue Depth | BullMQ queue depth, processing time, backlog trends |
+| Model Metrics | Token usage per model, confidence distributions, drift detection, fallback rates |
+
+</AccordionItem>
+</Accordion>
+
+---
+
+## Live Application Monitoring Stack
+
+Nine monitoring layers cover every surface of the platform, from user experience down to business metrics. Each layer has dedicated tooling, specific metrics, and automated alert thresholds.
+
+<InfoBox type="fun" title="Think of it like layers of a building's security">
+  A secure building does not rely on a single lock. It has perimeter cameras, lobby guards, badge readers, floor sensors, vault doors, and alarms — each watching a different layer. Our monitoring stack works the same way: 9 layers, each watching a different part of the system, so nothing slips through unnoticed.
+</InfoBox>
+
+<FeatureGrid columns={3}>
+  <FeatureCard icon="👤" title="1. User Experience" description="Page load time, CUI response time, error rate. Tooling: Vercel Analytics + Sentry." color="blue" />
+  <FeatureCard icon="🔌" title="2. API Layer" description="Request rate, latency p50/p95/p99, error rate. Tooling: Railway metrics." color="green" />
+  <FeatureCard icon="📡" title="3. WebSocket" description="Connection count, throughput, reconnection rate, feed lag. Tooling: Custom monitor." color="purple" />
+  <FeatureCard icon="🗄️" title="4. Database" description="Query latency, connection pool, replication lag, slow queries. Tooling: Supabase + pg_stat_statements." color="blue" />
+  <FeatureCard icon="⚡" title="5. Redis/Cache" description="Hit rate, memory usage, eviction rate, pub/sub lag, prompt cache. Tooling: Upstash dashboard." color="red" />
+  <FeatureCard icon="🧠" title="6. AI Inference" description="Claude latency, token throughput, cache ratio, local LLM latency, router performance. Tooling: Custom middleware." color="purple" />
+  <FeatureCard icon="📈" title="7. KIS API" description="Order success rate, quote latency, WebSocket health, error codes. Tooling: KIS response monitor." color="green" />
+  <FeatureCard icon="🔒" title="8. Security Events" description="Auth failures, injection attempts, rate limit violations, agent health. Tooling: Agent 11 + Agent 12." color="red" />
+  <FeatureCard icon="💼" title="9. Business Metrics" description="Active users, orders/min, signal generation rate, doc queries, feature requests. Tooling: Custom + PostgreSQL." color="blue" />
+</FeatureGrid>
+
+### Alert Thresholds by Layer
+
+<Accordion>
+  <AccordionItem title="Layer 1: User Experience" icon="👤" defaultOpen={true}>
+
+| Metric | Alert Threshold |
+|--------|----------------|
+| Page load time | Above 3 seconds |
+| Error rate | Above 1% |
+| CUI response time | Above 2 seconds |
+
+</AccordionItem>
+
+  <AccordionItem title="Layer 2: API Layer" icon="🔌">
+
+| Metric | Alert Threshold |
+|--------|----------------|
+| Latency p95 | Above 500ms |
+| Error rate | Above 0.5% |
+
+</AccordionItem>
+
+  <AccordionItem title="Layer 3: WebSocket" icon="📡">
+
+| Metric | Alert Threshold |
+|--------|----------------|
+| Feed lag | Above 2 seconds |
+| Reconnection rate | Above 5% per minute |
+
+</AccordionItem>
+
+  <AccordionItem title="Layer 4: Database" icon="🗄️">
+
+| Metric | Alert Threshold |
+|--------|----------------|
+| Average query latency | Above 100ms |
+| Connection pool usage | Above 80% |
+
+</AccordionItem>
+
+  <AccordionItem title="Layer 5: Redis/Cache" icon="⚡">
+
+| Metric | Alert Threshold |
+|--------|----------------|
+| Hit rate | Below 80% |
+| Memory usage | Above 85% |
+
+</AccordionItem>
+
+  <AccordionItem title="Layer 6: AI Inference" icon="🧠">
+
+| Metric | Alert Threshold |
+|--------|----------------|
+| Claude p95 latency | Above 5 seconds |
+| Token burn rate | Above 120% of budget |
+
+</AccordionItem>
+
+  <AccordionItem title="Layer 7: KIS API" icon="📈">
+
+| Metric | Alert Threshold |
+|--------|----------------|
+| Order failure rate | Above 1% |
+| Quote latency | Above 500ms |
+
+</AccordionItem>
+
+  <AccordionItem title="Layer 8: Security Events" icon="🔒">
+
+| Metric | Alert Threshold |
+|--------|----------------|
+| Any event | CRITICAL severity triggers immediate alert |
+| Injection attempts | Spike above baseline triggers alert |
+
+</AccordionItem>
+
+  <AccordionItem title="Layer 9: Business Metrics" icon="💼">
+
+| Metric | Alert Threshold |
+|--------|----------------|
+| Any key metric | Unusual drops (deviation from rolling average) |
+
+</AccordionItem>
+</Accordion>
+
+---
+
+## Alerting Severity Framework
+
+All alerts across the 9 monitoring layers are classified into 4 severity levels. Each level has a defined auto-response, notification chain, and SLA.
+
+| Severity | Definition | Auto Response | Human Notify | SLA |
+|---|---|---|---|---|
+| **P0 Critical** | Platform down or money at risk | Classic Mode activated, freeze orders, quarantine agents | PagerDuty on-call + CTO, Slack #incidents, SMS to security | Ack: 5 min, Mitigate: 30 min, Resolve: 2 hours |
+| **P1 High** | Significant degradation or compliance risk | Route to fallback services, increase logging level | PagerDuty on-call, Slack #incidents | Ack: 15 min, Mitigate: 1 hour, Resolve: 4 hours |
+| **P2 Medium** | Degraded performance or elevated risk | Auto-remediation (restart services, clear cache) | Slack #alerts, email to on-call | Ack: 30 min, Resolve: 24 hours |
+| **P3 Low** | Anomaly within normal range, needs investigation | Log and queue for review | Slack #monitoring, daily digest | Review: next business day |
+
+<InfoBox type="fun" title="Think of it like a hospital triage">
+  P0 is a heart attack — everyone drops what they are doing and runs. P1 is a broken arm — urgent, but the heart attack patient goes first. P2 is a bad cold — the nurse handles it on schedule. P3 is a routine checkup — it can wait until tomorrow. The triage system ensures the right response at the right speed.
+</InfoBox>
+
+<InfoBox type="warning" title="P0 auto-response is immediate">
+  When a P0 fires, the system does not wait for a human. Classic Mode activates automatically, pending orders freeze, and compromised agents quarantine themselves. Human notification happens simultaneously — but the system protects users first, then explains why.
+</InfoBox>
+
+---
+
+## Chaos Playbooks
+
+Seven pre-defined playbooks for the most critical failure scenarios. Each playbook has been rehearsed and is triggered automatically or semi-automatically based on the alerting framework.
+
+<InfoBox type="fun" title="Think of it like fire drills">
+  Schools practice fire drills so that when a real fire happens, nobody panics — everyone knows exactly where to go. Chaos playbooks work the same way. We have already decided what to do for every major disaster, written it down, practiced it, and wired the system to start executing the plan automatically.
+</InfoBox>
+
+<Accordion>
+  <AccordionItem title="PB-001: Claude API Outage" icon="🧠" defaultOpen={true}>
+
+**Trigger:** Claude API unreachable or latency exceeds SLA for 60+ seconds.
+
+**Auto Response:**
+- Route 100% of traffic to local LLM fallback
+- Downgrade AI features to local model capabilities
+- Alert CTO and engineering on-call
+
+**Recovery:** Monitor Claude status. Canary test before restoring traffic. Gradual ramp-up (10% then 50% then 100%).
+
+</AccordionItem>
+
+  <AccordionItem title="PB-002: KIS API Outage" icon="📈">
+
+**Trigger:** KIS API unreachable or order submission failure rate exceeds 5%.
+
+**Auto Response:**
+- Halt all new order submissions
+- Freeze pending orders in staged state
+- Display maintenance banner to users
+- Contact KIS support
+
+**Escalation:** If orders were mid-execution when outage occurred, notify FSC compliance team. User funds may be in transit.
+
+**Recovery:** Confirm KIS API health. Reconcile all pending orders. Resume in order of submission time.
+
+</AccordionItem>
+
+  <AccordionItem title="PB-003: Database Overload" icon="🗄️">
+
+**Trigger:** Query latency p95 exceeds 500ms or connection pool exceeds 95%.
+
+**Auto Response:**
+- Route reads to read replica
+- Shed non-critical write operations
+- Queue AI training and analytics writes
+
+**Recovery:** Identify and terminate long-running queries. Scale connection pool if needed. Restore normal routing once p95 drops below 100ms.
+
+</AccordionItem>
+
+  <AccordionItem title="PB-004: Coordinated Prompt Injection" icon="🛡️">
+
+**Trigger:** Agent 11 detects injection attempt spike across multiple agents simultaneously.
+
+**Auto Response:**
+- Quarantine affected agents immediately
+- Activate Classic Mode for all users
+- Block source IPs at edge
+- Increase logging to maximum verbosity
+
+**Recovery:** Review injection logs. Identify attack vector. Patch prompt defenses. Run canary tests against new attack patterns. Reactivate agents one-by-one with monitoring.
+
+</AccordionItem>
+
+  <AccordionItem title="PB-005: AML Transaction Freeze" icon="🚩">
+
+**Trigger:** Risk Guard agent flags a transaction for anti-money laundering review.
+
+**Procedure:**
+1. Risk Guard raises flag with evidence
+2. Compliance Officer reviews within 72 hours
+3. If confirmed: file KoFIU Suspicious Transaction Report (STR) within 3 business days
+4. FSC notification required for all confirmed AML events
+
+**Escalation:** If no Compliance Officer response within 72 hours, auto-escalate to CTO and external compliance counsel.
+
+</AccordionItem>
+
+  <AccordionItem title="PB-006: Data Breach" icon="🔓">
+
+**Trigger:** Agent 11 detects unauthorized data access or exfiltration attempt.
+
+**Auto Response:**
+- Revoke all active sessions immediately
+- Isolate affected systems from network
+- Increase logging to maximum on all systems
+- Begin forensic investigation
+
+**Regulatory Requirements:**
+- PIPC (Personal Information Protection Commission) notification within 72 hours
+- Affected users notified within 72 hours
+- Preserve all evidence for investigation
+
+</AccordionItem>
+
+  <AccordionItem title="PB-007: KRX Circuit Breaker" icon="⚡">
+
+**Trigger:** Korea Exchange (KRX) activates market-wide or stock-specific circuit breaker.
+
+**Auto Response:**
+- Halt all order submissions automatically
+- Display circuit breaker notice to all active users
+- Monitor KRX announcements for resumption
+
+**Recovery:** Resume order acceptance only after KRX confirms trading has reopened. Notify users with staged orders that they must re-confirm.
+
+</AccordionItem>
+</Accordion>

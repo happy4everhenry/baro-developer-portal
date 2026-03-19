@@ -1,0 +1,84 @@
+---
+title: API Reference
+description: How BARO's iOS app talks to the server — explained simply!
+---
+
+<PageMeta status="live" layer="backend" />
+
+# API Reference
+
+## What is an API?
+
+Imagine you're at a restaurant. You don't walk into the kitchen and cook your own food — that would be crazy! Instead, you tell the **waiter** what you want, the waiter goes to the kitchen, and comes back with your food.
+
+An **API** (Application Programming Interface) works the same way. The BARO app on your phone is *you* at the table. The **API is the waiter**. And the kitchen? That's the server where all the stock market data lives.
+
+Our API is built with **FastAPI**, a super-fast Python framework. It supports two ways of talking:
+
+- **REST API** — You ask a question, you get an answer.
+- **WebSocket** — An open phone line that keeps sending you live updates.
+
+<InfoBox type="tip" title="REST vs WebSocket — What's the difference?">
+**REST** is like texting a friend. You send a message, wait for a reply, done.
+
+**WebSocket** is like a phone call that stays open. Once you connect, data keeps flowing to you in real time — like live stock prices updating every second!
+</InfoBox>
+
+## By the Numbers
+
+<StatGrid columns={4}>
+  <StatCard value="25+" label="REST Endpoints" />
+  <StatCard value="4" label="WebSocket Channels" />
+  <StatCard value="12" label="AI Agent Services" />
+  <StatCard value="99.9%" label="Uptime Target" />
+</StatGrid>
+
+## How It All Connects
+
+<Diagram title="How the BARO App Talks to the Server">
+  <DiagramRow>
+    <DiagramNode type="view" icon="📱" label="iOS App" sublabel="What you see" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="sends requests" />
+  <DiagramRow>
+    <DiagramNode type="service" icon="⚡" label="FastAPI Server" sublabel="Python backend" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="fetches data" />
+  <DiagramRow>
+    <DiagramNode type="data" icon="🏦" label="KIS Server" sublabel="Korea Investment & Securities" />
+  </DiagramRow>
+</Diagram>
+
+<Diagram title="Live Price Updates via WebSocket">
+  <DiagramRow>
+    <DiagramNode type="data" icon="📊" label="Live Prices" sublabel="Real-time market data" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="streams continuously" />
+  <DiagramRow>
+    <DiagramNode type="service" icon="🔌" label="WebSocket Server" sublabel="Always-open connection" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="pushes updates" />
+  <DiagramRow>
+    <DiagramNode type="view" icon="📱" label="iOS App" sublabel="Prices update instantly" />
+  </DiagramRow>
+</Diagram>
+
+## Explore the API
+
+<FeatureGrid columns={2}>
+  <FeatureCard icon="🔐" title="Authentication" description="Email/password and Apple Sign In with JWT tokens. Endpoints: register, login, refresh, logout, me." href="/api/authentication" color="red" />
+  <FeatureCard icon="📡" title="REST Endpoints" description="All the questions you can ask the server, and the answers you get back." href="/api/endpoints" color="blue" />
+  <FeatureCard icon="🔌" title="WebSocket" description="The always-open connection for live stock prices and updates." href="/api/websocket" color="purple" />
+  <FeatureCard icon="🚨" title="Error Codes" description="What the server says when something goes wrong, and what to do about it." href="/api/error-codes" color="amber" />
+  <FeatureCard icon="🐍" title="Python Backend" description="A tour of the FastAPI server that powers everything behind the scenes." href="/api/python-backend" color="jade" />
+  <FeatureCard icon="🏦" title="KIS Integration" description="How we connect to Korea Investment & Securities for real market data." href="/api/kis-integration" color="teal" />
+  <FeatureCard icon="📈" title="Market Service" description="The service that keeps track of what the whole market is doing." href="/api/market-service" color="blue" />
+</FeatureGrid>
+
+<InfoBox type="note" title="Live vs Mock endpoints">
+Most endpoints return **live data** from the KIS Open API. The `/api/stocks/search` endpoint currently returns **mock data** as KIS does not provide a search API. Authentication endpoints (`/api/auth/*`) are fully live with SQLite-backed user storage.
+</InfoBox>
+
+<InfoBox type="info" title="All roads lead to KIS">
+Almost every piece of stock data in BARO comes from the **Korea Investment & Securities (KIS)** API. Our FastAPI server acts as a translator — it takes the KIS data and reshapes it into a format the iOS app can easily understand.
+</InfoBox>

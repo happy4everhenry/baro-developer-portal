@@ -1,0 +1,157 @@
+# Motion Principles <KoreanLabel>모션 원칙</KoreanLabel>
+
+<PageMeta status="live" layer="frontend" />
+
+BARO's animations are designed to feel snappy, natural, and purposeful. Every movement tells you something is happening -- whether it is a tab switching, a price updating, or data loading in.
+
+<StatGrid columns={4}>
+  <StatCard value="2" label="Spring Curves" />
+  <StatCard value="3" label="Easing Functions" />
+  <StatCard value="0.2--0.4s" label="Duration Range" />
+  <StatCard value="60fps" label="Target Framerate" />
+</StatGrid>
+
+<InfoBox type="fun" title="Why do animations matter?">
+Animations are like body language for your app. A snappy bounce says "Got it!" while a smooth slide says "Here comes something new." Without animations, an app would feel like flipping through flash cards -- it works, but it does not feel alive.
+</InfoBox>
+
+## Motion Design Philosophy <KoreanLabel>모션 철학</KoreanLabel>
+
+BARO animations follow three core principles:
+
+<FeatureGrid columns={3}>
+  <FeatureCard icon="⚡" title="Responsive" description="All interactive elements respond within 1 frame. Gestures like scrubbing and pinch have zero animation delay." />
+  <FeatureCard icon="🌿" title="Natural" description="Spring curves with physical damping create organic movement. No hard linear animations for UI elements." />
+  <FeatureCard icon="🎯" title="Purposeful" description="Every animation communicates a state change. Financial data uses fast, subtle transitions for clarity." />
+</FeatureGrid>
+
+<Tabs>
+<Tab label="Spring Curves" icon="🌀">
+
+## Primary Spring Curve <KoreanLabel>메인 스프링 커브</KoreanLabel>
+
+The default spring animation used across the app for interactive state changes. It feels snappy with a tiny bounce before settling.
+
+**response:** 0.35 | **dampingFraction:** 0.75
+
+<InfoBox type="info" title="What do these numbers mean?">
+A response of 0.35s means the spring reaches its target in about 350 milliseconds. The 0.75 damping fraction creates a single subtle overshoot before settling -- enough to feel organic without looking bouncy.
+</InfoBox>
+
+### Where It Is Used
+
+| Component | Trigger | What Animates |
+|---|---|---|
+| FloatingTabBar | Tab selection | `matchedGeometryEffect` indicator capsule slides between tabs |
+| KLSegmentedControl | Segment tap | Pill indicator transitions to new segment with spring |
+| KLScrollableTabHeader | Tab selection + auto-scroll | Capsule pill + `scrollTo(anchor: .center)` |
+| TabBarButton | Selection change | Icon scale (`1.0 -> 1.1`) + color + indicator position |
+
+```swift filename="Standard Usage"
+// Tab selection with spring animation
+withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+    selectedTab = newTab
+}
+
+// Auto-scroll with matching spring
+.onChange(of: selected) { _, newValue in
+    withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+        proxy.scrollTo(newValue, anchor: .center)
+    }
+}
+```
+
+</Tab>
+
+<Tab label="Easing" icon="📐">
+
+## Easing Functions <KoreanLabel>이징 함수</KoreanLabel>
+
+Standard easing curves used for non-spring animations. Each one has a specific job.
+
+| Easing | Duration | Purpose | Usage Examples |
+|---|---|---|---|
+| `.easeInOut` | 0.3s | Default UI state transitions | Price digit animation, tab bar collapse, dot indicators, banner auto-play |
+| `.easeInOut` | 0.2s | Quick interactive feedback | Period tab selection, chart settings toggle, chart type/overlay selection |
+| `.easeInOut` | 0.4s | Larger visual transitions | Banner page slide, carousel transitions |
+| `.easeOut` | 0.25s | Deceleration / settling | Double-tap zoom reset, zoom button press |
+| `.easeOut` | 0.4s | Fade out / disappear | Scroll indicator hide |
+| `.linear` | 1.2s | Continuous repeating motion | Shimmer gradient sweep (skeleton loading) |
+| `.easeInOut` | 0.8s | Pulsing / breathing | Shimmer opacity pulse (skeleton loading) |
+
+## Animation Token Reference <KoreanLabel>애니메이션 토큰</KoreanLabel>
+
+While BARO does not define centralized animation tokens (animations are inline), these are the de facto standards:
+
+<PropsTable>
+| Token Name | SwiftUI Value | Semantic Use |
+|---|---|---|
+| `spring.primary` | `.spring(response: 0.35, dampingFraction: 0.75)` | Tab indicators, segmented controls, capsule pills |
+| `ease.standard` | `.easeInOut(duration: 0.3)` | Default state change, price digit ticking |
+| `ease.fast` | `.easeInOut(duration: 0.2)` | Quick interactive feedback |
+| `ease.slow` | `.easeInOut(duration: 0.4)` | Content reveals, carousel |
+| `ease.settle` | `.easeOut(duration: 0.25)` | Zoom reset, deceleration |
+| `shimmer.sweep` | `.linear(duration: 1.2).repeatForever()` | Skeleton gradient sweep |
+| `shimmer.pulse` | `.easeInOut(duration: 0.8).repeatForever(autoreverses: true)` | Skeleton opacity pulse |
+</PropsTable>
+
+</Tab>
+
+<Tab label="Duration Guide" icon="⏱️">
+
+## Duration Guidelines <KoreanLabel>지속 시간 가이드</KoreanLabel>
+
+These timing conventions make sure animations feel fast enough for financial data while still looking smooth for decorative transitions.
+
+<Accordion>
+<AccordionItem title="0.15s -- Instant Feedback" icon="⚡" badge="Fastest">
+Chart type radio selection, overlay checkbox toggle. Nearly instant visual confirmation. You barely see it, but you feel it.
+</AccordionItem>
+
+<AccordionItem title="0.2-0.3s -- Standard Interaction" icon="👆" badge="Default">
+Tab switches, price ticking, period selection, accordion expansion. This is the sweet spot for most interactive elements.
+</AccordionItem>
+
+<AccordionItem title="0.35s -- Spring Response" icon="🌀" badge="Spring">
+Primary spring curve response time. Used for all `matchedGeometryEffect` transitions. The slight bounce makes it feel alive.
+</AccordionItem>
+
+<AccordionItem title="0.4s+ -- Scenic Transitions" icon="🎬" badge="Slow">
+Banner carousel, scroll indicator fade-out, large content reveals. Slower timing adds visual polish to bigger movements.
+</AccordionItem>
+</Accordion>
+
+</Tab>
+
+<Tab label="Performance" icon="🚀">
+
+## Performance Guidelines <KoreanLabel>성능 가이드</KoreanLabel>
+
+<InfoBox type="warning" title="60fps or bust!">
+Financial apps need to feel instant. Every optimization here is about keeping the frame rate at 60fps even with hundreds of data points on screen.
+</InfoBox>
+
+<Accordion>
+<AccordionItem title="Canvas for charting" icon="🎨" badge="Rendering" defaultOpen={true}>
+`StockChartView` uses `Canvas` instead of SwiftUI `Path` views for 60fps chart rendering with hundreds of data points. Canvas gives direct access to Core Graphics for maximum performance.
+</AccordionItem>
+
+<AccordionItem title="LTTB downsampling" icon="📉" badge="Data">
+Chart display data is pre-downsampled to ~300 points before rendering using the Largest Triangle Three Buckets algorithm. Full data is kept only for gesture hit-testing.
+</AccordionItem>
+
+<AccordionItem title="Minimal animation on data views" icon="🔢" badge="Text">
+Stock prices use `.numericText()` content transition (GPU-accelerated) rather than layout-based animations. This means the GPU handles the digit rolling, not the CPU.
+</AccordionItem>
+
+<AccordionItem title="Lazy rendering" icon="🦥" badge="Layout">
+`StockDetailPageView` uses `LazyVStack` for tab content below the fold, keeping the chart in a non-lazy section to prevent deallocation flashes.
+</AccordionItem>
+
+<AccordionItem title="Instant scroll on tab change" icon="📜" badge="Scroll">
+Content tab changes use `withAnimation(nil)` for `scrollTo` to prevent visible scroll animation. The content just appears where it should be.
+</AccordionItem>
+</Accordion>
+
+</Tab>
+</Tabs>

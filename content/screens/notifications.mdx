@@ -1,0 +1,50 @@
+# Notifications <KoreanLabel>알림</KoreanLabel>
+
+<PageMeta status="live" layer="frontend" since="2025" />
+
+<InfoBox type="fun" title="What are notifications?">
+**Notifications** keep you in the loop — like a friend who taps your shoulder to say "Hey, Samsung just hit your target price!" They make sure you never miss important market events.
+</InfoBox>
+
+## What You See
+
+### Notification Feed
+
+```
+┌─────────────────────────────┐
+│  🔔 Notifications           │
+│  ┌───────────────────────┐  │
+│  │ 📈 삼성전자 목표가 도달  │  │  ← Price alert
+│  │ 72,400원 (+1.2%)       │  │
+│  │ 2시간 전 · 읽지 않음    │  │  ← Unread indicator
+│  └───────────────────────┘  │
+│  ┌───────────────────────┐  │
+│  │ 📰 속보: 금리 인하 결정  │  │  ← News alert
+│  │ 한국은행 기준금리 동결   │  │
+│  │ 5시간 전                │  │
+│  └───────────────────────┘  │
+└─────────────────────────────┘
+```
+
+### Notification Settings
+
+| Category | Toggle Options |
+|----------|---------------|
+| Price Alerts | Target price reached, daily summary |
+| News | Breaking news, analyst reports |
+| Events | New events, event reminders |
+| Marketing | Promotions, product updates |
+
+## Features
+
+- **Read/unread state** — Visual indicator for new notifications
+- **Category-based** — Price alerts, news, events, and marketing
+- **Customizable preferences** — Toggle each category on/off
+- **Tap to navigate** — Price alerts open stock detail, news opens article
+
+## Source Files
+
+| File | Purpose |
+|------|---------|
+| `Features/Notifications/NotificationView.swift` | Notification feed with read/unread state |
+| `Features/Notifications/NotificationSettingsView.swift` | Notification preference toggles |

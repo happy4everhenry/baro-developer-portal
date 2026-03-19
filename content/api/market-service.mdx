@@ -1,0 +1,130 @@
+# Market Service <KoreanLabel>시장 서비스</KoreanLabel>
+
+<PageMeta status="wip" layer="backend" />
+
+Market data aggregation, caching, and real-time streaming architecture.
+
+<Tabs>
+  <Tab label="Features" icon="✨">
+
+## What Does the Market Service Do?
+
+The Market Service sits between the KIS API and the endpoints your app talks to. It handles all the behind-the-scenes work: transforming raw data into clean JSON, caching results so we don't hit rate limits, paginating large lists, and combining data from multiple trading venues.
+
+## Service Components
+
+<FeatureGrid columns={2}>
+  <FeatureCard icon="🏦" title="KIS API Client" description="OAuth, HTTP client, request signing, and error mapping (kis_api.py)" />
+  <FeatureCard icon="📡" title="Stream Manager" description="KIS WebSocket to client WebSocket fan-out and subscription management (stream_manager.py)" />
+  <FeatureCard icon="📈" title="Market Router" description="Indices, FX rates, and market overview endpoints (market.py)" />
+  <FeatureCard icon="📊" title="Stock Router" description="Stock list, search, detail, chart, and orderbook endpoints (stock.py)" />
+  <FeatureCard icon="🔌" title="WebSocket Router" description="Client WebSocket handler, message routing, and status endpoint (websocket.py)" />
+</FeatureGrid>
+
+## Caching Strategy
+
+<InfoBox type="tip" title="Why Cache?">
+The KIS API has a rate limit of 20 requests per second. Caching prevents us from hitting that limit and keeps the app feeling snappy.
+</InfoBox>
+
+| Data Type | Cache TTL | Strategy |
+|---|---|---|
+| Market Indices | 30 seconds | In-memory, refreshed on request if stale |
+| Stock Rankings | 60 seconds | Per-filter per-venue cache |
+| FX Rates | 60 seconds | In-memory cache |
+| Stock Detail | No cache | Always fresh from KIS |
+| Real-time Prices | 0 (live) | WebSocket stream, no caching |
+
+  </Tab>
+  <Tab label="Architecture" icon="🏗️">
+
+## Data Pipeline
+
+<Diagram title="Market Service Data Pipeline">
+  <DiagramRow>
+    <DiagramNode type="service" icon="🏦" label="KIS API" sublabel="Korea Investment & Securities Open API" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="REST + WebSocket" />
+  <DiagramRow>
+    <DiagramNode type="repo" icon="🔧" label="KIS Service Layer" sublabel="Auth, rate limiting, retry" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="Raw KIS responses" />
+  <DiagramRow>
+    <DiagramNode type="vm" icon="⚙️" label="Market Service" sublabel="Transform, cache, paginate, aggregate" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="Clean JSON" />
+  <DiagramRow>
+    <DiagramNode type="repo" icon="🌐" label="REST Router" sublabel="market.py, stock.py" />
+    <DiagramNode type="repo" icon="📡" label="Stream Manager" sublabel="WebSocket broadcast" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="HTTP / WS" />
+  <DiagramRow>
+    <DiagramNode type="view" icon="📱" label="iOS Client" sublabel="APIClient + WebSocketManager" />
+  </DiagramRow>
+</Diagram>
+
+## Stream Manager Architecture
+
+The StreamManager keeps a single upstream WebSocket connection to KIS and fans out real-time data to all connected iOS clients. It handles subscription reference counting (only subscribes upstream when the first client asks), venue-aware tr_id mapping, and automatic reconnection.
+
+```python filename="stream_manager.py"
+class StreamManager:
+    """Manages KIS WebSocket → Client fan-out"""
+
+    def __init__(self):
+        self.clients: dict[str, WebSocket] = {}
+        self.subscriptions: dict[str, set[str]] = {}  # code → client_ids
+        self.kis_ws: WebSocket | None = None
+
+    async def on_client_subscribe(self, client_id: str, codes: list[str], venue: str):
+        """Client subscribes to stock codes"""
+        for code in codes:
+            if code not in self.subscriptions:
+                self.subscriptions[code] = set()
+                # First subscriber → subscribe upstream to KIS
+                tr_id = VENUE_WS_TRADE[MarketVenue(venue)]
+                await self.kis_subscribe(tr_id, code)
+            self.subscriptions[code].add(client_id)
+
+    async def on_kis_message(self, data: dict):
+        """Fan out KIS message to subscribed clients"""
+        code = data.get("code")
+        for client_id in self.subscriptions.get(code, []):
+            await self.clients[client_id].send_json(data)
+```
+
+  </Tab>
+  <Tab label="API" icon="🔗">
+
+## Service File Map
+
+| Service | File | Responsibility |
+|---|---|---|
+| **KIS API Client** | `services/kis_api.py` | OAuth, HTTP client, request signing, error mapping |
+| **Stream Manager** | `services/stream_manager.py` | KIS WebSocket to client WebSocket fan-out, subscription management |
+| **Market Router** | `routers/market.py` | Indices, FX rates, market overview endpoints |
+| **Stock Router** | `routers/stock.py` | Stock list, search, detail, chart, orderbook endpoints |
+| **WebSocket Router** | `routers/websocket.py` | Client WebSocket handler, message routing, status endpoint |
+
+## How Streaming Works
+
+<StepGuide>
+  <Step number={1} title="Client Connects">
+    The iOS app opens a WebSocket to `/ws/stream` on the FastAPI backend.
+  </Step>
+  <Step number={2} title="Client Subscribes">
+    The app sends a subscribe message with stock codes and a venue (KRX, NXT, or Combined).
+  </Step>
+  <Step number={3} title="First Subscriber Triggers Upstream">
+    If no other client is watching that stock, the StreamManager subscribes to KIS upstream using the correct venue tr_id.
+  </Step>
+  <Step number={4} title="KIS Sends Data">
+    Real-time price ticks arrive from the KIS WebSocket.
+  </Step>
+  <Step number={5} title="Fan-Out to Clients">
+    The StreamManager forwards each tick to every client subscribed to that stock code.
+  </Step>
+</StepGuide>
+
+  </Tab>
+</Tabs>

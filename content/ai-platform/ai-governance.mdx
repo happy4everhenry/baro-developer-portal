@@ -1,0 +1,377 @@
+# AI Governance
+
+<PageMeta status="in_progress" layer="backend" />
+
+A living framework — not a one-time compliance exercise. Every pillar is versioned, measurable, and replaceable. Each pillar is operationally independent, ensuring no single point of governance failure. The governance framework has been fully defined and is being implemented alongside Phase 1 agent development.
+
+<InfoBox type="fun" title="Think of it like the rules of a game!">
+  Governance is the rulebook that makes sure everyone plays fair and nobody cheats. Each of the 5 pillars is like a different referee watching a different part of the game — one checks the ethics, another guards the exits, another keeps score, and so on.
+</InfoBox>
+
+<StatGrid columns={4}>
+  <StatCard value="5" label="Governance Pillars" />
+  <StatCard value="12" label="Agents Governed" />
+  <StatCard value="EU+KR" label="Regulatory Coverage" />
+  <StatCard value="0" label="Ungoverned Actions" />
+</StatGrid>
+
+---
+
+## The 5 Pillars at a Glance
+
+<FeatureGrid columns={5}>
+  <FeatureCard icon="⚖️" title="Alignment" description="Does AI behave consistently with values, ethics, and legal obligations?" color="blue" />
+  <FeatureCard icon="🛑" title="Control" description="Can we stop, constrain, and authorize every AI action?" color="red" />
+  <FeatureCard icon="👁️" title="Visibility" description="Can we see, understand, and investigate every AI agent?" color="purple" />
+  <FeatureCard icon="🔒" title="Security" description="Are AI systems protected, resilient, and within safe boundaries?" color="green" />
+  <FeatureCard icon="🌐" title="Societal Integration" description="Are we accountable, fair, and legally compliant?" color="orange" />
+</FeatureGrid>
+
+---
+
+## How the Pillars Connect
+
+<Diagram title="AI Governance Framework" caption="5 operationally independent pillars — each versioned, measurable, and replaceable">
+  <DiagramRow>
+    <DiagramNode type="view" icon="🤖" label="12 AI Agents" sublabel="All governed actions" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="governed by" />
+  <DiagramRow>
+    <DiagramGroup label="5 Governance Pillars">
+      <DiagramNode type="service" icon="⚖️" label="Alignment" sublabel="Ethics & Values" />
+      <DiagramNode type="vm" icon="🛑" label="Control" sublabel="Kill Switches & Auth" />
+      <DiagramNode type="repo" icon="👁️" label="Visibility" sublabel="Monitoring & Registry" />
+      <DiagramNode type="data" icon="🔒" label="Security" sublabel="Threat Defense" />
+      <DiagramNode type="model" icon="🌐" label="Societal" sublabel="Regulatory Compliance" />
+    </DiagramGroup>
+  </DiagramRow>
+  <DiagramArrow direction="down" label="enforced via" />
+  <DiagramRow>
+    <DiagramNode type="default" icon="⚙️" label="Legal Rules Engine" sublabel="1 central enforcement layer" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="audited by" />
+  <DiagramRow>
+    <DiagramNode type="view" icon="📋" label="AI Ethics Review Board" sublabel="Monthly + annual external audit" />
+  </DiagramRow>
+</Diagram>
+
+---
+
+<Tabs>
+  <Tab label="The 5 Pillars" icon="🏛️">
+
+### Governance Pillars — Deep Dive
+
+<Accordion>
+  <AccordionItem title="Pillar 1: Alignment — Ethics & Values">
+
+**Core Question:** Does AI behave consistently with values, ethics, and legal obligations?
+
+| Attribute | Detail |
+|-----------|--------|
+| **Owner** | AI Ethics Board + Compliance Officer |
+| **Review Cycle** | Monthly review + annual external audit |
+| **Enforcement** | Behavioral constraints in system prompts, enforced by self-review nodes |
+
+**Code of Ethics — 6 Principles:**
+
+| Principle | Behavioral Constraint |
+|-----------|----------------------|
+| Do No Financial Harm | No autonomous financial actions without HITL approval |
+| Honesty | No fabricated data; confidence scores required on all outputs |
+| User Autonomy | Never override user decisions; always present options |
+| Fairness | Equal treatment across demographics; bias monitoring active |
+| Transparency About Limitations | Always disclose AI limitations and confidence levels |
+| Privacy Respect | Minimal data collection; full consent and opt-out flows |
+
+Each principle has behavioral constraints embedded in system prompts and enforced by self-review nodes.
+
+</AccordionItem>
+
+  <AccordionItem title="Pillar 2: Control — Stop, Constrain, Authorize">
+
+**Core Question:** Can we stop, constrain, and authorize every AI action?
+
+| Attribute | Detail |
+|-----------|--------|
+| **Owner** | Engineering Lead + Security Lead |
+| **Review Cycle** | Weekly drill + monthly authorization review |
+| **Key Mechanisms** | Kill switches, authorization levels, agent boundaries |
+
+Control ensures that every AI action can be stopped, constrained, or rolled back.
+
+**Kill Switch Levels:**
+
+| Level | Scope | Effect |
+|-------|-------|--------|
+| Agent-level pause | Single agent | Suspends one agent; all others continue normally |
+| Full Classic Mode | All AI off | Reverts the entire platform to non-AI operation; all features work without AI |
+| Granular tool revocation | Specific tool/capability | Revokes a specific tool from a specific agent without pausing the agent entirely |
+
+**Authorization Matrix:**
+
+Each agent has a defined set of allowed actions. Actions outside the matrix are blocked at the system level — not by the agent's own judgment.
+
+| Agent Category | Can Do Autonomously | Requires Human Approval |
+|----------------|--------------------|-----------------------|
+| Advisory agents (Trade Signal, Portfolio Optimizer) | Generate recommendations, surface data | Execute trades, modify portfolio |
+| Interaction agents (CUI) | Navigate UI, pre-fill forms, search | Submit orders, modify account settings |
+| Safety agents (Risk Guard) | Flag transactions, generate alerts | Freeze accounts, file STRs |
+| Infrastructure agents (Agent 11, Agent 12) | Monitor, detect, alert | Quarantine agents, activate Classic Mode |
+
+**Weekly Control Drill:** Every week, the engineering team runs a kill switch drill — testing agent-level pause, Classic Mode activation, and granular tool revocation to ensure all controls function correctly under pressure.
+
+<InfoBox type="fun" title="Think of it like a fire drill">
+  Just like schools practice fire drills so everyone knows what to do in an emergency, BARO practices "AI off" drills every week. If something ever goes wrong for real, the team already knows exactly which buttons to press.
+</InfoBox>
+
+</AccordionItem>
+
+  <AccordionItem title="Pillar 3: Visibility — See, Understand, Investigate">
+
+**Core Question:** Can we see, understand, and investigate every AI agent?
+
+| Attribute | Detail |
+|-----------|--------|
+| **Owner** | ML/AI Engineer + Security Lead |
+| **Review Cycle** | Continuous monitoring + weekly review |
+| **Key Mechanisms** | Agent Registry Panel, full trace logging |
+
+**Agent Registry:** Every agent is versioned, documented, and monitored. The Agent Registry Panel provides a real-time view of all 12 agents — their status, version, recent actions, confidence distributions, and anomaly flags. No agent can operate without being registered.
+
+**Observability:** Full traces for every LangGraph execution. Every node traversal, every tool call, every LLM invocation is captured with timestamps, input/output payloads, and latency. Traces are queryable and replayable.
+
+**Explainability:** Why did the AI do X? Every decision is traceable from a single `interaction_id`. From that ID, you can reconstruct the complete chain: which agent acted, what context it received, which LangGraph nodes it traversed, what tools it called, what the LLM returned, and what the final output was. No black boxes.
+
+<InfoBox type="fun" title="Think of it like a glass building">
+  Visibility means the AI works inside a glass building. You can see everything it does from the outside. If someone asks "why did the AI recommend that stock?" you can walk through every step it took, like watching a replay in slow motion.
+</InfoBox>
+
+</AccordionItem>
+
+  <AccordionItem title="Pillar 4: Security — Protect, Defend, Contain">
+
+**Core Question:** Are AI systems protected, resilient, and within safe boundaries?
+
+| Attribute | Detail |
+|-----------|--------|
+| **Owner** | Security Lead |
+| **Review Cycle** | Daily posture scan + monthly red team |
+| **Key Mechanisms** | Security Posture Panel, threat modeling, boundary enforcement |
+
+Security covers all 8 AI-specific threat vectors: model hijacking, prompt injection, infection/backdoor, data poisoning, evasion attacks, model extraction, membership inference, and AI-specific DoS.
+
+**Daily Posture Scans:** Agent 11 (Security Monitor) runs a full AI Security Posture Management (AI-SPM) scan every day — checking all agents, models, data pipelines, and communication channels against the threat model.
+
+**Monthly Red Team Exercises:** Adversarial testing of AI defenses by the security team. This includes prompt injection attempts, data poisoning simulations, evasion attack testing, and cross-agent injection scenarios.
+
+**Security Posture Panel:** A dedicated view within One Cockpit showing real-time security status across all 8 threat vectors, active mitigations, unresolved vulnerabilities, and the results of the latest posture scan.
+
+<InfoBox type="info" title="See AI Security for full details">
+  The AI Security page covers all 8 threat vectors, defense strategies, Agent 11 schedules, and Agent 12 monitoring signals in detail.
+</InfoBox>
+
+</AccordionItem>
+
+  <AccordionItem title="Pillar 5: Societal Integration — Accountability & Compliance">
+
+**Core Question:** Are we accountable, fair, and legally compliant?
+
+| Attribute | Detail |
+|-----------|--------|
+| **Owner** | Compliance Officer + Legal Counsel |
+| **Review Cycle** | Quarterly regulatory review + annual societal audit |
+| **Key Mechanisms** | Regulatory Compliance Panel, fairness testing, legal mapping |
+
+Societal Integration ensures that the AI platform meets all regulatory requirements across jurisdictions and maintains fairness, accountability, and transparency for all users.
+
+**Quarterly Regulatory Review:** Every quarter, the compliance team conducts a comprehensive review of all applicable regulations (EU AI Act, FSC Guidelines, PIPA, Financial Consumer Protection Act, Korean AI Basic Act) and performs a gap analysis against current implementation.
+
+**Annual Societal Audit:** An external auditor conducts a full societal impact assessment, covering fairness, accountability, transparency, and community impact. Results are published to the AI Ethics Review Board.
+
+**Accountability:** Who is responsible when AI makes a mistake? BARO maintains a clear accountability chain: the agent's owner (as defined in the Agent Registry) is responsible for the agent's behavior, the Compliance Officer is responsible for regulatory adherence, and the AI Ethics Board is responsible for overall governance. Accountability is never diffused — there is always a named person.
+
+**Fairness Monitoring:** Continuous monitoring of AI outputs across demographics to detect and correct bias. Fairness parity must remain within a gap of less than 5% across all demographic groups. Any violation triggers an immediate review and model adjustment.
+
+**Legal Counsel Review:** Legal counsel reviews all regulatory changes, advises on cross-jurisdiction compliance, and signs off on any governance framework updates before they take effect.
+
+<InfoBox type="fun" title="Think of it like a neighborhood watch">
+  Societal Integration is about being a good neighbor. It is not enough to follow the law — you also need to treat everyone fairly, take responsibility when things go wrong, and make sure your actions do not harm the community. The annual audit is like inviting an inspector to check that you are keeping your promises.
+</InfoBox>
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+
+  <Tab label="Ethics & Alignment" icon="⚖️">
+
+### Alignment Metrics
+
+Every ethical principle is measured with quantitative targets. No metric is aspirational — each has an operational threshold and alerting.
+
+<Accordion>
+  <AccordionItem title="Alignment Metrics Dashboard">
+
+| Metric | Target | Description |
+|--------|--------|-------------|
+| Ethics Compliance Rate | **99.5%+** | Percentage of agent actions passing ethical review |
+| FSC Disclaimer Rate | **100%** | Financial Services Commission disclaimer attached to all financial outputs |
+| Confidence Calibration | **Within 10%** | Predicted confidence vs. actual accuracy deviation |
+| Fairness Parity | **Less than 5% gap** | Maximum demographic disparity in outcomes |
+| Citation Accuracy | **99%+** | Correctness of sourced references in agent outputs |
+| Autonomy Preservation | **100%** | User decisions never overridden by AI |
+
+</AccordionItem>
+</Accordion>
+
+### The 6 Ethical Principles
+
+| # | Principle | What It Means in Practice |
+|---|-----------|--------------------------|
+| 1 | **Do No Financial Harm** | No autonomous financial actions; HITL required for all money movements |
+| 2 | **Honesty** | No fabricated data; confidence scores on every output |
+| 3 | **User Autonomy** | Never override user decisions; always present multiple options |
+| 4 | **Fairness** | Equal treatment across all demographics; continuous bias monitoring |
+| 5 | **Transparency About Limitations** | Always disclose when AI is uncertain or out-of-scope |
+| 6 | **Privacy Respect** | Minimal data collection; consent-first; full opt-out support |
+
+Each principle has behavioral constraints embedded directly in system prompts and enforced by self-review nodes within the agent execution pipeline.
+
+</Tab>
+
+  <Tab label="Regulations" icon="📜">
+
+### Regulatory Alignment
+
+<InfoBox type="warning" title="EU AI Act — High-Risk Classification">
+  BARO's AI advisory agents are classified as **High-Risk AI Systems** under Annex III of the EU AI Act. This requires mandatory conformity assessments, continuous monitoring, and human oversight mechanisms before EU market launch.
+</InfoBox>
+
+<Accordion>
+  <AccordionItem title="EU AI Act">
+
+| Attribute | Detail |
+|-----------|--------|
+| **Classification** | High-Risk AI System (Annex III) |
+| **Status** | <StatusBadge status="monitoring" /> Monitoring for EU launch |
+| **Requirements** | Conformity assessment, human oversight, continuous monitoring, transparency obligations |
+| **Impact** | Must complete full conformity assessment before any EU market deployment |
+
+</AccordionItem>
+
+  <AccordionItem title="FSC AI Guidelines 2024 (금융위원회)">
+
+| Attribute | Detail |
+|-----------|--------|
+| **Scope** | Financial Services Commission AI usage guidelines for Korean financial institutions |
+| **Status** | <StatusBadge status="implemented" /> Implemented |
+| **Key Requirements** | Human-in-the-loop (HITL), explainability, bias monitoring |
+| **Implementation** | HITL enforced on all financial actions; explainability via confidence scores and reasoning traces; bias monitoring active |
+
+</AccordionItem>
+
+  <AccordionItem title="PIPA (개인정보보호법) — Personal Information Protection Act">
+
+| Attribute | Detail |
+|-----------|--------|
+| **Scope** | Korean data privacy law governing collection, use, and processing of personal information |
+| **Status** | <StatusBadge status="implemented" /> Implemented |
+| **Key Requirements** | Informed consent, opt-out mechanisms, data minimization |
+| **Implementation** | Consent flows built into onboarding; opt-out available for all AI features; minimal data collection enforced |
+
+</AccordionItem>
+
+  <AccordionItem title="금융소비자보호법 — Financial Consumer Protection Act">
+
+| Attribute | Detail |
+|-----------|--------|
+| **Scope** | Korean law protecting financial consumers, including suitability and appropriateness requirements |
+| **Status** | <StatusBadge status="implemented" /> Implemented |
+| **Key Requirements** | Suitability checks before financial product recommendations |
+| **Implementation** | Suitability check node in every advisory agent pipeline; user risk profile validated before any recommendation |
+
+</AccordionItem>
+
+  <AccordionItem title="Korean AI Basic Act (AI 기본법)">
+
+| Attribute | Detail |
+|-----------|--------|
+| **Scope** | Upcoming comprehensive Korean AI legislation (draft stage) |
+| **Status** | <StatusBadge status="monitoring" /> Monitoring — draft legislation |
+| **Key Requirements** | TBD — expected to cover AI transparency, accountability, and safety |
+| **Impact** | Framework designed to be adaptable; no hard dependencies on current regulation structure |
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+
+  <Tab label="Review Board" icon="👥">
+
+### AI Ethics Review Board
+
+The board meets monthly for operational reviews and coordinates an annual external audit. All board decisions are logged and versioned.
+
+| Role | Responsibility |
+|------|---------------|
+| **Chair (Compliance Officer)** | Leads board meetings; owns final governance sign-off; ensures regulatory alignment |
+| **AI Ethics Lead** | Monitors alignment metrics; flags ethical concerns; maintains the Code of Ethics |
+| **User Advocate** | Represents end-user interests; reviews fairness and autonomy metrics |
+| **Legal Counsel** | Interprets regulatory requirements; advises on legal risk; reviews cross-jurisdiction compliance |
+| **External Auditor** | Conducts annual independent audit; validates metrics and processes; provides external accountability |
+
+### Review Cadence
+
+| Review Type | Frequency | Scope |
+|-------------|-----------|-------|
+| Alignment Review | Monthly | Ethics metrics, principle violations, system prompt updates |
+| Control Drill | Weekly | Kill switch tests, authorization boundary checks |
+| Visibility Review | Weekly | Agent registry, anomaly flags, trace quality |
+| Security Scan | Daily (automated) | Posture assessment, threat detection, boundary integrity |
+| Red Team Exercise | Monthly | Adversarial testing of AI defenses |
+| Regulatory Review | Quarterly | Regulation changes, compliance gap analysis |
+| Societal Audit | Annual | External audit of fairness, accountability, and societal impact |
+
+</Tab>
+</Tabs>
+
+---
+
+## Adoptable Framework Principle
+
+<InfoBox type="info" title="Every component is versioned and replaceable">
+  No vendor, model, or regulation is assumed permanent. The governance framework is designed so that any pillar, metric, regulation mapping, or enforcement mechanism can be swapped without breaking the others. This is a living framework — built for change.
+</InfoBox>
+
+Every component in the governance framework is independently versioned and replaceable. This is a deliberate architectural decision to prevent vendor lock-in and ensure long-term adaptability.
+
+<Accordion>
+  <AccordionItem title="What 'Replaceable' Means in Practice" icon="🔄" defaultOpen={true}>
+
+| Component | Current Implementation | Can Be Replaced With |
+|-----------|----------------------|---------------------|
+| LLM Provider | Claude (Anthropic) | Any LLM API — GPT, Gemini, open-source models |
+| Vector Database | Supabase pgvector | Pinecone, Weaviate, Qdrant, or any vector store |
+| Legal Rules Engine | Custom rule engine | Updated with new legislation without code changes |
+| Governance Pillars | 5 independent pillars | Each pillar can be upgraded, extended, or restructured independently |
+| Regulatory Mappings | EU AI Act, FSC, PIPA | New regulations added as configuration, not code |
+| Agent Framework | LangGraph | Any orchestration framework — the governance layer is framework-agnostic |
+
+**Claude can be replaced.** The system is designed so that switching from Claude to another LLM provider requires changing the API integration layer only. No governance logic, no audit trails, no compliance rules are coupled to a specific model provider.
+
+**Legal Rules Engine updates with new legislation.** When a new regulation is enacted or an existing one changes, the Legal Rules Engine is updated through configuration — not through code deployments. This ensures regulatory compliance keeps pace with legislative changes without engineering bottlenecks.
+
+</AccordionItem>
+</Accordion>
+
+<InfoBox type="fun" title="Think of it like building with LEGO">
+  Every piece of the governance framework is like a LEGO brick. If you do not like the red brick, you can swap it for a blue one without rebuilding the whole castle. The AI model, the database, the rules — they are all bricks that can be changed one at a time.
+</InfoBox>
+
+<StatGrid columns={4}>
+  <StatCard value="5" label="Independent Pillars" />
+  <StatCard value="1" label="Legal Rules Engine" />
+  <StatCard value="12" label="Agents Governed" />
+  <StatCard value="0" label="Ungoverned Actions" />
+</StatGrid>

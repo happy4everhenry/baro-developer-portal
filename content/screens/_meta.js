@@ -1,0 +1,16 @@
+export default {
+  index: 'All Screens',
+  splash: 'Splash',
+  login: 'Login / Register',
+  home: 'Home Screen',
+  'stock-detail': 'Stock Detail',
+  'market-overview': 'Market Overview',
+  search: 'Search',
+  'news-detail': 'News Detail',
+  'theme-detail': 'Theme Detail',
+  'my-page': 'My Page',
+  events: 'Events',
+  notifications: 'Notifications',
+  'intelligence-hub': 'AI Insights',
+  'trading-floor': 'Trading Floor',
+}

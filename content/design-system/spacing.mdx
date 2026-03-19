@@ -1,0 +1,172 @@
+# Spacing & Layout <KoreanLabel>간격 & 레이아웃</KoreanLabel>
+
+<PageMeta status="live" layer="frontend" />
+
+BARO uses a **2pt base grid** with 12 spacing tokens ranging from 2pt to 28pt. Consistent spacing creates rhythm and visual harmony across dense financial data screens.
+
+<StatGrid columns={4}>
+  <StatCard value="12" label="Spacing Tokens" />
+  <StatCard value="2pt" label="Base Unit" />
+  <StatCard value="2--28" label="Range (pt)" />
+  <StatCard value="5" label="Radius Tokens" />
+</StatGrid>
+
+<InfoBox type="tip" title="Spacing is like breathing room">
+Think of spacing as the breathing room between elements. Small spaces (2--4pt) keep related things close together, like a name and its label. Large spaces (20--28pt) separate big sections, like chapters in a book. Everything in between keeps the layout comfortable to read.
+</InfoBox>
+
+<Tabs>
+<Tab label="Spacing Scale" icon="ruler">
+
+## The 12 Spacing Tokens
+
+All spacing values are defined in `KLINESpacing.swift` as static `CGFloat` constants. The scale follows a near-linear progression on the 2pt grid.
+
+| Token | Value | Grid Multiple | Usage |
+|-------|-------|--------------|-------|
+| `xxs` | `2pt` | 1x | Tight typographic spacing, subtitle line gaps |
+| `xs` | `4pt` | 2x | Icon-to-text gap, inline element spacing |
+| `xsm` | `6pt` | 3x | Small component internal padding, badge padding |
+| `sm` | `8pt` | 4x | Compact padding, button vertical padding, tab gaps |
+| `smd` | `10pt` | 5x | Small card internal margins, compact card padding |
+| `md` | `12pt` | 6x | Default component spacing, list row gap, logo-text gap |
+| `mld` | `14pt` | 7x | Medium-large internal padding, section sub-headers |
+| `lg` | `16pt` | 8x | Standard card padding, horizontal content margin |
+| `xlg` | `18pt` | 9x | Large card padding, prominent group separators |
+| `xl` | `20pt` | 10x | Screen horizontal padding, section spacing |
+| `xxl` | `24pt` | 12x | Large section dividers, modal padding, hero spacing |
+| `xxxl` | `28pt` | 14x | Maximum spacing, screen-level vertical padding |
+
+## Grid System
+
+BARO uses a 2pt base grid. All spacing, sizing, and positioning values must be multiples of 2pt to maintain pixel-perfect alignment on Retina displays (2x and 3x).
+
+<InfoBox type="info" title="Grid Rules">
+1. All spacing values are even numbers (multiples of 2pt)
+2. Icon sizes: 18pt, 20pt, 24pt (all grid-aligned)
+3. Touch targets: minimum 44pt (iOS HIG requirement)
+4. Logo containers: 36pt or 40pt square
+5. Border widths: 1pt (sole exception to the grid)
+</InfoBox>
+
+</Tab>
+<Tab label="Layout Patterns" icon="layout">
+
+## Common Layout Patterns
+
+These spatial compositions are used across all BARO screens. Each pattern maps specific tokens to structural roles.
+
+### Screen Padding
+- **Horizontal:** `xl` (20pt) on both sides
+- **Top safe area:** System status bar height
+- **Section gap:** `xxl` (24pt) between sections
+- **Card gap:** `sm` (8pt) between cards
+
+### Card Internal Padding
+- **Standard card:** `lg` (16pt) all sides
+- **Compact card:** `md` (12pt) all sides
+- **Title-to-content:** `sm` (8pt)
+- **Inter-element gap:** `xs` to `sm` (4--8pt)
+
+### Stock List Row
+- **Row padding:** `md` (12pt) vertical, `lg` (16pt) horizontal
+- **Logo-to-text gap:** `md` (12pt)
+- **Name-to-ticker gap:** `xxs` (2pt)
+- **Row divider:** 1px `klDivider`
+
+## Layout Pattern Recipes
+
+Standardized spacing recipes for common interface patterns. Use these combinations consistently.
+
+| Pattern | Tokens Used | Description |
+|---------|-------------|-------------|
+| **Screen edge inset** | `xl` (20pt) | Horizontal padding from screen edge to content |
+| **Card inner padding** | `lg` (16pt) | Internal padding within card components |
+| **Card-to-card gap** | `sm` (8pt) | Vertical spacing between adjacent cards |
+| **Section spacing** | `xxl` (24pt) | Gap between major content sections |
+| **Icon-text gap** | `sm` (8pt) | Horizontal gap between icon and text |
+| **Text line spacing** | `xxs` (2pt) | Vertical gap between title and subtitle |
+| **List item vertical** | `md` (12pt) | Vertical padding within stock rows |
+| **Tab pill gap** | `sm` (8pt) | Gap between filter tab pills |
+| **Badge padding** | `xs` / `sm` | Vertical (4pt) / horizontal (8pt) inner padding |
+| **Carousel item gap** | `md` (12pt) | Spacing between scrolling cards |
+
+## Common Compositions
+
+| Context | Tokens Used |
+|---------|-------------|
+| Screen edge | `xl` (20pt) |
+| Section gap | `xxl` (24pt) |
+| Card padding | `lg` (16pt) |
+| List item vertical | `md` (12pt) |
+| Button padding | `sm` V, `lg` H |
+| Tab bar gap | `sm` (8pt) |
+| Carousel item gap | `md` (12pt) |
+
+</Tab>
+<Tab label="Code" icon="code">
+
+## Swift Implementation
+
+All spacing tokens live in the `KLINESpacing` enum. The enum has no cases -- it serves purely as a namespace.
+
+```swift filename="KLINESpacing.swift"
+import Foundation
+
+enum KLINESpacing {
+    /// 2pt -- Tight typographic spacing (subtitle line gap)
+    static let xxs: CGFloat = 2
+    /// 4pt
+    static let xs: CGFloat = 4
+    /// 6pt
+    static let xsm: CGFloat = 6
+    /// 8pt
+    static let sm: CGFloat = 8
+    /// 10pt
+    static let smd: CGFloat = 10
+    /// 12pt
+    static let md: CGFloat = 12
+    /// 14pt
+    static let mld: CGFloat = 14
+    /// 16pt
+    static let lg: CGFloat = 16
+    /// 18pt
+    static let xlg: CGFloat = 18
+    /// 20pt
+    static let xl: CGFloat = 20
+    /// 24pt
+    static let xxl: CGFloat = 24
+    /// 28pt
+    static let xxxl: CGFloat = 28
+}
+```
+
+```swift filename="Usage Example"
+// Card view with standard spacing
+VStack(spacing: KLINESpacing.sm) {
+    Text(stock.name)
+        .font(.klSubheadline)
+    Text(stock.ticker)
+        .font(.klCaption)
+}
+.padding(.horizontal, KLINESpacing.xl)
+.padding(.vertical, KLINESpacing.lg)
+
+// Section spacing between major areas
+VStack(spacing: KLINESpacing.xxl) {
+    MarketIndexSection()
+    StockListSection()
+    NewsSection()
+}
+.padding(.horizontal, KLINESpacing.xl)
+```
+
+## Spacing Guidelines
+
+<FeatureGrid columns={2}>
+  <FeatureCard icon="check" title="Do" description="Always use KLINESpacing tokens. Use xl (20pt) for screen-edge padding. Use xxl (24pt) to separate sections. Keep touch targets at least 44pt. Test on iPhone SE and Pro Max. Use md (12pt) as default sibling gap." />
+  <FeatureCard icon="x" title="Don't" description="Don't use odd-numbered spacing (3pt, 5pt, 7pt). Don't hardcode raw CGFloat literals. Don't exceed xxxl (28pt) in normal flows. Don't skip more than 2 scale steps between elements. Don't use xxs for general layout (typography only)." />
+</FeatureGrid>
+
+</Tab>
+</Tabs>

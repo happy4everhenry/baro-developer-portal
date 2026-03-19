@@ -1,0 +1,281 @@
+# Color System
+
+<PageMeta status="live" layer="frontend" />
+
+BARO's complete color palette -- 52 tokens extracted from `BAROColors.swift`. Every color has a job, and together they create a calm, trustworthy look for financial data.
+
+<StatGrid columns={4}>
+  <StatCard value="52" label="Color Tokens" />
+  <StatCard value="7" label="Token Groups" />
+  <StatCard value="15" label="Company Colors" />
+  <StatCard value="2" label="Themes (Light + Dark)" />
+</StatGrid>
+
+<InfoBox type="fun" title="Why red = UP in Korea?">
+In Korean (and most East Asian) markets, **red means price went up** and **blue means price went down**. This is the opposite of US and European markets. Think of red envelopes at Lunar New Year -- red is lucky and positive in Korean culture.
+</InfoBox>
+
+<Tabs>
+<Tab label="Primary & Accent" icon="palette">
+
+## Brand Colors
+
+BARO follows the **60-30-10 rule** used by top fintech brands like Stripe, Bloomberg, and N26. The palette has three tiers: neutrals (60%), primary (30%), and accents (10%).
+
+### Primary & Accent
+
+<SwatchGrid>
+  <ColorSwatch name="baroIndigo" hex="#3B3F8C" description="Primary -- AI presence, brand hero" />
+  <ColorSwatch name="baroIndigoLight" hex="#6366A8" description="Primary tint -- hover, secondary emphasis" />
+  <ColorSwatch name="baroGold" hex="#D4A843" description="Accent -- signal points, premium elements" />
+  <ColorSwatch name="baroTeal" hex="#3AAFA8" description="Secondary -- data viz, AI tech elements" />
+</SwatchGrid>
+
+<Accordion>
+<AccordionItem title="Color Psychology & Roles" icon="brain" defaultOpen={false}>
+
+| Token | Hex | Role | Psychological Basis |
+|-------|-----|------|---------------------|
+| `baroIndigo` | `#3B3F8C` | AI presence, narration, brand hero | Contemplation, wisdom, analytical depth. Korean tradition. Stripe uses the same indigo range |
+| `baroIndigoLight` | `#6366A8` | Hover states, secondary emphasis | Softer variant for interaction without losing brand identity |
+| `baroGold` | `#D4A843` | Attention, signal, premium | Wealth, prestige. Bloomberg-grade warm accent. Von Restorff effect for signal detection |
+| `baroTeal` | `#3AAFA8` | Data viz, secondary actions, AI tech | Modernity, clarity. Complements indigo on the color wheel. Used by N26 and Revolut similarly |
+
+</AccordionItem>
+<AccordionItem title="60-30-10 Distribution" icon="pie-chart" defaultOpen={false}>
+
+| Tier | Colors | Usage | Ratio |
+|------|--------|-------|-------|
+| **Neutrals** | Slate 900 to Slate 50 | Canvas, text, borders, backgrounds | 60% |
+| **Primary** | Indigo + Indigo Light | AI elements, brand UI, navigation, headers | 30% |
+| **Accents** | Gold + Teal | Signal points, data viz, CTAs, highlights | 10% |
+
+</AccordionItem>
+</Accordion>
+
+<InfoBox type="info" title="Semantic Rule">
+**Indigo** = AI is speaking. **Gold** = "look here" (the signal). **Teal** = data visualization and AI tech. **Red/Blue** = price data ONLY, never as UI accents -- saturated colors trigger impulsive behavior.
+</InfoBox>
+
+</Tab>
+<Tab label="Neutrals" icon="circle">
+
+## Neutral Scale (Indigo-Tinted)
+
+Neutrals carry a subtle indigo undertone so they harmonize with the primary palette. This creates a cohesive family rather than the visual clash of warm grays against cool indigo.
+
+<SwatchGrid>
+  <ColorSwatch name="baroSlate900" hex="#0F1018" description="Dark mode canvas" />
+  <ColorSwatch name="baroSlate800" hex="#1A1D2E" description="Primary text (on light)" />
+  <ColorSwatch name="baroSlate600" hex="#4A4E69" description="Muted text, secondary labels" />
+  <ColorSwatch name="baroSlate500" hex="#6B7085" description="Body text, descriptions" />
+  <ColorSwatch name="baroSlate300" hex="#9CA3B8" description="Tertiary text, placeholders" />
+  <ColorSwatch name="baroSlate200" hex="#E2E4ED" description="Borders, dividers" />
+  <ColorSwatch name="baroSlate50" hex="#F8F9FC" description="Light mode canvas" />
+</SwatchGrid>
+
+## Backgrounds
+
+Layered surface system for visual hierarchy. `klBackground` is the base canvas; `klSurface` is for elevated cards.
+
+<SwatchGrid>
+  <ColorSwatch name="klBackground" hex="#F2F3F5" />
+  <ColorSwatch name="klSurface" hex="#FFFFFF" />
+  <ColorSwatch name="klMoreButtonBg" hex="#F6F7F9" />
+</SwatchGrid>
+
+| Token | Hex | Usage |
+|-------|-----|-------|
+| `klBackground` | `#F2F3F5` | App-level background canvas |
+| `klSurface` | `#FFFFFF` | Cards, sheets, elevated containers |
+| `klMoreButtonBg` | `#F6F7F9` | Secondary button backgrounds, pill containers |
+
+## Text Hierarchy
+
+Four levels of text color guide users from the most important content down to supporting metadata.
+
+<SwatchGrid>
+  <ColorSwatch name="klText" hex="#1A1A1A" />
+  <ColorSwatch name="klTextSecondary" hex="#555555" />
+  <ColorSwatch name="klTextTertiary" hex="#AAAAAA" />
+  <ColorSwatch name="klTextQuaternary" hex="#BCBCBC" />
+</SwatchGrid>
+
+**Hierarchy Preview:**
+
+- **Samsung Electronics** -- `klText` (#1A1A1A) -- 17pt Bold
+- Current price: 72,400 KRW -- `klTextSecondary` (#555555) -- 14pt
+- Market cap: 432.1T KRW -- `klTextTertiary` (#AAAAAA) -- 12pt
+- Last updated 14:32:05 -- `klTextQuaternary` (#BCBCBC) -- 11pt
+
+## Borders, Dividers & UI Chrome
+
+Subtle structural tokens for separating content. Intentionally low-contrast for a clean, minimal interface.
+
+<SwatchGrid>
+  <ColorSwatch name="klBorder" hex="#F0F0F0" />
+  <ColorSwatch name="klDivider" hex="#F5F5F5" />
+  <ColorSwatch name="klNavBorder" hex="#EFEFEF" />
+</SwatchGrid>
+
+| Token | Hex | Usage |
+|-------|-----|-------|
+| `klBorder` | `#F0F0F0` | Card borders, input field borders, section dividers |
+| `klDivider` | `#F5F5F5` | Horizontal separators between list items |
+| `klNavBorder` | `#EFEFEF` | Navigation bar top border, tab bar separator |
+
+## Tabs, Buttons & Navigation
+
+<SwatchGrid>
+  <ColorSwatch name="klTabActive" hex="#1A1A1A" />
+  <ColorSwatch name="klTabInactive" hex="#ECEDF0" />
+  <ColorSwatch name="klMoreButton" hex="#777777" />
+  <ColorSwatch name="klMoreButtonBg" hex="#F6F7F9" />
+  <ColorSwatch name="klNavInactive" hex="#B0B0B0" />
+  <ColorSwatch name="klNavAccent" hex="#22C55E" />
+</SwatchGrid>
+
+## Banner Gradient
+
+Three-stop gradient for promotional banners. Flows from deep purple through lavender to soft violet.
+
+<SwatchGrid>
+  <ColorSwatch name="klBannerStart" hex="#7C3AED" />
+  <ColorSwatch name="klBannerMid" hex="#A78BFA" />
+  <ColorSwatch name="klBannerEnd" hex="#C4B5FD" />
+</SwatchGrid>
+
+</Tab>
+<Tab label="Semantic" icon="alert-circle">
+
+## Price Semantics <StatusBadge status="live">Korean Convention</StatusBadge>
+
+Korean financial markets use the opposite color convention from Western markets. This is culturally embedded and must be maintained across all financial data.
+
+<SwatchGrid>
+  <ColorSwatch name="klPriceUp" hex="#E04848" />
+  <ColorSwatch name="klPriceDown" hex="#3478F6" />
+</SwatchGrid>
+
+| Token | Hex | Meaning | Used for |
+|-------|-----|---------|----------|
+| `klPriceUp` | `#E04848` | Price Increase / Gains | Positive returns, upward movement, buy signals |
+| `klPriceDown` | `#3478F6` | Price Decrease / Losses | Negative returns, downward movement, sell signals |
+
+<InfoBox type="danger" title="Never swap red and blue">
+Korean users (and East Asian markets generally) expect **Red = Up, Blue = Down**. This is the opposite of US/European convention. Incorrect usage will confuse users and violate FSC compliance expectations. Never use green for price increases.
+</InfoBox>
+
+### Usage Guidelines
+
+<FeatureGrid columns={2}>
+  <FeatureCard icon="check" title="Do" description="Use klPriceUp (red) for positive changes. Use klPriceDown (blue) for negative changes. Use klText for primary headings. Use klSurface for elevated cards. Use company colors only for logos." />
+  <FeatureCard icon="x" title="Don't" description="Never use green for gains. Never use red for losses. Don't use klText on dark backgrounds. Don't use company colors for general UI. Don't mix klBorder and klDivider in the same component." />
+</FeatureGrid>
+
+</Tab>
+<Tab label="Brand Colors" icon="building">
+
+## Company Brand Colors -- KOSPI
+
+Official brand colors for KOSPI-listed companies. Used for logo backgrounds, stock row accents, and sector identification.
+
+<SwatchGrid>
+  <ColorSwatch name="klSamsung" hex="#1428A0" />
+  <ColorSwatch name="klSKHynix" hex="#E44332" />
+  <ColorSwatch name="klHyundai" hex="#002C5F" />
+  <ColorSwatch name="klLG" hex="#A50034" />
+  <ColorSwatch name="klHanwha" hex="#E8573A" />
+</SwatchGrid>
+
+## Company Brand Colors -- KOSDAQ
+
+Brand colors for KOSDAQ-listed companies, primarily biotech and advanced materials sectors.
+
+<SwatchGrid>
+  <ColorSwatch name="klCelltrion" hex="#0066B3" />
+  <ColorSwatch name="klEcopro" hex="#00A651" />
+  <ColorSwatch name="klAlteogen" hex="#6B3FA0" />
+  <ColorSwatch name="klHLB" hex="#D32F2F" />
+  <ColorSwatch name="klSamchully" hex="#1565C0" />
+</SwatchGrid>
+
+## Company Brand Colors -- US Stocks
+
+Brand colors for major US-listed companies available in BARO's cross-border trading.
+
+<SwatchGrid>
+  <ColorSwatch name="klApple" hex="#333333" />
+  <ColorSwatch name="klNvidia" hex="#76B900" />
+  <ColorSwatch name="klMicrosoft" hex="#00A4EF" />
+  <ColorSwatch name="klAmazon" hex="#FF9900" />
+  <ColorSwatch name="klGoogle" hex="#4285F4" />
+  <ColorSwatch name="klMeta" hex="#0668E1" />
+  <ColorSwatch name="klTesla" hex="#CC0000" />
+  <ColorSwatch name="klBerkshire" hex="#1A237E" />
+  <ColorSwatch name="klJPMorgan" hex="#003A70" />
+  <ColorSwatch name="klVisa" hex="#1A1F71" />
+</SwatchGrid>
+
+<Accordion>
+<AccordionItem title="Complete 52-Token Reference Table" icon="list" defaultOpen={false}>
+
+| Group | Token | Hex |
+|-------|-------|-----|
+| **Background** | `klBackground` | `#F2F3F5` |
+| | `klSurface` | `#FFFFFF` |
+| **Text** | `klText` | `#1A1A1A` |
+| | `klTextSecondary` | `#555555` |
+| | `klTextTertiary` | `#AAAAAA` |
+| | `klTextQuaternary` | `#BCBCBC` |
+| **Price** | `klPriceUp` | `#E04848` |
+| | `klPriceDown` | `#3478F6` |
+| **Border** | `klBorder` | `#F0F0F0` |
+| | `klDivider` | `#F5F5F5` |
+| | `klNavBorder` | `#EFEFEF` |
+| **Tabs** | `klTabActive` | `#1A1A1A` |
+| | `klTabInactive` | `#ECEDF0` |
+| **Button** | `klMoreButton` | `#777777` |
+| | `klMoreButtonBg` | `#F6F7F9` |
+| **Nav** | `klNavInactive` | `#B0B0B0` |
+| | `klNavAccent` | `#22C55E` |
+| **Banner** | `klBannerStart` | `#7C3AED` |
+| | `klBannerMid` | `#A78BFA` |
+| | `klBannerEnd` | `#C4B5FD` |
+| **Brand Primary** | `baroIndigo` | `#3B3F8C` |
+| | `baroIndigoLight` | `#6366A8` |
+| **Brand Accent** | `baroGold` | `#D4A843` |
+| | `baroTeal` | `#3AAFA8` |
+| **Brand Neutral** | `baroSlate900` | `#0F1018` |
+| | `baroSlate800` | `#1A1D2E` |
+| | `baroSlate600` | `#4A4E69` |
+| | `baroSlate500` | `#6B7085` |
+| | `baroSlate300` | `#9CA3B8` |
+| | `baroSlate200` | `#E2E4ED` |
+| | `baroSlate50` | `#F8F9FC` |
+
+</AccordionItem>
+<AccordionItem title="Swift Code" icon="code" defaultOpen={false}>
+
+```swift filename="KLINEColors.swift"
+// MARK: - BARO Brand -- Primary & Accent
+static let baroIndigo      = Color(hex: "3B3F8C")
+static let baroIndigoLight = Color(hex: "6366A8")
+static let baroGold        = Color(hex: "D4A843")
+static let baroTeal        = Color(hex: "3AAFA8")
+
+// MARK: - BARO Brand -- Neutral Scale
+static let baroSlate900 = Color(hex: "0F1018")
+static let baroSlate800 = Color(hex: "1A1D2E")
+static let baroSlate600 = Color(hex: "4A4E69")
+static let baroSlate500 = Color(hex: "6B7085")
+static let baroSlate300 = Color(hex: "9CA3B8")
+static let baroSlate200 = Color(hex: "E2E4ED")
+static let baroSlate50  = Color(hex: "F8F9FC")
+```
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+</Tabs>

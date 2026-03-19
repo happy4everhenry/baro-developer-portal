@@ -1,0 +1,229 @@
+# Reusable Components 공용 컴포넌트
+
+<PageMeta status="live" layer="frontend" />
+
+Shared UI components used across multiple features. Located in `Components/`.
+
+<StatGrid columns={3}>
+  <StatCard value="10" label="Component Files" />
+  <StatCard value="3" label="KL-prefixed" />
+  <StatCard value="3" label="AI & Interaction" />
+</StatGrid>
+
+---
+
+## CompanyLogoView.swift
+
+**Location:** `Components/CompanyLogoView.swift`
+
+Renders company logos with three style variants:
+
+```swift
+enum LogoStyle {
+    case text(String, logoColor: Color)       // Full name: "SAMSUNG"
+    case initials(String, logoColor: Color)   // Abbreviation: "H", "LG"
+    case symbol(String, logoColor: Color)     // SF Symbol: "sun.max.fill"
+}
+```
+
+**Usage:**
+
+```swift
+CompanyLogoView(style: stock.logoStyle, size: 40)
+```
+
+**Logo Resolution:**
+
+The `LogoStyleMapper` class maps known stock codes to their brand-specific logos:
+
+| Market | Companies Mapped |
+|--------|-----------------|
+| Korean | Samsung, SK Hynix, Hyundai, LG, POSCO, Naver, Kakao, Samsung Bio, Celltrion, KB Financial |
+| US | Apple, Microsoft, NVIDIA, Amazon, Tesla, Google, Meta, Berkshire, JPMorgan, Johnson & Johnson |
+
+Unknown stocks receive auto-generated initials from their company name.
+
+---
+
+## KLDetailNavBar.swift
+
+**Location:** `Components/KLDetailNavBar.swift`
+
+Custom navigation bar for detail pages (Stock Detail, News Detail, Theme Detail):
+
+```swift
+KLDetailNavBar(
+    title: stock.name,
+    subtitle: stock.code,
+    onBack: { dismiss() },
+    trailing: { /* action buttons */ }
+)
+```
+
+**Features:**
+- Back button with dismiss action
+- Title and optional subtitle
+- Trailing content slot for action buttons
+- Transparent background that becomes opaque on scroll
+
+---
+
+## KLSegmentedControl.swift
+
+**Location:** `Components/KLSegmentedControl.swift`
+
+Custom segmented control replacing the system `Picker`:
+
+```swift
+KLSegmentedControl(
+    items: ["종목정보", "호가", "일별시세", "투자자"],
+    selectedIndex: $selectedTab
+)
+```
+
+**Features:**
+- Animated sliding selection indicator
+- Customizable colors and fonts
+- Horizontal scrolling for many items
+- Used in: StockDetailPageView tab sections
+
+---
+
+## KLScrollableTabHeader.swift
+
+**Location:** `Components/KLScrollableTabHeader.swift`
+
+Horizontally scrollable tab header with underline indicator:
+
+```swift
+KLScrollableTabHeader(
+    tabs: ThemeCategory.allCases.map(\.rawValue),
+    selectedIndex: $selectedCategory
+)
+```
+
+**Features:**
+- Auto-scrolls to keep selected tab visible
+- Animated underline indicator
+- Used in: AIMarketIssuesView, ThemeDetailView
+
+---
+
+## KLMoreButton.swift
+
+**Location:** `Components/KLMoreButton.swift`
+
+"더보기" (More) button for section footers:
+
+```swift
+KLMoreButton(action: { showAllStocks = true })
+```
+
+Displays a right-chevron with "더보기" label. Used to expand collapsed sections.
+
+---
+
+## BAROMarkView.swift
+
+**Location:** `Components/BAROMarkView.swift`
+
+The BARO brand logo mark:
+
+```swift
+BAROMarkView(size: 24)
+```
+
+Renders the stylized BARO brand mark used in headers and loading screens.
+
+---
+
+## PriceChangeLabel.swift
+
+**Location:** `Components/PriceChangeLabel.swift`
+
+Formatted price change display with color coding:
+
+```swift
+PriceChangeLabel(change: stock.change,
+                 changePercent: stock.changePercent)
+```
+
+**Behavior:**
+- Positive changes → `klPriceUp` color (red, Korean convention)
+- Negative changes → `klPriceDown` color (blue, Korean convention)
+- Zero changes → `klTextSecondary` color (gray)
+- Formats: `+1,200 (+1.54%)` or `-800 (-0.98%)`
+- Uses `.numericText()` animation for live price transitions
+
+---
+
+## AIGlowOverlay.swift
+
+**Location:** `Components/AIGlowOverlay.swift`
+
+Animated glow effect overlay for AI-related UI elements:
+
+```swift
+someView
+    .modifier(AIGlowOverlay(isVisible: showGlow))
+```
+
+**Features:**
+- Pulsing gradient glow animation
+- Configurable visibility toggle
+- Used on FloatingAIButton and AI insight cards
+
+---
+
+## FavoriteToastPill.swift
+
+**Location:** `Components/FavoriteToastPill.swift`
+
+Toast notification pill that appears when a user favorites/unfavorites a stock, theme, or article:
+
+```swift
+FavoriteToastPill(
+    message: "삼성전자를 관심 종목에 추가했습니다",
+    isShowing: $showToast
+)
+```
+
+**Features:**
+- Auto-dismiss after ~2 seconds
+- Slide-up animation from bottom
+- Used across Search, StockDetail, and Home views
+
+---
+
+## FloatingAIButton.swift
+
+**Location:** `Components/FloatingAIButton.swift`
+
+Floating action button for quick access to AI insights:
+
+```swift
+FloatingAIButton(action: { showAIInsights = true })
+```
+
+**Features:**
+- Fixed position in bottom-right corner
+- AI glow overlay effect
+- Navigates to `AIInsightsView`
+- Used in MyPageView and MainTabView
+
+---
+
+## Component Usage Matrix
+
+| Component | Home | Search | StockDetail | NewsDetail | ThemeDetail | MyPage | Events |
+|-----------|:----:|:------:|:-----------:|:----------:|:-----------:|:------:|:------:|
+| CompanyLogoView | ✓ | ✓ | ✓ | | | | |
+| KLDetailNavBar | | | ✓ | ✓ | ✓ | | ✓ |
+| KLSegmentedControl | | | ✓ | | | | |
+| KLScrollableTabHeader | ✓ | | | | ✓ | | |
+| KLMoreButton | ✓ | | | | | | |
+| BAROMarkView | ✓ | | | | | | |
+| PriceChangeLabel | ✓ | ✓ | ✓ | | | | |
+| AIGlowOverlay | | | | | | | |
+| FavoriteToastPill | ✓ | ✓ | ✓ | | | | |
+| FloatingAIButton | | | | | | ✓ | |

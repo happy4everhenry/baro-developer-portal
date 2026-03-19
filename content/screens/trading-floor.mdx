@@ -1,0 +1,96 @@
+# Trading Floor <KoreanLabel>매매</KoreanLabel>
+
+<PageMeta status="planned" layer="frontend" />
+
+Order execution interface with real-time order book and swipe-to-execute — a Phase 3 feature targeted for 2026.
+
+<InfoBox type="note" title="Phase 3 Feature">
+The Trading Floor is where you actually buy and sell stocks. It is built for speed and precision, with a real-time order book, swipe-to-execute gestures, and built-in safety checks. This screen is planned for Phase 3, targeted for 2026.
+</InfoBox>
+
+## What Is the Trading Floor?
+
+This is BARO's core trading screen. You see live bid/ask prices, tap in your order, and swipe to confirm. Every order goes through pre-trade risk checks to make sure everything is compliant with Korean financial regulations.
+
+## Planned Elements
+
+<FeatureGrid columns={2}>
+  <FeatureCard icon="📊" title="TF1 · Order Book" description="Real-time bid/ask depth visualization with volume bars" />
+  <FeatureCard icon="✏️" title="TF2 · Order Entry" description="Price and quantity input with market/limit order type selector" />
+  <FeatureCard icon="👆" title="TF3 · Swipe-to-Execute" description="Haptic-confirmed swipe gesture for quick order submission" />
+  <FeatureCard icon="🛡️" title="TF4 · Risk Check Panel" description="Pre-trade risk validation with FSC compliance" />
+  <FeatureCard icon="🏛️" title="TF5 · Venue Selector" description="KRX / NXT / Combined toggle with best-price routing" />
+  <FeatureCard icon="✅" title="TF6 · Order Confirmation" description="Modal with order summary, total cost, and final confirmation" />
+  <FeatureCard icon="💼" title="TF7 · Position Summary" description="Current holdings with unrealized profit and loss" />
+  <FeatureCard icon="📜" title="TF8 · Order History" description="Recent orders with status: filled, pending, or cancelled" />
+</FeatureGrid>
+
+<Accordion>
+  <AccordionItem title="TF1 · Order Book" icon="📊" badge="PLANNED">
+    Real-time bid/ask depth visualization with volume bars. Shows 10 levels of market depth so you can see where the liquidity sits. Korean label: <KoreanLabel>호가창</KoreanLabel>
+  </AccordionItem>
+  <AccordionItem title="TF2 · Order Entry" icon="✏️" badge="PLANNED">
+    Price and quantity input fields with a market/limit order type selector. Designed for fast one-handed input. Korean label: <KoreanLabel>주문입력</KoreanLabel>
+  </AccordionItem>
+  <AccordionItem title="TF3 · Swipe-to-Execute" icon="👆" badge="PLANNED">
+    A haptic-confirmed swipe gesture to submit your order. This prevents accidental taps from placing trades. Korean label: <KoreanLabel>스와이프 주문</KoreanLabel>
+  </AccordionItem>
+  <AccordionItem title="TF4 · Risk Check Panel" icon="🛡️" badge="PLANNED">
+    Pre-trade risk validation that checks order size, buying power, and FSC compliance before any order goes through. Korean label: <KoreanLabel>위험 점검</KoreanLabel>
+  </AccordionItem>
+  <AccordionItem title="TF5 · Venue Selector" icon="🏛️" badge="PLANNED">
+    Toggle between KRX (Korea Exchange), NXT (NextTrade ATS), or Combined view with best-price routing across both venues. Korean label: <KoreanLabel>거래소 선택</KoreanLabel>
+  </AccordionItem>
+  <AccordionItem title="TF6 · Order Confirmation" icon="✅" badge="PLANNED">
+    A modal that shows the full order summary, total cost, and requires a final confirmation tap. Korean label: <KoreanLabel>주문확인</KoreanLabel>
+  </AccordionItem>
+  <AccordionItem title="TF7 · Position Summary" icon="💼" badge="PLANNED">
+    Displays your current stock holdings along with unrealized profit and loss for each position. Korean label: <KoreanLabel>보유현황</KoreanLabel>
+  </AccordionItem>
+  <AccordionItem title="TF8 · Order History" icon="📜" badge="PLANNED">
+    A list of your recent orders showing whether each one was filled, is still pending, or was cancelled. Korean label: <KoreanLabel>주문내역</KoreanLabel>
+  </AccordionItem>
+</Accordion>
+
+## FSC Compliance Requirements
+
+<InfoBox type="warning" title="Financial Regulations (FSC)">
+The Trading Floor must follow strict rules set by Korea's Financial Services Commission (FSC). These are not optional -- they are required by law for all Korean stock trading apps.
+</InfoBox>
+
+<StatGrid columns={3}>
+  <StatCard value="2-step" label="Order confirmation required" />
+  <StatCard value="1 sec" label="Cooling period between orders" />
+  <StatCard value="30 min" label="Auto-logout on inactivity" />
+</StatGrid>
+
+- **Pre-trade risk checks:** Maximum order size validation, buying power verification
+- **Order confirmation:** Mandatory 2-step confirmation for all orders
+- **Audit trail:** All order actions logged with timestamps for regulatory compliance
+- **Cooling period:** 1-second delay between consecutive orders
+- **Session timeout:** Auto-logout after 30 minutes of inactivity
+
+## Data Flow Architecture
+
+<Tabs>
+  <Tab label="Real-Time (WebSocket)" icon="⚡">
+    Live price data streams through KIS WebSocket connections using venue-specific transaction IDs:
+
+    | Data Type | KRX tr_id | NXT tr_id | Combined tr_id |
+    |---|---|---|---|
+    | Order Book | `H0STASP0` | `H0NXASP0` | `H0UNASP0` |
+    | Trade Prices | `H0STCNT0` | `H0NXCNT0` | `H0UNCNT0` |
+  </Tab>
+  <Tab label="REST API (Planned)" icon="🌐">
+    | Method | Path | What It Does |
+    |---|---|---|
+    | `POST` | `/api/orders` | Submit a new order |
+    | `GET` | `/api/orders` | Get order history |
+    | `DELETE` | `/api/orders/{id}` | Cancel a pending order |
+    | `GET` | `/api/portfolio/positions` | Get current holdings |
+  </Tab>
+</Tabs>
+
+---
+
+Detailed specification available in: `documents/Korea_Trading_SuperApp_Full_UI_Spec.docx` -- Screen 4: Trading Floor

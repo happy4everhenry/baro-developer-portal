@@ -1,0 +1,141 @@
+# KIS Integration <KoreanLabel>한국투자증권 연동</KoreanLabel>
+
+<PageMeta status="live" layer="backend" />
+
+Korea Investment & Securities API integration for market data and trading.
+
+<InfoBox type="info" title="What is KIS?">
+**KIS** stands for **Korea Investment & Securities** (<KoreanLabel>한국투자증권</KoreanLabel>). It is one of Korea's major brokerages, and its Open API is the real data source that powers BARO's stock quotes, charts, order books, rankings, and real-time price streams.
+</InfoBox>
+
+## How BARO Connects to KIS
+
+BARO talks to the KIS Open API in two ways: REST calls for on-demand data (quotes, charts, rankings) and a persistent WebSocket connection for real-time price ticks.
+
+<Diagram title="KIS Data Flow">
+  <DiagramRow>
+    <DiagramNode type="view" icon="📱" label="iOS App" sublabel="BARO client" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="HTTP + WebSocket" />
+  <DiagramRow>
+    <DiagramNode type="vm" icon="⚡" label="FastAPI Backend" sublabel="Auth, rate limiting, transformation" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="OAuth2 Bearer Token" />
+  <DiagramRow>
+    <DiagramNode type="service" icon="🏦" label="KIS Open API" sublabel="REST + WebSocket" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="Market Data" />
+  <DiagramRow>
+    <DiagramNode type="data" icon="📊" label="KRX / NXT Exchanges" sublabel="Korea Exchange + NextTrade ATS" />
+  </DiagramRow>
+</Diagram>
+
+## API Credentials
+
+<InfoBox type="warning" title="Keep These Secret">
+Never commit your KIS credentials to version control. Use environment variables and the `.env` file.
+</InfoBox>
+
+| Environment Variable | Description | Where to Get |
+|---|---|---|
+| `KIS_APP_KEY` | Application key for API authentication | KIS Open API Portal |
+| `KIS_APP_SECRET` | Application secret for token generation | KIS Open API Portal |
+| `KIS_ACCOUNT_NO` | Trading account number (XXXXXXXX-XX) | KIS Account Setup |
+| `KIS_BASE_URL` | API base URL (real vs mock) | Default: `https://openapi.koreainvestment.com:9443` |
+
+## Integration Points
+
+<Accordion>
+  <AccordionItem title="OAuth2 Token Flow" icon="🔑" defaultOpen={true}>
+    The authentication flow has four stages:
+
+    <StepGuide>
+      <Step number={1} title="Request Token">
+        `POST /oauth2/tokenP` with your `app_key` + `app_secret`
+      </Step>
+      <Step number={2} title="Receive Access Token">
+        KIS returns a token that expires in 24 hours.
+      </Step>
+      <Step number={3} title="Make API Calls">
+        Attach the token as `Authorization: Bearer {token}` on every request.
+      </Step>
+      <Step number={4} title="Auto-Refresh">
+        The backend automatically re-requests a new token before the 24-hour expiry.
+      </Step>
+    </StepGuide>
+
+```python filename="kis_auth.py"
+import httpx
+
+async def get_access_token(app_key: str, app_secret: str) -> str:
+    url = f"{KIS_BASE_URL}/oauth2/tokenP"
+    body = {
+        "grant_type": "client_credentials",
+        "appkey": app_key,
+        "appsecret": app_secret,
+    }
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(url, json=body)
+        data = resp.json()
+        return data["access_token"]
+```
+  </AccordionItem>
+
+  <AccordionItem title="Venue Mapping" icon="🏛️">
+    BARO supports three market venues, each with different KIS API parameters:
+
+    | Venue | REST Code | WS Trade tr_id | WS Orderbook tr_id | Description |
+    |---|---|---|---|---|
+    | **KRX** <KoreanLabel>한국거래소</KoreanLabel> | `J` | `H0STCNT0` | `H0STASP0` | Korea Exchange (traditional) |
+    | **NXT** <KoreanLabel>넥스트레이드</KoreanLabel> | `NX` | `H0NXCNT0` | `H0NXASP0` | NextTrade ATS (alternative) |
+    | **Combined** <KoreanLabel>통합</KoreanLabel> | `UN` | `H0UNCNT0` | `H0UNASP0` | Unified view across both venues |
+
+```python filename="venue.py"
+from enum import Enum
+
+class MarketVenue(str, Enum):
+    KRX = "krx"
+    NXT = "nxt"
+    COMBINED = "combined"
+
+VENUE_TO_MRKT_DIV = {
+    MarketVenue.KRX: "J",
+    MarketVenue.NXT: "NX",
+    MarketVenue.COMBINED: "UN",
+}
+```
+  </AccordionItem>
+
+  <AccordionItem title="WebSocket Approval Key" icon="📡">
+    KIS WebSocket connections need a **separate approval key** (different from the REST OAuth token). You get it from a REST call and use it in the initial WebSocket handshake.
+
+```python filename="kis_auth.py"
+async def get_approval_key(app_key: str, app_secret: str) -> str:
+    url = f"{KIS_BASE_URL}/oauth2/Approval"
+    body = {
+        "grant_type": "client_credentials",
+        "appkey": app_key,
+        "secretkey": app_secret,
+    }
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(url, json=body)
+        return resp.json()["approval_key"]
+```
+  </AccordionItem>
+
+  <AccordionItem title="Rate Limits & Constraints" icon="⏱️">
+
+    <StatGrid columns={2}>
+      <StatCard value="20 req/sec" label="REST API limit (per account)" />
+      <StatCard value="40 codes" label="Max WebSocket subscriptions per connection" />
+    </StatGrid>
+
+    | API Type | Limit | Notes |
+    |---|---|---|
+    | REST API | 20 req/sec | Per account, across all endpoints |
+    | WebSocket Subscriptions | 40 codes max | Per connection, per tr_id type |
+    | Token Refresh | 1 per 24 hours | Token valid for 24 hours |
+    | Market Hours | 09:00--15:30 KST | WebSocket streams active during trading hours only |
+
+  </AccordionItem>
+</Accordion>

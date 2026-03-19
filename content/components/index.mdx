@@ -1,0 +1,157 @@
+<PageMeta status="live" layer="frontend" />
+
+# Component Library
+
+<InfoBox type="fun" title="What are components?">
+Components are like **LEGO pieces** for building an app. Each piece has a special shape and job — a button piece, a chart piece, a card piece. You snap them together to build screens! The cool part? You build a piece once and use it everywhere.
+</InfoBox>
+
+BARO's component library is a collection of reusable SwiftUI building blocks. Every screen in the app is assembled from these pieces, which means everything looks and works the same way.
+
+---
+
+## By the Numbers
+
+<StatGrid columns={4}>
+  <StatCard value="13" label="Shared Components" />
+  <StatCard value="23" label="Chart Types" />
+  <StatCard value="6" label="Categories" />
+  <StatCard value="100%" label="SwiftUI" />
+</StatGrid>
+
+---
+
+## Component Categories
+
+<FeatureGrid columns={2}>
+  <FeatureCard icon="🧩" title="Shared Components" description="13 core pieces used everywhere — buttons, badges, tags, search bars, section headers, and more" href="/components/shared" color="jade" />
+  <FeatureCard icon="🧭" title="Navigation" description="Tab bars, navigation bars, and the pieces that help you move between screens" href="/components/navigation" color="blue" />
+  <FeatureCard icon="📋" title="Data Display" description="Cards, rows, and lists that show stocks, prices, and market data in clean layouts" href="/components/data-display" color="amber" />
+  <FeatureCard icon="📊" title="Charts" description="23 chart types — line charts, candlesticks, bar charts, pie charts, and many more" href="/components/charts" color="purple" />
+  <FeatureCard icon="💹" title="Stock Detail" description="Specialized pieces for the stock page — price headers, order books, financial tables" href="/components/stock-detail" color="red" />
+  <FeatureCard icon="⏳" title="Loading States" description="Skeleton loaders and shimmer effects that look great while data is loading" href="/components/loading" color="teal" />
+</FeatureGrid>
+
+---
+
+## How Components Build Screens
+
+<Diagram title="From Small Pieces to Big Screens">
+  <DiagramRow>
+    <DiagramNode type="data" icon="🧱" label="Design Tokens" sublabel="Colors, fonts, spacing" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="style" />
+  <DiagramRow>
+    <DiagramNode type="model" icon="🧩" label="Base Components" sublabel="Buttons, badges, icons" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="combine into" />
+  <DiagramRow>
+    <DiagramNode type="repo" icon="🏗️" label="Composite Components" sublabel="Stock cards, chart panels" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="assemble into" />
+  <DiagramRow>
+    <DiagramNode type="view" icon="📱" label="Full Screens" sublabel="Home, Stock Detail, etc." />
+  </DiagramRow>
+</Diagram>
+
+<InfoBox type="info" title="The LEGO rule">
+Just like LEGO, small pieces snap into medium pieces, and medium pieces snap into big structures. A **button** (small) goes inside a **stock card** (medium), which goes inside the **Home screen** (big). This keeps everything organized and reusable!
+</InfoBox>
+
+---
+
+## Explore Each Category
+
+<Accordion>
+  <AccordionItem title="Shared Components" icon="🧩" badge="13 pieces">
+    The foundation of BARO. These are used on almost every screen:
+
+    - **Buttons** — Primary, secondary, icon buttons, and text buttons
+    - **Badges** — Status indicators with colors and icons
+    - **Tags** — Small labels for categories and filters
+    - **Search Bar** — The text field with search icon and clear button
+    - **Section Headers** — Titles with optional "See All" actions
+    - **Dividers** — Thin lines that separate content sections
+    - **Empty States** — Friendly messages when there's no data yet
+    - And more!
+
+    [Browse all shared components →](/components/shared)
+  </AccordionItem>
+  <AccordionItem title="Navigation" icon="🧭" badge="Tab & Nav Bars">
+    The pieces that help you move around the app:
+
+    - **Tab Bar** — The bottom bar with Home, Market, Search, and Settings tabs
+    - **Navigation Bar** — The top bar with back button, title, and actions
+    - **Segmented Control** — Toggle between different views (like "Day / Week / Month")
+
+    [Browse navigation components →](/components/navigation)
+  </AccordionItem>
+  <AccordionItem title="Data Display" icon="📋" badge="Cards & Rows">
+    These show your data in clean, scannable layouts:
+
+    - **Stock Row** — A horizontal row showing name, price, and change
+    - **Stock Card** — A larger card with chart preview and key stats
+    - **Watchlist Item** — Compact row for your saved stocks
+    - **Market Mover Card** — Highlights top gainers and losers
+
+    [Browse data display components →](/components/data-display)
+  </AccordionItem>
+  <AccordionItem title="Charts" icon="📊" badge="23 types">
+    BARO's chart library is powerful and beautiful:
+
+    - **Line Chart** — Simple price over time
+    - **Candlestick Chart** — Open, high, low, close for traders
+    - **Bar Chart** — Volume and comparison data
+    - **Area Chart** — Filled line charts for portfolio value
+    - **Pie / Donut Chart** — Portfolio allocation breakdown
+    - **Mini Sparkline** — Tiny inline charts for stock rows
+    - And 17 more specialized chart types!
+
+    [Browse all chart types →](/components/charts)
+  </AccordionItem>
+  <AccordionItem title="Stock Detail Components" icon="💹" badge="Specialized">
+    Built specifically for the Stock Detail screen:
+
+    - **Price Header** — Big price display with change indicator
+    - **Order Book** — Live buy/sell order visualization
+    - **Financial Table** — Key metrics like P/E ratio and market cap
+    - **News Card** — Related articles and headlines
+
+    [Browse stock detail components →](/components/stock-detail)
+  </AccordionItem>
+  <AccordionItem title="Loading States" icon="⏳" badge="Skeletons">
+    What users see while data is loading:
+
+    - **Skeleton Loader** — Gray placeholder shapes that shimmer
+    - **Skeleton Card** — Card-shaped loader for stock cards
+    - **Skeleton Chart** — Chart-shaped loader for data visualizations
+    - **Pull-to-Refresh** — The spinner that appears when you pull down
+
+    [Browse loading components →](/components/loading)
+  </AccordionItem>
+</Accordion>
+
+---
+
+## Component Quality
+
+Every component in BARO follows these rules:
+
+<StepGuide>
+  <Step number={1} title="Reusable">
+    Build it once, use it on any screen. No copy-pasting code!
+  </Step>
+  <Step number={2} title="Themeable">
+    Every component works in both light and dark mode automatically.
+  </Step>
+  <Step number={3} title="Accessible">
+    Screen readers and VoiceOver can understand every component.
+  </Step>
+  <Step number={4} title="Documented">
+    Every component has examples, props, and usage guidelines right here in the portal.
+  </Step>
+</StepGuide>
+
+<InfoBox type="tip" title="Where to start?">
+If you're new, start with the **Shared Components** — they're the building blocks used everywhere. Once you understand those, the specialized categories will make a lot more sense!
+</InfoBox>

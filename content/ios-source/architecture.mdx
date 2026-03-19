@@ -1,0 +1,299 @@
+# Architecture Guide 아키텍처
+
+<PageMeta status="live" layer="frontend" />
+
+The BARO iOS app follows the **MVVM + Repository** pattern with protocol-based dependency injection, async/await concurrency, and real-time WebSocket streaming.
+
+## Architectural Layers
+
+<FlowDiagram>
+  <div style={{textAlign:'center', fontSize:'13px', fontWeight:700, color:'var(--kl-jade)'}}>BARO iOS Architecture</div>
+
+  <div style={{textAlign:'center', fontSize:'11px', fontWeight:600, color:'var(--kl-text-3)', marginTop:'12px'}}>PRESENTATION LAYER (SwiftUI Views)</div>
+  <FlowRow>
+    <FlowNode type="view">MainTabView</FlowNode>
+    <FlowNode type="view">HomeView</FlowNode>
+    <FlowNode type="view">SearchView</FlowNode>
+    <FlowNode type="view">StockDetailPageView</FlowNode>
+  </FlowRow>
+
+  <FlowArrow direction="down" />
+  <div style={{textAlign:'center', fontSize:'10px', color:'var(--kl-text-3)'}}>@Observable binding — automatic UI updates</div>
+
+  <div style={{textAlign:'center', fontSize:'11px', fontWeight:600, color:'var(--kl-text-3)'}}>BUSINESS LOGIC LAYER (ViewModels)</div>
+  <FlowRow>
+    <FlowNode type="vm">HomeViewModel</FlowNode>
+    <FlowNode type="vm">SearchViewModel</FlowNode>
+    <FlowNode type="vm">StockDetailPageViewModel</FlowNode>
+  </FlowRow>
+
+  <FlowArrow direction="down" />
+  <div style={{textAlign:'center', fontSize:'10px', color:'var(--kl-text-3)'}}>async/await calls through protocol interfaces</div>
+
+  <div style={{textAlign:'center', fontSize:'11px', fontWeight:600, color:'var(--kl-text-3)'}}>DATA ACCESS LAYER (Repositories)</div>
+  <FlowRow>
+    <FlowNode type="repo">MarketRepositoryProtocol</FlowNode>
+    <FlowNode type="repo">BannerRepositoryProtocol</FlowNode>
+    <FlowNode type="repo">NewsRepositoryProtocol</FlowNode>
+  </FlowRow>
+
+  <FlowArrow direction="down" />
+
+  <FlowRow>
+    <FlowNode type="service">APIMarketRepository</FlowNode>
+    <FlowNode type="service">MockMarketRepository</FlowNode>
+    <FlowNode type="service">MockBannerRepository</FlowNode>
+    <FlowNode type="service">MockNewsRepository</FlowNode>
+  </FlowRow>
+
+  <FlowArrow direction="down" />
+
+  <div style={{textAlign:'center', fontSize:'11px', fontWeight:600, color:'var(--kl-text-3)'}}>TRANSPORT LAYER</div>
+  <FlowRow>
+    <FlowNode type="service">APIClient (REST)</FlowNode>
+    <FlowNode type="service">WebSocketManager (WS)</FlowNode>
+  </FlowRow>
+</FlowDiagram>
+
+## MVVM Pattern Implementation
+
+### View Layer
+
+Views are pure SwiftUI structs that declare UI and bind to ViewModels via `@State`:
+
+```swift
+struct HomeView: View {
+    @State private var viewModel: HomeViewModel
+
+    init(container: DependencyContainer) {
+        _viewModel = State(initialValue: HomeViewModel(
+            marketRepository: container.marketRepository,
+            bannerRepository: container.bannerRepository,
+            newsRepository: container.newsRepository
+        ))
+    }
+
+    var body: some View {
+        ScrollView {
+            // Sections bind directly to viewModel properties
+            StockListView(stocks: viewModel.stocks,
+                         latestPrices: viewModel.latestPrices)
+        }
+        .task { await viewModel.loadAllData() }
+    }
+}
+```
+
+**Key patterns:**
+- Views hold `@State var viewModel` — the modern iOS 17+ approach
+- Data loading is triggered via `.task { }` modifier
+- Views never call repositories directly — always through the ViewModel
+- Navigation uses `NavigationLink` and `NavigationStack`
+
+### ViewModel Layer
+
+ViewModels are `@Observable` classes that manage state and coordinate data fetching:
+
+```swift
+@Observable
+final class HomeViewModel {
+    // MARK: - Dependencies
+    private let marketRepository: any MarketRepositoryProtocol
+    private let bannerRepository: any BannerRepositoryProtocol
+
+    // MARK: - Published State
+    var stocks: [Stock] = []
+    var indices: [MarketIndex] = []
+    var isLoadingStocks = true
+    var latestPrices: [String: PriceUpdate] = [:]
+
+    // MARK: - Data Loading
+    func loadAllData() async {
+        async let indicesTask = loadIndices()
+        async let stocksTask = loadStocks()
+        async let bannersTask = loadBanners()
+        _ = await (indicesTask, stocksTask, bannersTask)
+    }
+}
+```
+
+**Key patterns:**
+- `@Observable` macro (not legacy `ObservableObject`) — automatic change tracking
+- Per-section loading states (`isLoadingStocks`, `isLoadingBanners`, etc.)
+- Parallel data loading with `async let`
+- WebSocket integration via `AsyncStream` for live price updates
+- Filter/exchange selection triggers automatic reload
+
+### Repository Layer
+
+Repositories abstract data access behind protocols, enabling mock/API swapping:
+
+```swift
+protocol MarketRepositoryProtocol: Sendable {
+    func fetchStocks(filter: StockFilter, exchange: StockExchange) async throws -> [Stock]
+    func fetchStockDetail(id: String, exchange: StockExchange,
+                          name: String, venue: MarketVenue) async throws -> StockDetailInfo
+    // ... 9 methods total
+}
+```
+
+Two implementations:
+- **`APIMarketRepository`** — calls the FastAPI backend via `APIClient`, falls back to mock on failure
+- **`MockMarketRepository`** — generates deterministic mock data with seeded randomization
+
+## Dependency Injection
+
+All repositories are created and held by `DependencyContainer`, which is injected into the SwiftUI environment:
+
+```swift
+// BAROApp.swift
+@main
+struct BAROApp: App {
+    @State private var container = DependencyContainer(useMocks: true)
+
+    var body: some Scene {
+        WindowGroup {
+            MainTabView()
+                .environment(container)
+        }
+    }
+}
+```
+
+```swift
+// DependencyContainer.swift
+@Observable
+final class DependencyContainer {
+    let marketRepository: any MarketRepositoryProtocol
+    let bannerRepository: any BannerRepositoryProtocol
+    let newsRepository: any NewsRepositoryProtocol
+
+    init(useMocks: Bool = false) {
+        if useMocks {
+            marketRepository = MockMarketRepository()
+            // ...
+        } else {
+            marketRepository = APIMarketRepository()
+            // ...
+        }
+    }
+}
+```
+
+**Switching between mock and live data** is a single boolean toggle in `BAROApp.swift`.
+
+## Data Flow Pipelines
+
+### Home Screen Data Flow
+
+<FlowDiagram>
+  <div style={{textAlign:'center', fontSize:'13px', fontWeight:700, color:'var(--kl-jade)'}}>Home Screen Pipeline</div>
+  <FlowRow>
+    <FlowNode type="view">HomeView<br/><span style={{fontSize:'10px'}}>.task — loadAllData()</span></FlowNode>
+  </FlowRow>
+  <FlowArrow direction="down" />
+  <FlowRow>
+    <FlowNode type="vm">HomeViewModel<br/><span style={{fontSize:'10px'}}>6 parallel async let fetches</span></FlowNode>
+  </FlowRow>
+  <FlowArrow direction="down" />
+  <FlowRow>
+    <FlowNode type="repo">fetchIndices()</FlowNode>
+    <FlowNode type="repo">fetchStocks()</FlowNode>
+    <FlowNode type="repo">fetchRates()</FlowNode>
+    <FlowNode type="repo">fetchBanners()</FlowNode>
+    <FlowNode type="repo">fetchNews()</FlowNode>
+    <FlowNode type="repo">fetchThemes()</FlowNode>
+  </FlowRow>
+  <FlowArrow direction="down" />
+  <FlowRow>
+    <FlowNode type="model">@Observable properties update → Views re-render automatically</FlowNode>
+  </FlowRow>
+</FlowDiagram>
+
+### Real-Time Price Update Flow
+
+<FlowDiagram>
+  <div style={{textAlign:'center', fontSize:'13px', fontWeight:700, color:'var(--kl-amber)'}}>WebSocket Live Price Pipeline</div>
+  <FlowRow>
+    <FlowNode type="service">KIS WebSocket API</FlowNode>
+  </FlowRow>
+  <FlowArrow direction="down" />
+  <FlowRow>
+    <FlowNode type="service">FastAPI WS Relay<br/><span style={{fontSize:'10px'}}>ws://host:8000/ws/stream</span></FlowNode>
+  </FlowRow>
+  <FlowArrow direction="down" />
+  <FlowRow>
+    <FlowNode type="service">WebSocketManager (Singleton)<br/><span style={{fontSize:'10px'}}>Subscribe/Unsubscribe by stock code</span></FlowNode>
+  </FlowRow>
+  <FlowArrow direction="down" />
+  <FlowRow>
+    <FlowNode type="vm">AsyncStream&lt;PriceUpdate&gt;<br/><span style={{fontSize:'10px'}}>Per-code event stream</span></FlowNode>
+  </FlowRow>
+  <FlowArrow direction="down" />
+  <FlowRow>
+    <FlowNode type="view">latestPrices[code] overlay<br/><span style={{fontSize:'10px'}}>.numericText() animation</span></FlowNode>
+  </FlowRow>
+</FlowDiagram>
+
+### Stock Detail Data Flow
+
+<FlowDiagram>
+  <div style={{textAlign:'center', fontSize:'13px', fontWeight:700, color:'var(--kl-amber)'}}>Stock Detail Pipeline</div>
+  <FlowRow>
+    <FlowNode type="view">StockDetailPageView<br/><span style={{fontSize:'10px'}}>.task — loadDetail() + startLiveUpdates()</span></FlowNode>
+  </FlowRow>
+  <FlowArrow direction="down" />
+  <FlowRow>
+    <FlowNode type="vm">StockDetailPageViewModel<br/><span style={{fontSize:'10px'}}>Venue switching (KRX/NXT/Combined)</span></FlowNode>
+  </FlowRow>
+  <FlowArrow direction="down" />
+  <FlowRow>
+    <FlowNode type="repo">fetchStockDetail(id, venue)<br/><span style={{fontSize:'10px'}}>REST API</span></FlowNode>
+    <FlowNode type="service">WebSocketManager<br/><span style={{fontSize:'10px'}}>AsyncStream&lt;PriceUpdate&gt;</span></FlowNode>
+  </FlowRow>
+  <FlowArrow direction="down" />
+  <FlowRow>
+    <FlowNode type="model">StockDetailInfo</FlowNode>
+    <FlowNode type="vm">rebuildChartCache()<br/><span style={{fontSize:'10px'}}>Indicator computation</span></FlowNode>
+  </FlowRow>
+  <FlowArrow direction="down" />
+  <FlowRow>
+    <FlowNode type="view">PriceHeader</FlowNode>
+    <FlowNode type="view">Chart</FlowNode>
+    <FlowNode type="view">OrderBook</FlowNode>
+    <FlowNode type="view">Financials</FlowNode>
+  </FlowRow>
+</FlowDiagram>
+
+## Key Architectural Decisions
+
+### Why @Observable over ObservableObject
+
+The app uses Swift's modern `@Observable` macro (Observation framework) instead of the legacy `ObservableObject` + `@Published` pattern:
+
+| Aspect | @Observable (Used) | ObservableObject (Legacy) |
+|--------|-------------------|--------------------------|
+| Change tracking | Automatic, per-property | Manual via `@Published` |
+| View invalidation | Only properties actually read | All `@Published` properties |
+| Boilerplate | None — just add `@Observable` | `@Published` on every property |
+| Performance | Fine-grained updates | Potentially over-renders |
+
+### Why Protocol-Based Repositories
+
+- **Testability** — swap `MockMarketRepository` in tests without touching ViewModels
+- **Development speed** — UI development proceeds with mock data while API is under construction
+- **Resilience** — `APIMarketRepository` falls back to mock on network failure
+- **Separation of concerns** — ViewModels don't know how data is fetched
+
+### Why Singleton WebSocketManager
+
+- **Connection pooling** — single WebSocket connection shared across all screens
+- **Subscription management** — subscribe/unsubscribe by stock code, avoiding duplicate connections
+- **Lifecycle management** — automatic reconnection with exponential backoff
+- **Venue awareness** — subscription messages include venue (KRX/NXT/Combined)
+
+## Related Documentation
+
+- [Architecture Overview](/overview/architecture) — High-level system diagram
+- [Data Flow](/frontend/data-layer/data-flow) — Detailed data flow diagrams
+- [Repository Layer](/frontend/data-layer/repositories) — Repository protocol reference

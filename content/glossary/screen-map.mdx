@@ -1,0 +1,637 @@
+# 화면별 용어 맵
+
+<PageMeta status="live" layer="shared" />
+
+앱 화면에서 보이는 금융 용어를 클릭하면 해당 개념의 **상세 설명 페이지**로 이동합니다. 금융 배경 지식이 없는 개발자가 화면을 보면서 "이게 뭐지?" 할 때 바로 찾을 수 있도록 구성했습니다.
+
+---
+
+## BARO 전체 화면 목록 (14 Screens)
+
+BARO iOS 앱의 모든 화면과 각 화면이 연결되는 백엔드 서비스를 한눈에 볼 수 있는 인벤토리입니다.
+
+| # | Screen | iOS Source Path | Status | Backend Services |
+|---|--------|----------------|--------|-----------------|
+| 1 | **Splash** | `Features/Splash/SplashView.swift` | <StatusBadge status="live">Live</StatusBadge> | AuthManager (token validation) |
+| 2 | **Login / Register** | `Features/Auth/LoginView.swift`, `RegisterView.swift` | <StatusBadge status="live">Live</StatusBadge> | Auth API (JWT), Apple Sign In, Supabase Auth |
+| 3 | **Home** | `Features/Home/HomeView.swift` | <StatusBadge status="live">Live</StatusBadge> | Stock API, Market Index API, Currency API, News API, Theme API, KIS WebSocket (live prices) |
+| 4 | **Stock Detail** | `Features/StockDetailPage/StockDetailPageView.swift` | <StatusBadge status="live">Live</StatusBadge> | Stock Detail API, Chart API, OrderBook API, Investor Flow API, Analyst Opinion API, Financial API, Dividend API, KIS WebSocket |
+| 5 | **Market Overview** | `Features/MarketOverview/MarketOverviewDetailView.swift` | <StatusBadge status="live">Live</StatusBadge> | Market Index API |
+| 6 | **Search** | `Features/Search/SearchView.swift` | <StatusBadge status="live">Live</StatusBadge> | Stock Search API, Theme Search API |
+| 7 | **News Detail** | `Features/NewsDetail/NewsDetailView.swift` | <StatusBadge status="live">Live</StatusBadge> | News API, AI Summary Service |
+| 8 | **Theme Detail** | `Features/ThemeDetail/ThemeDetailView.swift` | <StatusBadge status="live">Live</StatusBadge> | Theme API, Related Stocks API |
+| 9 | **Intelligence Hub (AI Insights)** | `Features/AIInsights/AIInsightsView.swift` | <StatusBadge status="live">Live</StatusBadge> | AI Agent Orchestration, RAG Pipeline, LLM (Claude) |
+| 10 | **My Page** | `Features/MyPage/MyPageView.swift` | <StatusBadge status="live">Live</StatusBadge> | User API, Settings API, Supabase Auth |
+| 11 | **Events** | `Features/Events/EventsView.swift` | <StatusBadge status="live">Live</StatusBadge> | Events API |
+| 12 | **Notifications** | `Features/Notifications/NotificationView.swift` | <StatusBadge status="live">Live</StatusBadge> | Push Notification Service, Price Alert API |
+| 13 | **Trading Floor** | (not yet created) | <StatusBadge status="planned">Planned</StatusBadge> | KIS Trading API, Order Management, HITL Approval |
+| 14 | **Products / Assets** | `Features/Placeholders/` | <StatusBadge status="planned">Placeholder</StatusBadge> | Portfolio API, Asset Management API |
+
+<InfoBox type="info" title="Navigation Structure">
+`MainTabView` is the root container with 5 tabs: Home, Products (placeholder), Assets (placeholder), Events, and Menu (MyPage). Other screens are reached via navigation stack pushes or modal sheets. The Search screen is presented as a full-screen sheet from the Home tab.
+</InfoBox>
+
+---
+
+## 홈 화면 홈
+
+<ScreenMap title="HomeView — 금융 용어 맵">
+
+  <ScreenRegion
+    label="시장 현황 — 지수 카드"
+    file="MarketOverviewRowView → MarketIndexCardView"
+    description="지수(Index)는 여러 종목 가격을 종합한 숫자로, 시장 전체의 방향을 보여줍니다. 코스피 지수가 오르면 한국 대형주 시장이 전반적으로 상승한 것입니다."
+    link="/financial-glossary/market-basics#지수market-index"
+    color="jade"
+  >
+    <ScreenSubRegion label="코스피 (KOSPI)" file="StockExchange.kospi" description="한국 대표 대형주 시장. 삼성전자, 현대차 등 약 800개 종목 상장. 상장 요건이 엄격합니다." color="jade">
+      🇰🇷 코스피 2,723.15 +0.46%
+    </ScreenSubRegion>
+    <ScreenSubRegion label="코스닥 (KOSDAQ)" file="StockExchange.kosdaq" description="기술주·바이오 중심 시장. NASDAQ과 유사한 성격. 변동성이 KOSPI보다 큽니다." color="jade">
+      🇰🇷 코스닥 845.20 -0.12%
+    </ScreenSubRegion>
+    <ScreenSubRegion label="+0.46% / -0.12% (변동률)" file="전일 대비 변동" description="전일종가 대비 오늘 가격의 변동 비율(%). 빨간색(🔴)=상승, 파란색(🔵)=하락. 이것은 한국 금융시장의 색상 규칙입니다 (미국과 반대)." color="red">
+      상승 🔴 | 하락 🔵
+    </ScreenSubRegion>
+    <ScreenSubRegion label="🟢 거래중 / 장종료 (시장 세션)" file="MarketSessionStatus" description="주식시장 운영 시간 상태. KRX 정규장: 09:00~15:30. NXT 시간외: 15:40~20:00. 장이 열려있어야 거래할 수 있습니다." color="blue">
+      🟢 거래중 → 정규장 운영 중
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="환율 카드 — CurrencyRatesRowView"
+    file="CurrencyRate 모델"
+    description="환율은 한 나라의 화폐를 다른 나라 화폐로 교환할 때의 비율입니다. 'USD/KRW 1,481.60'은 1달러 = 1,481.60원이라는 뜻입니다."
+    link="/financial-glossary/exchanges-and-venues#환율-exchange-rate"
+    color="blue"
+  >
+    <ScreenSubRegion label="USD/KRW (달러/원)" file="CurrencyRate" description="1달러당 원화 가격. 환율이 오르면(원화 약세) 수출 기업에 유리하고, 내리면(원화 강세) 수입 기업에 유리합니다." color="blue">
+      🇺🇸 USD 1,481.60 +1.28%
+    </ScreenSubRegion>
+    <ScreenSubRegion label="JPY/KRW (100엔/원)" file="CurrencyRate.unitLabel" description="엔화는 1엔이 약 9원으로 단위가 작아서 '100엔' 기준으로 표시합니다. 이것은 금융 관례입니다." color="blue">
+      🇯🇵 JPY(100) 964.20
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="종목 리스트 — StockListView"
+    file="Stock 모델 + StockRowView"
+    description="종목(Stock)은 거래 가능한 하나의 주식입니다. 리스트에는 종목명, 종목코드, 현재가, 변동률이 표시됩니다."
+    link="/financial-glossary/market-basics#주식stock이란"
+    color="jade"
+  >
+    <ScreenSubRegion label="KOSPI | KOSDAQ | NASDAQ (거래소 탭)" file="StockExchange" description="주식이 거래되는 시장. KOSPI=한국 대형주, KOSDAQ=한국 기술주, NASDAQ=미국 기술주, NYSE=미국 대형주, AMEX=미국 중소형주." color="amber">
+      [KOSPI] KOSDAQ NASDAQ NYSE
+    </ScreenSubRegion>
+    <ScreenSubRegion label="시가총액 ▾ (정렬 필터)" file="StockFilter" description="시가총액 = 주가 × 발행주식수. 회사의 전체 주식 가치를 나타냅니다. 시가총액이 크면 '대형주', 작으면 '소형주'." color="amber">
+      시가총액 | 거래량 | 상승 | 하락 | 배당
+    </ScreenSubRegion>
+    <ScreenGroup label="정렬 기준 설명">
+      <ScreenSubRegion label="시가총액" file="StatisticItem.marketCap" description="회사의 전체 주식 가치 (주가 × 상장주수). 삼성전자 ≈ 430조원." color="jade">
+        회사 규모 순
+      </ScreenSubRegion>
+      <ScreenSubRegion label="거래량" file="StatisticItem.volume" description="해당 기간 거래된 주식 수. 거래량이 많으면 관심이 높고 유동성이 좋습니다." color="jade">
+        거래 활발도 순
+      </ScreenSubRegion>
+      <ScreenSubRegion label="상승 / 하락" file="Stock.changePercent" description="전일종가 대비 오늘 가격의 변동률(%). 상승=오른 종목, 하락=내린 종목." color="jade">
+        오늘 변동률 순
+      </ScreenSubRegion>
+      <ScreenSubRegion label="배당" file="StatisticItem.dividendYield" description="배당수익률 = 주당배당금 ÷ 주가 × 100%. 회사가 주주에게 돌려주는 이익의 비율." color="jade">
+        배당수익률 높은 순
+      </ScreenSubRegion>
+    </ScreenGroup>
+    <ScreenSubRegion label="72,300 -0.28% (가격 + 변동)" file="PriceChangeLabel" description="현재가와 전일 대비 변동률. 빨간색(🔴)=상승, 파란색(🔵)=하락 (한국 규칙). WebSocket으로 실시간 업데이트됩니다." color="red">
+      72,300 &nbsp; -200 (-0.28%)
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="테마 트렌드 — AIMarketIssuesView"
+    file="MarketTheme 모델"
+    description="테마는 공통 특성을 가진 종목들의 그룹입니다. '#반도체' 테마에는 삼성전자, SK하이닉스 등이 포함됩니다. 특정 이슈가 생기면 관련 테마 종목들이 함께 움직입니다."
+    link="/financial-glossary/market-basics#테마market-theme"
+    color="amber"
+  >
+    <ScreenSubRegion label="버블 크기 = 가중치(weight)" file="MarketThemeBubbleChartView" description="버블이 크면 시장에서 차지하는 비중이 크다는 뜻. 가중치는 해당 테마 관련 종목들의 시가총액이나 거래량 비중으로 결정됩니다." color="amber">
+      ◉ 큰 버블 = 비중 큰 테마
+    </ScreenSubRegion>
+    <ScreenSubRegion label="버블 색상 = 상승/하락" file="MarketTheme.changePercent" description="파란 버블(🔵)=테마 평균 상승, 빨간 버블(🔴)=테마 평균 하락. 전일 대비 테마 내 종목들의 평균 변동률입니다." color="blue">
+      🔵 상승 테마 | 🔴 하락 테마
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="경제소식 — NewsSectionView"
+    file="NewsArticle 모델"
+    description="뉴스, 증권사 리포트, 기업 공시 등 3가지 유형의 금융 정보입니다. 공시가 가장 공식적이고 신뢰도가 높습니다."
+    link="/financial-glossary/news-and-research"
+    color="red"
+  >
+    <ScreenSubRegion label="뉴스" file="NewsContentType.news" description="언론사의 경제/시장 기사. 시장 방향에 영향을 줄 수 있는 정보." color="red">
+      뉴스
+    </ScreenSubRegion>
+    <ScreenSubRegion label="리포트" file="NewsContentType.report" description="증권사 애널리스트가 작성한 전문 분석 보고서. 투자의견(매수/중립/매도)과 목표주가가 포함됩니다." color="blue">
+      리포트
+    </ScreenSubRegion>
+    <ScreenSubRegion label="공시" file="NewsContentType.disclosure" description="회사가 법적 의무에 따라 금융감독원 DART를 통해 공개하는 공식 문서. 실적 발표, 배당 결정, 유상증자 등. 가장 신뢰도 높은 정보원." color="amber">
+      공시
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+</ScreenMap>
+
+---
+
+## 종목 상세 화면 — 가격 영역
+
+<ScreenMap title="StockDetailPageView — 가격 및 차트 용어 맵">
+
+  <ScreenRegion
+    label="가격 헤더 — StockPriceHeaderView"
+    file="실시간 가격 표시"
+    description="현재 거래되고 있는 주식의 실시간 가격입니다. WebSocket을 통해 체결될 때마다 업데이트됩니다."
+    link="/financial-glossary/price-and-valuation"
+    color="jade"
+  >
+    <ScreenSubRegion label="₩72,300 (현재가)" file="Stock.price" description="가장 최근에 체결(거래 성사)된 가격. 매수자와 매도자의 가격이 일치하여 실제 거래가 이루어진 가격입니다." color="jade">
+      ₩72,300
+    </ScreenSubRegion>
+    <ScreenSubRegion label="-200 (-0.28%) (변동)" file="Stock.change / changePercent" description="전일종가(어제 마감 가격) 대비 현재가의 차이. -200원은 어제보다 200원 내렸다는 뜻. -0.28%는 비율로 표현한 것." color="red">
+      -200 (-0.28%) 🔴
+    </ScreenSubRegion>
+    <ScreenSubRegion label="[통합] 정규장 NXT (시세 선택)" file="MarketVenue" description="같은 종목도 KRX(정규장)와 NXT(대체거래소)에서 가격이 다를 수 있습니다. '통합'은 두 거래소의 합산 시세, '정규장'은 KRX만, 'NXT'는 NXT만의 시세입니다." color="blue">
+      [통합] &nbsp; 정규장 &nbsp; NXT
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="차트 영역 — StockChartView"
+    file="캔들스틱 차트"
+    description="가격 변동을 시각적으로 보여주는 차트입니다. 하나의 '봉(캔들)'이 하나의 기간(1일 등)을 나타내며, 시가·고가·저가·종가 4가지 정보를 담고 있습니다."
+    link="/financial-glossary/technical-analysis"
+    color="amber"
+  >
+    <ScreenSubRegion label="양봉 (🔴 빨간 캔들)" file="ChartType.candle" description="종가 > 시가인 캔들. 가격이 올랐음을 의미합니다. 몸통이 길수록 강한 상승." color="red">
+      🔴 시가 72,100 → 종가 72,300 (상승)
+    </ScreenSubRegion>
+    <ScreenSubRegion label="음봉 (🔵 파란 캔들)" file="ChartType.candle" description="종가 < 시가인 캔들. 가격이 내렸음을 의미합니다. 몸통이 길수록 강한 하락." color="blue">
+      🔵 시가 72,500 → 종가 72,300 (하락)
+    </ScreenSubRegion>
+    <ScreenSubRegion label="꼬리 (Wick/Shadow)" file="ChartPoint.high / .low" description="캔들 위아래의 가느다란 선. 윗꼬리 = 고가까지 갔다가 내려옴. 아랫꼬리 = 저가까지 갔다가 올라옴. 긴 꼬리는 해당 방향의 저항을 의미." color="amber">
+      ┃ 위 = 고가, 아래 = 저가
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="오버레이 지표 — 차트 위에 겹쳐진 선들"
+    file="OverlayIndicator"
+    description="가격 차트 위에 겹쳐서 표시되는 분석 도구입니다. 가격의 추세, 변동 범위, 매수/매도 타이밍을 파악하는 데 사용합니다."
+    link="/financial-glossary/technical-analysis#오버레이-지표-overlay-indicators"
+    color="blue"
+  >
+    <ScreenSubRegion label="MA(20) — 이동평균선" file="OverlayIndicator.ma" description="최근 20일간 종가의 평균을 연결한 선. 가격의 '소음'을 걸러내고 추세를 봅니다. 가격이 MA 위 = 상승 추세, 아래 = 하락 추세." color="jade">
+      ── 이동평균 20일선 ──
+    </ScreenSubRegion>
+    <ScreenSubRegion label="BB — 볼린저 밴드" file="OverlayIndicator.bollingerBand" description="MA를 중심으로 표준편차 ×2 범위의 상단/하단 밴드. 가격이 상단 밴드 근처 = 과매수(너무 올라서 조정 가능), 하단 밴드 근처 = 과매도(반등 가능)." color="amber">
+      상단 ── MA(20) ── 하단
+    </ScreenSubRegion>
+    <ScreenSubRegion label="일목균형표 (구름대)" file="OverlayIndicator.ichimoku" description="일본에서 개발된 복합 지표. 구름대(색칠된 영역)가 핵심: 가격이 구름 위 = 상승, 구름 안 = 불확실, 구름 아래 = 하락. 5개 선이 함께 추세를 판단합니다." color="purple">
+      ☁️ 구름대 (Cloud)
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Parabolic SAR (점)" file="OverlayIndicator.parabolicSAR" description="가격 위/아래의 점. 점이 가격 아래 = 상승 추세(보유), 점이 가격 위 = 하락 추세(매도 고려). 점이 위아래로 바뀌는 지점이 추세 전환 신호." color="blue">
+      · · · 가격 · · ·
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="보조 지표 패널 — SubIndicatorChartView"
+    file="SubIndicator"
+    description="가격 차트 아래에 별도 패널로 표시되는 분석 도구입니다. 가격만으로는 알 수 없는 거래량, 모멘텀, 과매수/과매도 상태를 파악합니다."
+    link="/financial-glossary/technical-analysis#보조-지표-sub-indicators"
+    color="blue"
+  >
+    <ScreenSubRegion label="거래량 막대 (Volume)" file="SubIndicator.volume" description="해당 기간 거래된 주식 수를 막대로 표시. 빨간 막대 = 가격 상승일, 파란 막대 = 가격 하락일. 거래량 급증 = 중요한 이벤트 발생 신호." color="blue">
+      ▇▇▅▇▃▅▇▅▃▇ (빨강/파랑 막대)
+    </ScreenSubRegion>
+    <ScreenSubRegion label="RSI (상대강도지수)" file="SubIndicator.rsi" description="0~100 사이의 값. 70 이상 = 과매수(너무 올라서 조정 가능), 30 이하 = 과매도(반등 가능). 매수/매도 타이밍 판단에 사용합니다." color="amber">
+      RSI(14) ── 54.2 &nbsp; [30 ── 70 가이드]
+    </ScreenSubRegion>
+    <ScreenSubRegion label="MACD" file="SubIndicator.macd" description="두 이동평균의 차이로 추세 강도를 파악. MACD 라인이 시그널 라인 위로 교차 = 매수 신호(골든 크로스), 아래로 교차 = 매도 신호(데드 크로스). 히스토그램은 두 선의 차이." color="jade">
+      MACD ── Signal ── Histogram
+    </ScreenSubRegion>
+    <ScreenSubRegion label="스토캐스틱 (Stochastic)" file="SubIndicator.stochastic" description="현재 가격이 최근 가격 범위에서 어디에 있는지를 0~100으로 표시. 80 이상 = 과매수, 20 이하 = 과매도." color="purple">
+      %K ── %D &nbsp; [20 ── 80 가이드]
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="차트 기간 선택 — PeriodTabs"
+    file="ChartPeriod"
+    description="차트에 표시할 기간을 선택합니다. 짧은 기간은 단기 트레이딩에, 긴 기간은 장기 투자 판단에 사용합니다."
+    link="/financial-glossary/technical-analysis#차트-기간-period"
+    color="blue"
+  >
+    <ScreenSubRegion label="1일 (당일)" file="ChartPeriod.oneDay" description="오늘 하루의 분봉(분 단위 캔들) 차트. 단타 트레이더가 주로 사용합니다." color="blue">
+      1일
+    </ScreenSubRegion>
+    <ScreenSubRegion label="1개월 ~ 3년" file="ChartPeriod" description="1개월/3개월 = 단기~중기 추세 파악. 1년/3년 = 장기 투자 판단. 기간이 길수록 큰 추세를 볼 수 있습니다." color="blue">
+      1개월 &nbsp; 3개월 &nbsp; 1년 &nbsp; 3년
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+</ScreenMap>
+
+---
+
+## 차트 설정 시트 — ChartSettingsSheet
+
+<ScreenMap title="ChartSettingsSheet — 전체 차트 옵션 용어 맵">
+
+  <ScreenRegion
+    label="차트유형 탭 — 전체 17종"
+    file="ChartType enum"
+    description="차트의 시각적 표현 방식을 선택합니다. 각 유형은 가격 데이터를 다른 방식으로 시각화합니다."
+    link="/financial-glossary/technical-analysis#차트-유형--전체-17종"
+    color="jade"
+  >
+    <ScreenGroup label="기본 차트 (4종)">
+      <ScreenSubRegion label="캔들" file="ChartType.candle" description="시가·고가·저가·종가를 봉 형태로 표시. 양봉(🔴상승)=종가>시가, 음봉(🔵하락)=종가<시가. 가장 보편적인 차트." color="jade">
+        ┏┃┓ 캔들스틱
+      </ScreenSubRegion>
+      <ScreenSubRegion label="바" file="ChartType.bar" description="캔들과 유사하나 수직 막대 형태. 몸통 없이 시가/종가를 좌/우 틱으로 표시." color="jade">
+        ├ 바
+      </ScreenSubRegion>
+      <ScreenSubRegion label="바(시고저종)" file="ChartType.barOHLC" description="OHLC(Open-High-Low-Close) 바. 왼쪽 틱=시가, 오른쪽 틱=종가. 전통적 서양 차트." color="jade">
+        ├┤ OHLC
+      </ScreenSubRegion>
+      <ScreenSubRegion label="라인" file="ChartType.line" description="종가만 선으로 연결. 가장 단순한 차트. 전체적인 추세 흐름 파악에 적합." color="jade">
+        ╱╲╱ 라인
+      </ScreenSubRegion>
+    </ScreenGroup>
+    <ScreenGroup label="고급 차트 (13종)">
+      <ScreenSubRegion label="FLOW" file="ChartType.flow" description="부드러운 곡선 차트. 추세를 유동적으로 표현." color="blue">
+        ～ FLOW
+      </ScreenSubRegion>
+      <ScreenSubRegion label="계단" file="ChartType.step" description="가격 변동 시점을 수직/수평 계단으로 표시. 정확한 변동 시점 파악." color="blue">
+        ┐└ 계단
+      </ScreenSubRegion>
+      <ScreenSubRegion label="PnF" file="ChartType.pnf" description="Point & Figure. 시간 축 없이 X(상승)/O(하락) 열로만 표시. 순수 가격 패턴 분석." color="blue">
+        XO PnF
+      </ScreenSubRegion>
+      <ScreenSubRegion label="삼선전환도" file="ChartType.threeLineBreak" description="3봉 연속 고/저 돌파 시에만 새 봉 생성. 노이즈 제거, 의미있는 추세 전환만 포착." color="blue">
+        ▌▌▌ 삼선전환
+      </ScreenSubRegion>
+      <ScreenSubRegion label="스윙" file="ChartType.swing" description="의미있는 고점/저점만 직선 연결. 추세의 골격(swing high/swing low)만 표시." color="blue">
+        /\/ 스윙
+      </ScreenSubRegion>
+      <ScreenSubRegion label="렌코" file="ChartType.renko" description="일정 가격 변동폭마다 블록(벽돌) 생성. 시간 무관, 가격 변동 크기만 반영. 추세가 명확." color="blue">
+        ▪▪▪ 렌코
+      </ScreenSubRegion>
+      <ScreenSubRegion label="Kagi" file="ChartType.kagi" description="방향 전환 시 선 방향 변경. 두꺼운 선=상승(양), 얇은 선=하락(음). 일본 전통 차트." color="blue">
+        ┃┃ Kagi
+      </ScreenSubRegion>
+      <ScreenSubRegion label="영역라인" file="ChartType.areaLine" description="라인 차트 아래를 색으로 채움. 시각적으로 추세 직관 파악. 대중적인 미디어 차트." color="blue">
+        ▓▓ 영역
+      </ScreenSubRegion>
+      <ScreenSubRegion label="역시계곡선" file="ChartType.inverseClock" description="X축=거래량, Y축=가격. 시간순 점 연결. 반시계 방향 회전=상승 신호, 시계 방향=하락 신호." color="blue">
+        ↺ 역시계
+      </ScreenSubRegion>
+      <ScreenSubRegion label="분산형" file="ChartType.scatter" description="가격을 점으로만 표시. 분포 패턴, 밀집 구간, 이상치 파악." color="blue">
+        · · 분산
+      </ScreenSubRegion>
+      <ScreenSubRegion label="Heikin-Ashi" file="ChartType.heikinAshi" description="평균값으로 재계산한 캔들. 일반 캔들보다 노이즈 적어 추세가 더 선명. 'Heikin-Ashi' = 일본어 '평균 봉'." color="blue">
+        HA 하이킨
+      </ScreenSubRegion>
+      <ScreenSubRegion label="캔들볼륨" file="ChartType.candleVolume" description="캔들 너비가 거래량에 비례. 거래 활발한 봉이 넓게, 한산한 봉이 좁게. 가격+거래량 동시 시각화." color="blue">
+        ▌▊▍ 캔들볼륨
+      </ScreenSubRegion>
+      <ScreenSubRegion label="이큐볼륨" file="ChartType.equivolume" description="너비=거래량, 높이=가격 범위인 박스. 큰 박스 = 거래 많고 변동 큰 기간." color="blue">
+        ▬▮ 이큐볼륨
+      </ScreenSubRegion>
+    </ScreenGroup>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="오버레이 탭 — 전체 17종"
+    file="OverlayIndicator enum"
+    description="가격 차트 위에 겹쳐서 표시되는 지표. 추세, 지지/저항, 과매수/과매도 구간을 시각화합니다."
+    link="/financial-glossary/technical-analysis#오버레이-지표--전체-17종"
+    color="amber"
+  >
+    <ScreenSubRegion label="주가이동평균" file="OverlayIndicator.priceMA" description="일정 기간 평균 가격선. 가격이 MA 위=상승 추세, 아래=하락 추세. 골든크로스(단기MA↑장기MA)=매수, 데드크로스=매도 신호." color="jade">
+      ── MA(5/20/60/120)
+    </ScreenSubRegion>
+    <ScreenSubRegion label="가격 & Box" file="OverlayIndicator.priceBox" description="가격 범위를 박스로 표시. 지지/저항 구간 시각화." color="blue">
+      □ 가격박스
+    </ScreenSubRegion>
+    <ScreenSubRegion label="그물차트" file="OverlayIndicator.netChart" description="여러 기간 MA 동시 표시. 선들이 모이면(수렴) 추세 전환 구간." color="blue">
+      ≡ 그물
+    </ScreenSubRegion>
+    <ScreenSubRegion label="매물대" file="OverlayIndicator.volumeProfile" description="가격대별 과거 거래량을 가로 막대로 표시. 거래 많았던 가격대 = 지지/저항선." color="blue">
+      ▌▌ 매물대
+    </ScreenSubRegion>
+    <ScreenSubRegion label="일목균형표" file="OverlayIndicator.ichimoku" description="5개 선 + 구름대. 가격이 구름 위=상승, 안=불확실, 아래=하락. 전환선·기준선·선행스팬A·선행스팬B·후행스팬." color="amber">
+      ☁ 일목균형
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Bollinger Band" file="OverlayIndicator.bollingerBand" description="MA ± 표준편차×2 밴드. 상단=과매수, 하단=과매도. 밴드 축소=큰 변동 임박(스퀴즈)." color="amber">
+      ═══ BB
+    </ScreenSubRegion>
+    <ScreenSubRegion label="DEMA" file="OverlayIndicator.dema" description="Double EMA. 일반 MA보다 빠르게 추세 변화 감지. 지연(lag) 감소." color="blue">
+      ── DEMA
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Demark" file="OverlayIndicator.demark" description="Tom DeMark 지표. 추세 소진(exhaustion) 지점 예측. 카운트 기반으로 고점/저점 타이밍." color="blue">
+      ⓓ Demark
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Envelope" file="OverlayIndicator.envelope" description="MA × (1±N%) 밴드. 볼린저밴드보다 단순. 고정 비율이라 변동성 반영 안함." color="blue">
+      ═ Envelope
+    </ScreenSubRegion>
+    <ScreenSubRegion label="MAC" file="OverlayIndicator.mac" description="Moving Average Convergence. 두 MA의 수렴/발산을 차트 위에 직접 표시." color="blue">
+      ×× MAC
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Parabolic SAR" file="OverlayIndicator.parabolicSAR" description="가격 위/아래의 점. 아래=상승 추세(보유), 위=하락 추세(매도). 점 위치 전환=추세 전환." color="amber">
+      · · SAR
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Pivot" file="OverlayIndicator.pivot" description="전일 (고+저+종)÷3 = 피봇 포인트. 지지1,2 / 저항1,2 자동 계산. 데이트레이더 기준점." color="blue">
+      ── Pivot
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Pivot전봉기준" file="OverlayIndicator.pivotPrevBar" description="전봉(이전 캔들) 기준 피봇. 더 단기적인 지지/저항." color="blue">
+      ── Pivot전봉
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Price Channel" file="OverlayIndicator.priceChannel" description="N기간 최고가(상단)와 최저가(하단)로 채널. 상단 돌파=상승 추세, 하단 돌파=하락 추세." color="blue">
+      ═ 채널
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Starc Bands" file="OverlayIndicator.starcBands" description="Stoller Average Range Channel. ATR(평균변동폭) 기반 밴드. BB와 유사하나 ATR 사용." color="blue">
+      ═ Starc
+    </ScreenSubRegion>
+    <ScreenSubRegion label="TEMA" file="OverlayIndicator.tema" description="Triple EMA. DEMA보다 더 빠른 반응. 지연 최소화. 민감한 추세 추적." color="blue">
+      ── TEMA
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Zig Zag" file="OverlayIndicator.zigZag" description="의미있는 가격 변동만 직선 연결. 작은 노이즈 제거. 엘리어트 파동 분석에 활용." color="blue">
+      /\/ ZigZag
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="보조지표 탭 — 전체 155종 (9개 카테고리)"
+    file="SubIndicatorCatalog"
+    description="가격 차트 아래에 별도 패널로 표시되는 지표. 거래량, 추세, 변동성, 시장강도 등 9개 카테고리로 분류됩니다. 상세 설명은 기술적 분석 페이지 참조."
+    link="/financial-glossary/technical-analysis#보조-지표--전체-155종-9개-카테고리"
+    color="blue"
+  >
+    <ScreenSubRegion label="관심지표 (9종)" file="SubIndicatorCategory.favorites" description="핵심 지표 모음: 주가이동평균, 일목균형표, Bollinger Band, Envelope, CCI, DMI, 이격도, RSI, Stochastic Fast" color="jade">
+      주가이동평균 | RSI | MACD | ...
+    </ScreenSubRegion>
+    <ScreenSubRegion label="거래량지표 (17종)" file="SubIndicatorCategory.volume" description="거래량 기반 지표: 거래량, 거래량이동평균, 거래대금, BII, Chaikins OSC, CMF, Force Index, EOM, MFI, NVI, OBV, PVI, VA Oscillator, Volume Oscillator, VR, VROC 등" color="blue">
+      거래량 | OBV | MFI | CMF | ...
+    </ScreenSubRegion>
+    <ScreenSubRegion label="추세지표 (23종)" file="SubIndicatorCategory.trend" description="추세 방향/강도: AD Line, ADX, ADXR, CCI, DMI, Formula, LRL, LRS, MACD, MACD OSC, MACD+OSC, MAO, Momentum, NDI, Price Oscillator, Price ROC, Reverse, ROC, Sonar, SROC, TRIX, TSF, VHF" color="amber">
+      MACD | ADX | Momentum | ...
+    </ScreenSubRegion>
+    <ScreenSubRegion label="변동성지표 (21종)" file="SubIndicatorCategory.volatility" description="가격 변동폭: 이격도, 이격도[지수], AB Ratio, ATR, Band %B, Band Width, Bollinger Band[보조], Chaikins Volatility, DPO, DRF, Mass Index, NCO, Qstic, RMI, RSI, Sigma, Standard Deviation, Stochastic Fast/Slow/Oscillator, Williams R" color="purple">
+      RSI | Stochastic | ATR | ...
+    </ScreenSubRegion>
+    <ScreenSubRegion label="2차파생지표 (11종)" file="SubIndicatorCategory.combo" description="복합 지표: %B+Stochastic, LRS+Stochastic, MACD+Stochastic, Momentum+Stochastic, OBV+Momentum, OBV+Stochastic, ROC+Stochastic, RSI+MACD, RSI+Stochastic, Sonar+심리도, Stochastic+RSI" color="amber">
+      RSI+MACD | MACD+Stoch | ...
+    </ScreenSubRegion>
+    <ScreenSubRegion label="시장강도지표 (19종)" file="SubIndicatorCategory.marketStrength" description="매수/매도 세력 균형: 심리도, 신심리도, BPDL Short/Stochastic, Elder_Ray Bear/Bull, Force Index Long/Short, GM McClellan Oscillator/Summation, LFI, MA Indicator, OBV 변형, PVT, RCI, TRIN, Volume Accumulator" color="blue">
+      심리도 | Elder Ray | PVT | ...
+    </ScreenSubRegion>
+    <ScreenSubRegion label="시장지표 (15종)" file="SubIndicatorCategory.market" description="수급/신용 데이터: 기관순매수누적/량, 시가총액, 외국인 보유량/보유율/순매수/누적, 뉴스건수/공시건수/뉴스강도, 개인 순매수량/누적, 신용잔고주수/잔고율/공여율" color="jade">
+      외국인 순매수 | 기관 | 신용 | ...
+    </ScreenSubRegion>
+    <ScreenSubRegion label="신호검색 (20종)" file="SubIndicatorCategory.signalSearch" description="자동 매수/매도 신호: 이동평균/단순지수/단순가격/멀티MA 크로스, MACD/MAO/PVI 크로스, Parabolic SAR, Stochastics, ADXRStrategy, CCI BaseLine/OverBought, Disparity, DMI, Golden Cross EMA, MACD BaseLine, Sonar Momentum/Signal, WilliamsR, RSI 신호" color="red">
+      골든크로스 | RSI | MACD | ...
+    </ScreenSubRegion>
+    <ScreenSubRegion label="캔들 강세/약세 (20종)" file="SubIndicatorCategory.candlePatterns" description="캔들 패턴 강세/약세 자동 감지: 이동평균/단순지수/단순가격/멀티MA 크로스, MACD, MAO, PVI, Parabolic SAR, Stochastics, ADXRStrategy, CCI BaseLine/OverBought, DMI, Disparity, Golden Cross EMA, MACD BaseLine, Sonar Momentum/Signal, WilliamsR, RSI 강세약세" color="red">
+      강세 ▲ | 약세 ▼
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+</ScreenMap>
+
+---
+
+## 종목 상세 화면 — 정보 탭들
+
+<ScreenMap title="StockDetailPageView 컨텐츠 탭 — 용어 맵">
+
+  <ScreenRegion
+    label="종목정보 탭 — StockInfoGridView"
+    file="StatisticItem"
+    description="종목의 핵심 투자 지표를 2열 그리드로 표시합니다. 각 지표를 탭하면 설명(StockInfoExplanationSheet)을 볼 수 있습니다."
+    link="/financial-glossary/price-and-valuation"
+    color="jade"
+  >
+    <ScreenGroup label="가격 지표">
+      <ScreenSubRegion label="전일 72,500" file="StatisticItem.prevClose" description="어제 장 마감 시 마지막 거래 가격. 오늘의 등락률은 이 가격 대비로 계산됩니다." color="jade">
+        전일종가 (Previous Close)
+      </ScreenSubRegion>
+      <ScreenSubRegion label="시가 72,400" file="StatisticItem.openPrice" description="오늘 장 시작 후 첫 거래 가격. 전일종가와의 차이를 '갭(Gap)'이라 합니다." color="jade">
+        시가 (Opening Price)
+      </ScreenSubRegion>
+      <ScreenSubRegion label="고가 72,800 / 저가 71,900" file="StatisticItem.highPrice / lowPrice" description="당일 최고가/최저가. 캔들차트의 위/아래 꼬리 끝이 이 값입니다." color="jade">
+        고가 / 저가
+      </ScreenSubRegion>
+      <ScreenSubRegion label="상한가 / 하한가" file="StatisticItem.upperLimit / lowerLimit" description="하루 최대 변동 한계 (전일종가 ±30%). 급격한 가격 변동으로부터 투자자를 보호하는 규제입니다." color="red">
+        ±30% 가격 제한
+      </ScreenSubRegion>
+    </ScreenGroup>
+    <ScreenGroup label="거래 지표">
+      <ScreenSubRegion label="거래량 12,345,678" file="StatisticItem.volume" description="당일 거래된 주식 수. 많으면 관심이 높음. 거래량 급증 = 중요 이벤트 신호." color="blue">
+        거래량 (Volume)
+      </ScreenSubRegion>
+      <ScreenSubRegion label="거래대금 892억" file="StatisticItem.tradingValue" description="거래량 × 가격 = 총 거래 금액. 저가주 100만주 vs 고가주 1만주를 비교할 때 유용합니다." color="blue">
+        거래대금 (Trading Value)
+      </ScreenSubRegion>
+      <ScreenSubRegion label="시가총액 430조" file="StatisticItem.marketCap" description="주가 × 발행주식수 = 회사 전체 가치. 10조 이상 = 대형주, 1조 미만 = 소형주." color="blue">
+        시가총액 (Market Cap)
+      </ScreenSubRegion>
+    </ScreenGroup>
+    <ScreenGroup label="밸류에이션 지표">
+      <ScreenSubRegion label="PER 12.5배" file="StatisticItem.per" description="주가 ÷ 주당순이익(EPS). '이 회사가 벌어들이는 이익의 몇 배로 거래되는가'. PER이 낮으면 저평가(가치주), 높으면 성장 기대(성장주)." color="amber">
+        PER — 주가수익비율
+      </ScreenSubRegion>
+      <ScreenSubRegion label="EPS 5,784원" file="StatisticItem.eps" description="순이익 ÷ 발행주식수 = 1주당 벌어들이는 순이익. EPS가 높으면 회사가 돈을 잘 번다는 의미." color="amber">
+        EPS — 주당순이익
+      </ScreenSubRegion>
+      <ScreenSubRegion label="PBR 1.2배" file="StatisticItem.pbr" description="주가 ÷ 주당순자산(BPS). PBR < 1이면 주가가 회사 장부가치보다 낮음 (저평가 가능성)." color="amber">
+        PBR — 주가순자산비율
+      </ScreenSubRegion>
+      <ScreenSubRegion label="BPS 60,250원" file="StatisticItem.bps" description="(총자산 - 총부채) ÷ 발행주식수. 회사가 청산되면 1주당 돌아가는 금액." color="amber">
+        BPS — 주당순자산
+      </ScreenSubRegion>
+      <ScreenSubRegion label="ROE 9.6%" file="StatisticItem.roe" description="순이익 ÷ 자기자본 × 100%. 주주의 돈으로 얼마나 효율적으로 이익을 냈는가. 10% 이상이면 양호." color="amber">
+        ROE — 자기자본이익률
+      </ScreenSubRegion>
+    </ScreenGroup>
+    <ScreenGroup label="기타 지표">
+      <ScreenSubRegion label="52주 최고/최저" file="StatisticItem.week52High / week52Low" description="최근 1년(52주) 동안의 최고가와 최저가. 현재가가 52주 최고에 가까우면 역대급으로 비싼 수준." color="purple">
+        52주 가격 범위
+      </ScreenSubRegion>
+      <ScreenSubRegion label="외인소진율 82.3%" file="StatisticItem.foreignExhaustion" description="외국인 보유 가능 한도 대비 실제 보유 비율. 100% 가까우면 외국인이 더 못 삼. 높은 외인 보유 = 글로벌 자금 흐름에 민감." color="purple">
+        외인소진율
+      </ScreenSubRegion>
+      <ScreenSubRegion label="배당수익률 2.0%" file="StatisticItem.dividendYield" description="주당배당금 ÷ 주가 × 100%. 은행 이자와 비교하여 투자 매력을 판단. 3% 이상이면 '배당주'로 분류." color="purple">
+        배당수익률
+      </ScreenSubRegion>
+    </ScreenGroup>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="호가 탭 — StockOrderBookView"
+    file="OrderBook 모델"
+    description="'이 가격에 사겠다/팔겠다'는 주문을 모아 보여주는 실시간 화면. 매수(사려는 사람)와 매도(팔려는 사람)의 대기 주문을 시각화합니다."
+    link="/financial-glossary/order-book-and-trading"
+    color="red"
+  >
+    <ScreenSubRegion label="매도 호가 (Ask) — 빨간 영역" file="OrderBook.asks" description="이 가격에 '팔겠다'는 주문들. 위에서부터 비싼 순. 가장 아래가 '최우선 매도호가' = 지금 바로 살 수 있는 가장 싼 가격." color="red">
+      72,500 ▓▓▓▓▓ 1,200주 매도
+    </ScreenSubRegion>
+    <ScreenSubRegion label="매수 호가 (Bid) — 파란 영역" file="OrderBook.bids" description="이 가격에 '사겠다'는 주문들. 위에서부터 비싼 순. 가장 위가 '최우선 매수호가' = 지금 바로 팔 수 있는 가장 비싼 가격." color="blue">
+      72,300 ▓▓▓▓ 1,100주 매수
+    </ScreenSubRegion>
+    <ScreenSubRegion label="가로 막대 (잔량 시각화)" file="StockOrderBookView.maxQuantity" description="막대 길이 = 해당 가격 잔량 / 최대 잔량. 길면 대기 주문이 많다는 뜻. 매도 막대가 크면 하락 압력, 매수 막대가 크면 상승 압력." color="amber">
+      ▓▓▓▓▓▓ = 주문 대기량
+    </ScreenSubRegion>
+    <ScreenSubRegion label="총잔량 요약 (Summary)" file="summaryBar" description="총 매도 잔량 vs 총 매수 잔량의 비율. 매수 > 매도면 상승 가능성, 매도 > 매수면 하락 가능성의 참고 지표." color="amber">
+      매도 55% ████░░░░ 매수 45%
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="투자자 탭 — InvestorFlowDetailView"
+    file="InvestorFlow 모델"
+    description="외국인·기관·개인 3대 투자 주체의 매매 동향입니다. 누가 사고 누가 파는지를 추적하면 주가 방향을 예측하는 데 도움이 됩니다."
+    link="/financial-glossary/investor-flow"
+    color="amber"
+  >
+    <ScreenSubRegion label="외국인 +2,340 (순매수)" file="InvestorFlowDaily" description="외국인 매수량 - 매도량 = 순매수. 양(+)이면 외국인이 더 사들인 것 (긍정적). 외국인·기관은 대규모 자금으로 주가에 큰 영향." color="jade">
+      🟢 외국인 순매수
+    </ScreenSubRegion>
+    <ScreenSubRegion label="기관 -1,200 (순매도)" file="InvestorFlowDaily" description="기관투자자(증권사, 보험사, 연기금 등)의 매매. 기관 순매수가 지속되면 해당 종목에 대한 '스마트 머니'의 관심을 의미." color="blue">
+      🔵 기관 순매도
+    </ScreenSubRegion>
+    <ScreenSubRegion label="개인 -1,140 (순매도)" file="InvestorFlowDaily" description="일반 개인 투자자의 매매. 개인은 외국인·기관과 반대 방향으로 움직이는 경우가 많습니다 (역지표)." color="amber">
+      🟠 개인 순매도
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="의견 탭 — AnalystOpinionDetailView"
+    file="AnalystOpinion 모델"
+    description="증권사 애널리스트(전문 분석가)들의 이 종목에 대한 투자 추천 의견입니다."
+    link="/financial-glossary/news-and-research#투자의견-analyst-opinion"
+    color="jade"
+  >
+    <ScreenSubRegion label="매수 12 / 중립 3 / 매도 0" file="BrokerOpinion" description="매수(Buy)=사라, 중립(Hold)=보유만, 매도(Sell)=팔아라. 실제로 증권사들은 매도 의견을 거의 안 내므로, '중립'도 부정적 신호일 수 있습니다." color="jade">
+      BUY 12 &nbsp; HOLD 3 &nbsp; SELL 0
+    </ScreenSubRegion>
+    <ScreenSubRegion label="목표주가 85,000원" file="AnalystOpinion.targetPrice" description="애널리스트가 12개월 내 도달 예상 가격. 현재가(72,300)보다 높으면 상승 여력이 있다는 분석. 괴리율 = (85,000-72,300)/72,300 = +17.6%." color="amber">
+      목표가 85,000원 (현재가 대비 +17.6%)
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="배당 탭 — DividendDetailView"
+    file="DividendInfo 모델"
+    description="회사가 주주에게 이익의 일부를 현금으로 돌려주는 배당에 대한 정보입니다."
+    link="/financial-glossary/dividend"
+    color="amber"
+  >
+    <ScreenSubRegion label="배당수익률 2.0%" file="dividendYield" description="주당배당금 ÷ 주가 × 100%. 은행 예금 금리와 비교하여 투자 매력 판단. 3% 이상이면 '고배당주'." color="amber">
+      배당수익률
+    </ScreenSubRegion>
+    <ScreenSubRegion label="주당배당금 1,444원" file="dividendPerShare" description="1주당 받는 배당금. 100주 보유 시 144,400원 수령. 분기배당이면 4번에 나눠 지급." color="jade">
+      주당배당금
+    </ScreenSubRegion>
+    <ScreenSubRegion label="배당 추이 막대 그래프" file="dividendChart()" description="연도별 배당금 변화. 꾸준히 증가하면 '배당 성장주'(투자자 선호). 급감하면 실적 악화 신호." color="blue">
+      2024 ████ | 2023 ███ | 2022 ██
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="재무 탭 — FinancialDetailView"
+    file="FinancialDetailRecord 모델"
+    description="회사의 수익성, 안정성, 성장성을 보여주는 재무제표 요약입니다."
+    link="/financial-glossary/financial-statements"
+    color="jade"
+  >
+    <ScreenSubRegion label="총매출 302.2조" file="FinancialDetailRecord.revenue" description="회사가 제품/서비스를 팔아 벌어들인 총 금액. 매출 증가 = 사업 성장. '조' 단위로 표시 (1조 = 1,000,000,000,000원)." color="jade">
+      매출액 (Revenue)
+    </ScreenSubRegion>
+    <ScreenSubRegion label="영업이익 36.8조" file="FinancialDetailRecord.operatingProfit" description="매출 - 영업비용(원재료, 인건비 등). 본업에서 벌어들이는 이익. 영업이익률 = 영업이익/매출 × 100%." color="jade">
+      영업이익 (Operating Profit)
+    </ScreenSubRegion>
+    <ScreenSubRegion label="순이익 26.4조" file="FinancialDetailRecord.netIncome" description="영업이익에서 이자, 세금 등을 모두 반영한 최종 이익. EPS(주당순이익) = 순이익 ÷ 발행주식수." color="jade">
+      순이익 (Net Income)
+    </ScreenSubRegion>
+    <ScreenSubRegion label="부채비율 35.2%" file="FinancialDetailRecord.debtRatio" description="총부채 ÷ 총자본 × 100%. 100% 이하 = 안정, 200% 이상 = 주의. 업종마다 기준이 다릅니다 (은행은 부채비율이 원래 높음)." color="amber">
+      부채비율 (Debt Ratio)
+    </ScreenSubRegion>
+    <ScreenSubRegion label="분기 / 연간 (기간 전환)" file="FinancialTab" description="분기별(24.Q1, 24.Q2...) 또는 연간(2023, 2024...) 데이터 전환. 분기별은 최근 추세, 연간은 전체 흐름 파악에 유용합니다." color="blue">
+      [분기] &nbsp; 연간
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+</ScreenMap>
+
+---
+
+## 검색 화면
+
+<ScreenMap title="SearchView — 용어 맵">
+
+  <ScreenRegion
+    label="검색 탭 — KLSegmentedControl"
+    file="SearchTab"
+    description="종목 검색 카테고리입니다. 각 탭은 다른 종류의 투자 상품을 필터링합니다."
+    link="/financial-glossary/market-basics"
+    color="amber"
+  >
+    <ScreenSubRegion label="국내 (Domestic)" file="SearchTab.domestic" description="한국 거래소(KOSPI/KOSDAQ)에 상장된 종목. 원화(KRW)로 거래. 실시간 데이터." color="jade">
+      국내 = KOSPI + KOSDAQ
+    </ScreenSubRegion>
+    <ScreenSubRegion label="해외 (US)" file="SearchTab.us" description="미국 거래소(NASDAQ/NYSE/AMEX)에 상장된 종목. 달러(USD)로 거래. 15분 지연 데이터." color="blue">
+      해외 = NASDAQ + NYSE + AMEX
+    </ScreenSubRegion>
+    <ScreenSubRegion label="ETF" file="SearchTab.etf" description="상장지수펀드. 여러 종목을 묶어서 1주처럼 거래. 예: 'KODEX 삼성그룹' = 삼성 계열사 주식 묶음. 국내 ETF와 해외 ETF로 구분됩니다." color="amber">
+      ETF (상장지수펀드)
+    </ScreenSubRegion>
+    <ScreenSubRegion label="테마 (Theme)" file="SearchTab.theme" description="공통 특성을 가진 종목 그룹. '#반도체'에는 삼성전자, SK하이닉스 등이 포함. 특정 이슈 발생 시 관련 테마 종목들이 함께 움직입니다." color="amber">
+      테마 = 종목 그룹
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="종목 행 — SearchStockRow"
+    file="Stock 모델"
+    description="검색 결과의 개별 종목 행에 표시되는 정보입니다."
+    link="/financial-glossary/market-basics#주식stock이란"
+    color="jade"
+  >
+    <ScreenSubRegion label="소수점 (태그)" file="StockTagPill" description="분할주(Fractional Shares) 거래 가능 표시. 1주 전체를 사지 않아도 금액 단위로 소액 투자 가능. 예: 72,000원짜리 주식을 10,000원어치만 구매." color="blue">
+      소수점 = 분할 매수 가능
+    </ScreenSubRegion>
+    <ScreenSubRegion label="NXT (태그)" file="StockTagPill" description="이 종목이 NXT(넥스트레이드, 대체거래소)에서도 거래 가능하다는 표시. NXT에서는 정규장 외 시간(~20:00)에도 거래할 수 있습니다." color="blue">
+      NXT = 시간외 거래 가능
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+</ScreenMap>
+
+---
+
+## 빠른 참조 — 용어 ↔ 용어사전 페이지
+
+| 화면에서 보이는 것 | 의미 (한 줄 요약) | 상세 설명 |
+|---|---|---|
+| 🔴 빨간색 가격 | 전일 대비 상승 (한국 규칙) | [주식시장 기초](/financial-glossary/market-basics) |
+| 🔵 파란색 가격 | 전일 대비 하락 (한국 규칙) | [주식시장 기초](/financial-glossary/market-basics) |
+| PER, EPS, PBR, BPS, ROE | 주식이 비싼지 싼지 판단하는 지표 | [가격 및 밸류에이션](/financial-glossary/price-and-valuation) |
+| 호가, 매수, 매도, 잔량 | 사고팔겠다는 주문의 현황 | [호가 및 매매](/financial-glossary/order-book-and-trading) |
+| MA, BB, RSI, MACD | 차트 위의 기술적 분석 도구 | [기술적 분석](/financial-glossary/technical-analysis) |
+| 매출, 영업이익, 부채비율 | 회사의 재무 건전성 지표 | [재무제표](/financial-glossary/financial-statements) |
+| 외국인, 기관, 개인 | 3대 투자 주체의 매매 동향 | [투자자 동향](/financial-glossary/investor-flow) |
+| 배당수익률, 배당락일 | 주주에게 돌려주는 이익 관련 | [배당](/financial-glossary/dividend) |
+| KOSPI, KOSDAQ, NXT | 주식이 거래되는 시장 | [거래소 및 마켓](/financial-glossary/exchanges-and-venues) |
+| 매수/중립/매도, 목표주가 | 증권사 전문가 의견 | [뉴스 및 리서치](/financial-glossary/news-and-research) |

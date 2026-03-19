@@ -1,0 +1,891 @@
+# Interactive Screen Map 화면 코드맵
+
+<PageMeta status="live" layer="frontend" />
+
+Click on any section of the screen wireframes below to see the **source file**, **description**, and **link to detailed documentation**. Expand sub-regions to drill down into individual component layouts with exact source line references.
+
+---
+
+## Main Tab Navigation 메인 탭 네비게이션
+
+<ScreenMap title="MainTabView.swift (327 lines) → Features/MainTabView.swift">
+
+  <ScreenRegion
+    label="Content Area — Tab Switching"
+    file="Features/MainTabView.swift"
+    description="ZStack root (line 44). switch selectedTab (line 47) renders: case 0 → HomeView (line 49), case 1 → ProductsPlaceholderView, case 2 → AssetsPlaceholderView, case 3 → StocksPlaceholderView, case 4 → MenuPlaceholderView. Content layer sits behind the FloatingTabBar overlay."
+    link="/ios-source/feature-modules#maintabviewswift--root-navigation"
+    color="jade"
+  >
+    HomeView / ProductsPlaceholder / AssetsPlaceholder / ...
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Floating Tab Bar — FloatingTabBar (Expanded)"
+    file="Features/MainTabView.swift"
+    description="Private struct FloatingTabBar (line 114). Expanded state: VStack (line 131) → search bar Button (line 134) on first row, then HStack (line 157) with Home button + category pill + AI button. Collapse logic: isCollapsed computed from scrollOffset > 20 && !forceExpanded (line 39)."
+    link="/ios-source/feature-modules#maintabviewswift--root-navigation"
+    color="purple"
+  >
+    🔍 종목명, 코드 검색...
+    <ScreenSubRegion label="Search Bar Button (line 134)" file="Features/MainTabView.swift" description="Full-width Button (line 134) with HStack (line 135): magnifyingglass icon + placeholder text '종목명, 코드 검색...'. Calls onSearchTap closure → sets showSearch = true. Only visible when !isCollapsed (line 133)." color="jade">
+      🔍 종목명, 코드 검색...
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Home Button (line 197)" file="Features/MainTabView.swift" description="Circular Button (line 197) with ZStack (line 203): house.fill Image (line 211). When selectedTab == 0, shows jade highlight ring via Circle().stroke (line 207) with matchedGeometryEffect (line 208). Only visible when !isCollapsed." color="jade">
+      🏠
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Category Pill — 4 Tabs (line 222)" file="Features/MainTabView.swift" description="HStack (line 222) inside Capsule with ForEach(tabItems) (line 223) rendering TabBarButton structs. tabItems computed property (line 263) returns: (상품, 1), (자산, 2), (종목, 3), (메뉴, 4). Sliding indicator uses matchedGeometryEffect id 'selectedTab' (line 309)." color="blue">
+      상품 &nbsp; 자산 &nbsp; [종목] &nbsp; 메뉴
+    </ScreenSubRegion>
+    <ScreenSubRegion label="AI Assistant Button (line 241)" file="Features/MainTabView.swift" description="Button (line 241) with Image sparkle icon (line 242). Gradient circle background (jade to teal). Always visible in both expanded and collapsed states. Placeholder for future AI features." color="amber">
+      ✦
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Floating Tab Bar — FloatingTabBar (Collapsed)"
+    file="Features/MainTabView.swift"
+    description="When isCollapsed == true (line 158): HStack (line 157) shows three-dot Button (line 162) that sets forceExpanded=true, inline search pill Button (line 175) with HStack (line 176) containing magnifyingglass + '검색...' text, and AI assistant Button (line 241)."
+    link="/ios-source/feature-modules#maintabviewswift--root-navigation"
+    color="purple"
+  >
+    <ScreenSubRegion label="Three-dot Menu Button (line 162)" file="Features/MainTabView.swift" description="Button (line 162) with Image(systemName: 'ellipsis') (line 165). Action: forceExpanded = true — forces tab bar back to expanded state." color="purple">
+      ⋯
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Inline Search Pill (line 175)" file="Features/MainTabView.swift" description="Button (line 175) with HStack (line 176): magnifyingglass Image (line 177) + '검색...' Text. Capsule background. Calls onSearchTap → showSearch = true." color="jade">
+      🔍 검색...
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Search Overlay — .fullScreenCover (line 77)"
+    file="Features/Search/SearchView.swift"
+    description=".fullScreenCover(isPresented: $showSearch) at line 77 presents SearchView. Dismissed via .navigateToHome notification handler at line 82 (showSearch = false, selectedTab = 0) or SearchView's own dismiss button."
+    link="/ios-source/feature-modules#search-module"
+    color="blue"
+  >
+    → SearchView (full screen cover)
+  </ScreenRegion>
+
+</ScreenMap>
+
+---
+
+## Home Screen 홈 화면
+
+<ScreenMap title="HomeView.swift (142 lines) → Features/Home/HomeView.swift">
+
+  <ScreenRegion
+    label="Navigation Bar — HomeHeaderView"
+    file="Features/Home/Components/HomeHeaderView.swift (52 lines)"
+    description="HomeHeaderView() called at HomeView line 40. Struct declared at line 9. Body (line 10): outer HStack (line 11) containing brand section and action buttons."
+    link="/ios-source/feature-modules#home-module"
+    color="jade"
+  >
+    <ScreenSubRegion label="BAROMarkView + Title (line 13)" file="Features/Home/Components/HomeHeaderView.swift" description="Inner HStack(spacing: BAROSpacing.sm) at line 13: BAROMarkView() (line 15) renders Canvas-drawn brand logo (BAROMarkView.swift line 26, 90 lines). Text('BARO') at line 17 with .klTitle font." color="jade">
+      🌿 BARO
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Action Buttons (line 24)" file="Features/Home/Components/HomeHeaderView.swift" description="HStack(spacing: BAROSpacing.xs) at line 24: notification bell Button (line 26, systemName: 'bell') + profile Button (line 35, systemName: 'person.circle'). Both 44pt frames." color="blue">
+      🔔 &nbsp; 👤
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Banner Carousel — BannerCarouselView"
+    file="Features/Home/Components/BannerCarouselView.swift (141 lines)"
+    description="Conditional at HomeView line 43: if viewModel.banners.isEmpty → BannerSkeletonView(), else → BannerCarouselView(banners:). Struct at line 15. Body (line 28): VStack(spacing: 0) at line 29."
+    link="/ios-source/feature-modules#home-components-18-files"
+    color="amber"
+  >
+    <ScreenSubRegion label="TabView Pager (line 31)" file="Features/Home/Components/BannerCarouselView.swift" description="TabView(selection: $currentPage) at line 31 with .tabViewStyle(.page(indexDisplayMode: .never)) at line 37. ForEach(Array(banners.enumerated())) at line 32 renders BannerCardView (private struct, line 91) for each banner." color="amber">
+      📊 AI 시장 인사이트
+    </ScreenSubRegion>
+    <ScreenSubRegion label="BannerCardView (line 91)" file="Features/Home/Components/BannerCarouselView.swift" description="Private struct at line 91. Body (line 95): ZStack(alignment: .leading) at line 96 → RoundedRectangle at line 98 with LinearGradient (line 100), overlay HStack (line 107) with title VStack (line 109) and emoji icon (line 124)." color="amber">
+      gradient card + 📊
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Page Dots + Play/Pause (line 43)" file="Features/Home/Components/BannerCarouselView.swift" description="HStack at line 43. ForEach(0..<banners.count) at line 44 renders dot Circles: active = 8pt filled jade, inactive = 6pt gray. Play/pause Button at line 52 toggles isPlaying (line 23). Timer auto-scroll via .onReceive(timer) at line 76, interval from Timer.publish (line 26)." color="blue">
+      ● ○ ○ &nbsp; ▶
+    </ScreenSubRegion>
+    <ScreenSubRegion label="BannerSkeletonView" file="Features/Home/Components/SkeletonViews.swift" description="Struct at SkeletonViews.swift line 9. VStack(spacing: 0) at line 11: RoundedRectangle placeholder (line 13) with .shimmer() modifier (line 17). Dot placeholders ForEach(0..<3) at line 20." color="purple">
+      ░░░░░░░░░░░░░░░░
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Date & Market Status — DateDisplayView"
+    file="Features/Home/Components/DateDisplayView.swift (101 lines)"
+    description="Called at HomeView line 50. Struct at line 14. Body (line 18): HStack(spacing: BAROSpacing.sm) at line 19. Private status property from MarketSessionStatus.current (line 16)."
+    link="/ios-source/feature-modules#home-components-18-files"
+    color="blue"
+  >
+    <ScreenSubRegion label="Date Label (line 21)" file="Features/Home/Components/DateDisplayView.swift" description="Text at line 21 showing Korean-formatted date via Date+Korean.swift extension. Format: '2025년 3월 14일 금요일'. Font: .klCaption, weight: .medium, color: Color.klTextSecondary." color="blue">
+      2025년 3월 14일 금요일
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Market Session Badge (line 26)" file="Features/Home/Components/DateDisplayView.swift" description="Inner HStack at line 26. If status.isActive: pulsing dot Circle at line 28 with PulsingDotModifier (private struct, line 69) using @State isPulsing with .scaleEffect/.opacity animation (line 77). Status label Text at line 35. Capsule background (line 41)." color="jade">
+      🟢 거래중
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Countdown Text (line 47)" file="Features/Home/Components/DateDisplayView.swift" description="Conditional at line 47: if let countdown = status.countdown, shows countdown Text with .klCaption font and .klTextTertiary color." color="blue">
+      장 마감까지 2시간 30분
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Market Indices — MarketOverviewRowView"
+    file="Features/Home/Components/MarketOverviewRowView.swift (114 lines)"
+    description="Conditional at HomeView line 53: if loading → MarketOverviewRowSkeletonView(), else → MarketOverviewRowView(). Struct at line 15. Body (line 39): horizontal ScrollView (line 40) → HStack(spacing: BAROSpacing.smd) at line 41."
+    link="/ios-source/feature-modules#home-components-18-files"
+    color="jade"
+  >
+    <ScreenSubRegion label="MarketIndexCardView (line 48)" file="Features/Home/Components/MarketIndexCardView.swift (133 lines)" description="ForEach(indices) at MarketOverviewRowView line 48. Struct at MarketIndexCardView.swift line 10. Body (line 24): VStack (line 25) with flag+name HStack (line 27), index value Text (line 37), change Text (line 45), market status conditional (line 52). Korean indices show PulsingDotModifier (line 93)." color="jade">
+      🇰🇷 코스피 2,723 +0.46%
+    </ScreenSubRegion>
+    <ScreenSubRegion label="CurrencyRateCardView (line 60)" file="Features/Home/Components/CurrencyRatesRowView.swift (63 lines)" description="ForEach(currencyRates) at MarketOverviewRowView line 60. Struct at CurrencyRatesRowView.swift line 13. Body (line 17): VStack (line 18) with flag+code HStack (line 20), rate Text (line 29), change Text (line 34), unit label Text (line 41)." color="blue">
+      🇺🇸 USD 1,481.60 +1.28%
+    </ScreenSubRegion>
+    <ScreenSubRegion label="More Button → MarketOverviewDetailView (line 68)" file="Features/Home/Components/MarketOverviewRowView.swift" description="Conditional chevron button at line 68 (if hasData). Tapping sets showDetail = true. .fullScreenCover(isPresented: $showDetail) at line 90 presents MarketOverviewDetailView() with indices, rates, and repository." color="amber">
+      ▸ 더보기
+    </ScreenSubRegion>
+    <ScreenSubRegion label="MarketOverviewRowSkeletonView" file="Features/Home/Components/SkeletonViews.swift" description="Struct at SkeletonViews.swift line 106. Body (line 107): ScrollView (line 108) → HStack (line 109) → ForEach(0..<4) at line 110 renders MarketIndexCardSkeletonView (line 37). .shimmer() at line 63." color="purple">
+      ░░ ░░░ ░░░
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Stock List — StockListView"
+    file="Features/Home/Components/StockListView.swift (173 lines)"
+    description="Conditional at HomeView line 66: if stocks.isEmpty → StockListSkeletonView(), else → StockListView(). Struct at line 15. Body (line 47): VStack(spacing: BAROSpacing.md) at line 48 with sectionHeader (line 90) and stockListCard (line 104)."
+    link="/ios-source/feature-modules#home-components-18-files"
+    color="jade"
+  >
+    <ScreenSubRegion label="Section Header (line 90)" file="Features/Home/Components/StockListView.swift" description="Private computed var sectionHeader (line 90): HStack with section title Text (line 92) '인기 종목' and trailing elements." color="jade">
+      인기 종목
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Exchange Selector Button (line 109)" file="Features/Home/Components/StockListView.swift" description="Button at line 109 inside card header. HStack showing selectedExchange flag emoji + name + chevron.down. Tapping sets showStockDetail = true → .fullScreenCover at line 62 presents StockDetailView with exchange/filter options." color="amber">
+      🇰🇷 KOSPI ▾
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Filter Menu Button (line 127)" file="Features/Home/Components/StockListView.swift" description="Button at line 127 with three-dot icon (ellipsis). Tapping sets showFilterSheet = true → .sheet at line 56 presents StockFilterSheet." color="amber">
+      ⋯
+    </ScreenSubRegion>
+    <ScreenSubRegion label="StockRowView (line 139)" file="Features/Home/Components/StockRowView.swift (134 lines)" description="ForEach(Array(stocks.enumerated())) at StockListView line 139. StockRowView struct at StockRowView.swift line 21. Body (line 44): HStack(spacing: 0) at line 45. Components: rank Text (line 47), CompanyLogoView (line 54), name+subtitle VStack (line 58), price+change VStack (line 74)." color="jade">
+      1 &nbsp; 🟦 삼성전자 005930 &nbsp; 72,300 -0.28%
+    </ScreenSubRegion>
+    <ScreenGroup label="StockRowView internals">
+      <ScreenSubRegion label="Rank Number (line 47)" file="Features/Home/Components/StockRowView.swift" description="Text at line 47 showing stock rank. Font: .klCaption, weight: .bold, color: .klTextTertiary. Fixed width frame." color="jade">
+        1
+      </ScreenSubRegion>
+      <ScreenSubRegion label="CompanyLogoView (line 54)" file="Components/CompanyLogoView.swift (82 lines)" description="Called at StockRowView line 54. Struct at CompanyLogoView.swift line 17. Body (line 33): ZStack (line 34) → Circle fill (line 36) + switch style (line 41): .text → 2-char Text (line 43), .symbol → SF Symbol Image (line 54). Background color from backgroundColor computed property (line 64)." color="purple">
+        🟦
+      </ScreenSubRegion>
+      <ScreenSubRegion label="Price with Live Animation (line 75)" file="Features/Home/Components/StockRowView.swift" description="Price Text at line 75 showing displayPrice (computed at line 34, uses livePrice?.price ?? stock.price). Modifier: .contentTransition(.numericText()) at line 77 + .animation(.easeInOut(duration: 0.3)) at line 78 for smooth live updates." color="jade">
+        72,300
+      </ScreenSubRegion>
+      <ScreenSubRegion label="PriceChangeLabel (line 81)" file="Components/PriceChangeLabel.swift (64 lines)" description="Called at StockRowView line 81. Struct at PriceChangeLabel.swift line 12. Body (line 49): single Text (line 50) showing formatted change + percent. Color computed (line 39): isPositive → Color.klPriceUp (red), else → Color.klPriceDown (blue). Korean convention." color="red">
+        -200 (-0.28%)
+      </ScreenSubRegion>
+    </ScreenGroup>
+    <ScreenSubRegion label="StockFilterSheet (line 56)" file="Features/Home/Components/StockFilterSheet.swift (123 lines)" description=".sheet(isPresented: $showFilterSheet) at StockListView line 56. Struct at StockFilterSheet.swift line 16. Body (line 26): exchange ScrollView with ForEach(StockExchange.allCases) at line 48, sort criteria LazyVGrid with ForEach(StockFilter.allCases) at line 87. .presentationDetents([.height(320)]) at line 109." color="amber">
+      거래소: KOSPI | 정렬: 시가총액
+    </ScreenSubRegion>
+    <ScreenSubRegion label="ExchangeSelectionSheet (line 62)" file="Features/Home/Components/ExchangeSelectionSheet.swift (109 lines)" description=".fullScreenCover at StockListView line 62 presents StockDetailView. Exchange sheet separately at ExchangeSelectionSheet.swift line 15. ForEach(StockExchange.allCases) at line 40 renders rows: flag ZStack (line 45), name+status VStack (line 56), radio button ZStack (line 68). .presentationDetents([.medium]) at line 98." color="blue">
+      🇰🇷 KOSPI 🟢 | 🇺🇸 NASDAQ ⚪
+    </ScreenSubRegion>
+    <ScreenSubRegion label="KLMoreButton → StockDetailView (line 152)" file="Features/Home/Components/StockListView.swift" description="KLMoreButton at line 152: action sets showStockDetail = true. .fullScreenCover at line 62 presents StockDetailView." color="jade">
+      더보기 →
+    </ScreenSubRegion>
+    <ScreenSubRegion label="StockListSkeletonView" file="Features/Home/Components/SkeletonViews.swift" description="Struct at SkeletonViews.swift line 162. Body (line 163): VStack (line 164) with header skeleton (line 166), ForEach(0..<5) at line 182 → StockRowSkeletonView (private, line 125), 'more' placeholder (line 191). .shimmer() at line 201." color="purple">
+      ░░ ⚪ ░░░░ &nbsp; ░░░
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="AI Market Themes — AIMarketIssuesView"
+    file="Features/Home/Components/AIMarketIssuesView.swift (125 lines)"
+    description="Conditional at HomeView line 89: only shown if !viewModel.marketThemes.isEmpty. Struct at line 15. Body (line 30): VStack(spacing: BAROSpacing.md) at line 31."
+    link="/ios-source/feature-modules#home-components-18-files"
+    color="amber"
+  >
+    <ScreenSubRegion label="Section Header + Timestamp (line 33)" file="Features/Home/Components/AIMarketIssuesView.swift" description="HStack at line 33 with '테마 트렌드' title Text and timestamp. KLMoreButton action at line 63 sets showDetail = true." color="amber">
+      테마 트렌드 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 더보기 →
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Theme Ranking List (line 47)" file="Features/Home/Components/AIMarketIssuesView.swift" description="VStack(spacing: 0) card at line 47. ForEach(Array(rankedThemes.enumerated())) at line 48. Each row calls themeRow(rank:theme:) (line 79): HStack(spacing: BAROSpacing.md) at line 80 with rank Text (line 82), theme name+description VStack (line 88), change % Text (line 102)." color="amber">
+      1 #반도체 +2.4% | 2 #AI +1.8%
+    </ScreenSubRegion>
+    <ScreenSubRegion label="→ ThemeDetailView (line 63)" file="Features/Home/Components/AIMarketIssuesView.swift" description=".fullScreenCover(isPresented: $showDetail) at line 63 presents ThemeDetailView with themes and repository." color="blue">
+      → ThemeDetailView
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="News Feed — NewsSectionView"
+    file="Features/Home/Components/NewsSectionView.swift (315 lines)"
+    description="Conditional at HomeView line 97: if news.isEmpty → NewsSectionSkeletonView(), else → NewsSectionView(). Struct at line 18. Body (line 59): VStack(spacing: BAROSpacing.md) at line 60."
+    link="/ios-source/feature-modules#home-components-18-files"
+    color="red"
+  >
+    <ScreenSubRegion label="Section Header (line 62)" file="Features/Home/Components/NewsSectionView.swift" description="HStack at line 62 with '경제소식' title Text. KLMoreButton at line 161 sets showDetail = true." color="red">
+      경제소식 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 더보기 →
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Content Type Tabs (line 72)" file="Features/Home/Components/NewsSectionView.swift" description="ScrollView(.horizontal) at line 72. ForEach(NewsContentType.allCases) at line 74 renders capsule Buttons (line 76). Selected: jade background. .animation(.easeInOut(duration: 0.2)) at line 76 on selection change." color="red">
+      [전체] &nbsp; 뉴스 &nbsp; 리포트 &nbsp; 공시
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Region Selector + Filter (line 104)" file="Features/Home/Components/NewsSectionView.swift" description="Card header HStack: region selector Button at line 104 (flag + selectedRegion name + chevron), active filter badge HStack at line 120, filter icon Button at line 131 → sets showFilterSheet = true." color="amber">
+      🇰🇷 국내 ▾ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 🔧
+    </ScreenSubRegion>
+    <ScreenSubRegion label="newsRow() (line 190)" file="Features/Home/Components/NewsSectionView.swift" description="Private func newsRow at line 190. ForEach at line 151 shows prefix(5). Row structure: VStack (line 191) → HStack(spacing: BAROSpacing.md) at line 192. Accent bar RoundedRectangle with LinearGradient (line 194). Title Text at line 206 (2-line limit). Content type badge (line 213). Source + time metadata HStack (line 211)." color="red">
+      ▌ 서울 강남 집값... &nbsp;&nbsp;&nbsp; 1시간 전
+    </ScreenSubRegion>
+    <ScreenSubRegion label="AI Summary Toggle (line 238)" file="Features/Home/Components/NewsSectionView.swift" description="Conditional at line 238: if article.aiSummary != nil → Button at line 238 toggles expandedSummaryId. Expanded summary section at line 264 with .transition(.asymmetric(insertion: .opacity, removal: .opacity)) for smooth animation." color="amber">
+      ✦ AI 요약 ▾
+    </ScreenSubRegion>
+    <ScreenSubRegion label="NewsFilterSheet (line 171)" file="Features/Home/Components/NewsFilterSheet.swift (119 lines)" description=".sheet(isPresented: $showFilterSheet) at NewsSectionView line 171. Struct at NewsFilterSheet.swift line 16. Region selection ForEach(NewsRegion.allCases) at line 48. Category selection LazyVGrid ForEach(NewsCategory.allCases) at line 83. .presentationDetents([.height(320)]) at line 105." color="amber">
+      지역: 국내 | 카테고리: 경제
+    </ScreenSubRegion>
+    <ScreenSubRegion label="→ NewsDetailView (line 177)" file="Features/Home/Components/NewsSectionView.swift" description=".fullScreenCover(isPresented: $showDetail) at line 177 presents NewsDetailView with articles and repository." color="blue">
+      → NewsDetailView
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Floating Tab Bar — MainTabView"
+    file="Features/MainTabView.swift"
+    description="FloatingTabBar overlay at MainTabView ZStack (line 72). See Main Tab Navigation section above for full component breakdown."
+    link="/ios-source/feature-modules#maintabviewswift--root-navigation"
+    color="purple"
+  >
+    🏠 홈 &nbsp; 📦 상품 &nbsp; 💰 자산 &nbsp; 📈 종목 &nbsp; ☰ 메뉴
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Bottom Padding"
+    file="Features/Home/HomeView.swift"
+    description="Spacer().frame(height: 120) at HomeView line 107. Provides clearance so content is not hidden behind the floating tab bar."
+    color="blue"
+  >
+    &nbsp;
+  </ScreenRegion>
+
+</ScreenMap>
+
+---
+
+## Stock Detail Screen 종목 상세 화면
+
+<ScreenMap title="StockDetailPageView.swift (389 lines) → Features/StockDetailPage/">
+
+  <ScreenRegion
+    label="Navigation Bar — KLDetailNavBar (line 29)"
+    file="Components/KLDetailNavBar.swift (87 lines)"
+    description="KLDetailNavBar called at StockDetailPageView line 29. Struct at KLDetailNavBar.swift line 25 (generic over Trailing view). Body (line 38): HStack (line 39) with dismiss Button (line 41), title Text (line 52), trailing view."
+    link="/ios-source/reusable-components#kldetailnavbarswift"
+    color="purple"
+  >
+    <ScreenSubRegion label="Dismiss Button (line 41)" file="Components/KLDetailNavBar.swift" description="Button at line 41 calling onDismiss closure. Image(systemName: icon) at line 42 — default icon is 'xmark' (line 30). 44pt frame." color="purple">
+      ✕
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Title (line 52)" file="Components/KLDetailNavBar.swift" description="Text(title) at line 52 — stock name string. Font: .klSubhead, weight: .bold. Centered between spacers (line 49, 56)." color="purple">
+      삼성전자 005930
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Trailing: Home + Favorite (line 30)" file="Features/StockDetailPage/StockDetailPageView.swift" description="@ViewBuilder trailing at StockDetailPageView line 30: HStack(spacing: 0) at line 30. Home Button (line 32) posts .navigateToHome notification. Favorite toggle Button (line 44) toggles viewModel.isFavorite with star.fill/star icon." color="amber">
+      🏠 &nbsp; ⭐
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Price Status Line (line 268)"
+    file="Features/StockDetailPage/StockDetailPageView.swift"
+    description="Private computed var priceStatusLine at line 268. HStack(spacing: BAROSpacing.xsm) at line 269: current price Text, change amount Text, change percent Text. Uses PriceChangeLabel colors. Thin bar below nav bar."
+    link="/ios-source/feature-modules#stock-detail-components-17-files"
+    color="jade"
+  >
+    ₩72,300 &nbsp; -200 &nbsp; -0.28%
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Price Header — StockPriceHeaderView (line 64)"
+    file="Features/StockDetailPage/Components/StockPriceHeaderView.swift (211 lines)"
+    description="Called at StockDetailPageView line 64. Struct at line 16. Body (line 43): VStack(alignment: .leading, spacing: BAROSpacing.sm) at line 44."
+    link="/ios-source/feature-modules#stock-detail-components-17-files"
+    color="jade"
+  >
+    <ScreenSubRegion label="Stock Name + Code Row (line 46)" file="Features/StockDetailPage/Components/StockPriceHeaderView.swift" description="HStack(spacing: BAROSpacing.xsm) at line 46 with stock name and code. If stock supports NXT: venue pill Button at line 61." color="jade">
+      삼성전자 005930
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Venue Selector Pill (line 61)" file="Features/StockDetailPage/Components/StockPriceHeaderView.swift" description="Button at line 61 (conditional on NXT support). HStack(spacing: BAROSpacing.xxs) at line 64 showing selected venue name + chevron. Tapping sets showVenueSheet = true. MarketVenueSheet (private struct, line 149): ForEach(MarketVenue.allCases) at line 167 with radio button selection." color="blue">
+      [통합] ▾ → MarketVenueSheet
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Large Price Display (line 103)" file="Features/StockDetailPage/Components/StockPriceHeaderView.swift" description="Text(displayPrice.formattedWon) at line 103. Font: .klLargeTitle, weight: .black. Shows scrubbed price during chart interaction or live price otherwise. Color from priceColor computed property (line 39)." color="jade">
+      ₩72,300
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Change Values (line 110)" file="Features/StockDetailPage/Components/StockPriceHeaderView.swift" description="HStack(spacing: BAROSpacing.xsm) at line 110 with PriceChangeLabel showing absolute change and percentage. Red for up, blue for down (Korean convention)." color="red">
+      -200 (-0.28%) 🔴
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Scrubbing Date (line 96)" file="Features/StockDetailPage/Components/StockPriceHeaderView.swift" description="Conditional at line 96: if isScrubbing, let date = scrubbingDate → shows formatted date Text using DateFormatter (static, line 135). Only visible during chart touch interaction." color="blue">
+      2025.03.14
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Price Chart — StockChartView (line 78)"
+    file="Features/StockDetailPage/Components/StockChartView.swift (1,376 lines)"
+    description="chartView computed property at StockDetailPageView line 178, called at line 78. Struct at StockChartView.swift line 22. Body (line 138): GeometryReader (line 145) → ZStack(alignment: .topLeading) at line 150. Canvas-based rendering."
+    link="/ios-source/feature-modules#stock-detail-components-17-files"
+    color="amber"
+  >
+    <ScreenSubRegion label="Static Chart Layer (line 264)" file="Features/StockDetailPage/Components/StockChartView.swift" description="Private func staticChartLayer at line 264. Renders: gridLines (line 242), then switches on chartType: candlestickCanvas (line 336), ohlcBarCanvas (line 386), stepLineCanvas (line 424), multiColorLineCanvas (line 491). Each renders on SwiftUI Canvas with GraphicsContext." color="amber">
+      📈 candle/line/area chart
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Overlay Indicators" file="Features/StockDetailPage/Components/StockChartView.swift" description="Overlay outputs (MA, Bollinger, Ichimoku) drawn in Canvas alongside price data. Data from overlayOutputs property (line 46). Computed via IndicatorComputation.swift (90KB+)." color="blue">
+      MA(20) ── BB ── Ichimoku cloud
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Pinch-to-Zoom Gesture (line 165)" file="Features/StockDetailPage/Components/StockChartView.swift" description=".gesture(MagnifyGesture()...) at line 165. Updates chartSettings.zoomLevel. @State isPinching (line 51) tracks gesture state. Double-tap reset at .onTapGesture(count: 2) (line 222)." color="purple">
+      pinch → zoom in/out
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Scrubbing + Pan Gesture (line 180)" file="Features/StockDetailPage/Components/StockChartView.swift" description=".simultaneousGesture(DragGesture(minimumDistance: 0)...) at line 180. Short press = scrubbing (updates scrubbingPrice/scrubbingDate bindings). Long horizontal drag = pan (updates chartSettings.panOffset). panStartOffset @State at line 53." color="purple">
+      drag → scrub price | pan chart
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Current Price Line + Badge" file="Features/StockDetailPage/Components/StockChartView.swift" description="currentPriceLine rendered at ZStack line 155: dashed horizontal line at current price Y position. currentPriceBadge at line 156: small colored capsule showing current price value. badgeColor computed (line 129): jade if positive, red if negative." color="jade">
+      ── 72,300 ──
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Sub-Indicators — SubIndicatorChartView (line 82)"
+    file="Features/StockDetailPage/Components/SubIndicatorChartView.swift (386 lines)"
+    description="Conditional at StockDetailPageView line 82: if !viewModel.subIndicatorOutputs.isEmpty → VStack with ForEach (line 84) renders SubIndicatorChartView for each output. Struct at line 24. Body (line 86): GeometryReader (line 87) → ZStack (line 91)."
+    link="/ios-source/feature-modules#stock-detail-components-17-files"
+    color="blue"
+  >
+    <ScreenSubRegion label="Indicator Label (line 98)" file="Features/StockDetailPage/Components/SubIndicatorChartView.swift" description="Text(output.name) at line 98. Shows indicator name (Volume, RSI, MACD, etc.). Font: .klCaption2, color: .klTextTertiary. Positioned at top-left of panel." color="blue">
+      Volume / RSI(14) / MACD
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Canvas Rendering (line 108)" file="Features/StockDetailPage/Components/SubIndicatorChartView.swift" description="Canvas at line 108 renders series via drawSeries (line 148). Draws: lines (drawLine, line 179), bands (drawBand, line 203), clouds (drawCloud, line 241), dots (drawDots, line 273), histograms (drawHistogram, line 285), horizontal guide lines (drawHorizontalLines, line 311), volume bars (drawVolumeBars, line 361)." color="amber">
+      ▇▇▅▇▃▅▇▅▃▇▅▇▃▅▇
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Zoom Controls + Indicator Pills (line 95)"
+    file="Features/StockDetailPage/StockDetailPageView.swift"
+    description="HStack(spacing: BAROSpacing.sm) at line 95. Contains IndicatorPillsView (line 99) and zoomControls computed property (line 108, defined at line 208)."
+    link="/ios-source/feature-modules#stock-detail-components-17-files"
+    color="amber"
+  >
+    <ScreenSubRegion label="IndicatorPillsView (line 99)" file="Features/StockDetailPage/Components/IndicatorPillsView.swift (65 lines)" description="Called at line 99. Struct at IndicatorPillsView.swift line 15. Body (line 21): ScrollView(.horizontal) at line 22 → HStack(spacing: BAROSpacing.xs) at line 23. ForEach(sortedOverlays) at line 24 and ForEach(resolvedSubIndicators) at line 27. Each pill rendered by pill() func (line 37): Text with capsule background." color="amber">
+      MA(20) ✕ &nbsp; BB ✕ &nbsp; RSI ✕
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Zoom Buttons (line 208)" file="Features/StockDetailPage/StockDetailPageView.swift" description="Private computed var zoomControls at line 208. HStack(spacing: BAROSpacing.xs) at line 212. Zoom out Button (line 214, minus.magnifyingglass), zoom in Button (line 233, plus.magnifyingglass). Conditional reset Button (line 249, arrow.counterclockwise) only if isZoomed." color="blue">
+      🔍- &nbsp; 🔍+ &nbsp; ↺
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Period Selector — StockDetailPeriodTabsView (line 114)"
+    file="Features/StockDetailPage/Components/StockDetailPeriodTabsView.swift (62 lines)"
+    description="Called at StockDetailPageView line 114. Struct at line 14. Body (line 25): HStack(spacing: 0) at line 26."
+    link="/ios-source/feature-modules#stock-detail-components-17-files"
+    color="blue"
+  >
+    <ScreenSubRegion label="Period Tab Buttons (line 27)" file="Features/StockDetailPage/Components/StockDetailPeriodTabsView.swift" description="ForEach(ChartPeriod.allCases) at line 27 → Button at line 28. Selected: jade background capsule. Periods: 1일, 1개월, 3개월, 1년, 3년. Binding to selectedPeriod (line 16). onChange triggers chart data refetch." color="blue">
+      [1일] &nbsp; 1개월 &nbsp; 3개월 &nbsp; 1년 &nbsp; 3년
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Settings Gear Button (line 43)" file="Features/StockDetailPage/Components/StockDetailPeriodTabsView.swift" description="Button at line 43 with Image(systemName: 'gearshape') at line 46. Sets showChartSettings = true. .sheet(isPresented: $showChartSettings) at line 55 presents ChartSettingsSheet." color="amber">
+      ⚙️ → ChartSettingsSheet
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Content Tabs — KLSegmentedControl (line 139)"
+    file="Features/StockDetailPage/StockDetailPageView.swift"
+    description="LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) at line 134. Section header: KLSegmentedControl at line 139 with 8 tabs. Tab enum: ContentTab with cases info, orderBook, dailyPrice, investorFlow, analystOpinion, reports, dividend, financial. .onChange at line 155 scrolls to 'contentTabs' id."
+    link="/ios-source/feature-modules#stockdetailpageviewswift"
+    color="jade"
+  >
+    종목정보 | 호가 | 일별시세 | 투자자 | 의견 | 리포트 | 배당 | 재무
+  </ScreenRegion>
+
+  <ScreenGroup label="Content Tab Views — contentForSelectedTab (line 303)">
+
+    <ScreenSubRegion label="Tab 0: StockInfoGridView — 종목정보" file="Features/StockDetailPage/Components/StockInfoGridView.swift (168 lines)" description="Struct at line 16. Body (line 27): VStack (line 28) with headerRow (line 70) → info Button (line 74) opens StockInfoExplanationSheet (.sheet at line 52), edit Button (line 82) opens StockInfoEditSheet (.sheet at line 60). Grid: ForEach(stride) at line 36 renders 2-column layout via infoRow (line 101) → infoCell (line 120)." color="jade">
+      전일 72,500 | 시가 72,400 | PER 12.5x
+    </ScreenSubRegion>
+
+    <ScreenSubRegion label="Tab 1: StockOrderBookView — 호가" file="Features/StockDetailPage/Components/StockOrderBookView.swift (256 lines)" description="Struct at line 20. Body (line 33): VStack (line 34) with header (line 66), ForEach(orderBook.asks) at line 41 → askRow (line 92): red bars with RoundedRectangle at line 105. currentPriceRow (line 172). ForEach(orderBook.bids) at line 52 → bidRow (line 133): blue bars. summaryBar (line 205): distribution HStack at line 221." color="red">
+      72,500 ▓▓▓▓▓ ASK | 72,300 ▓▓▓▓ BID
+    </ScreenSubRegion>
+
+    <ScreenSubRegion label="Tab 2: StockDailyPriceView — 일별시세" file="Features/StockDetailPage/Components/StockDailyPriceView.swift (190 lines)" description="Struct at line 9. Body (line 57): HStack (line 58) with fixed left date column VStack (line 60) and horizontal ScrollView (line 94). Sortable headers via toggleSort (line 154). ForEach at line 80 and 107 render date + OHLCV values." color="blue">
+      03/14 72,300 -200 -0.28% 12.3M
+    </ScreenSubRegion>
+
+    <ScreenSubRegion label="Tab 3: InvestorFlowTabView — 투자자" file="Features/StockDetailPage/Components/StockDetailSectionsView.swift" description="Nested struct at StockDetailSectionsView.swift line 23. Body (line 35): VStack (line 36). Legend dots: legendDot (line 72) for 기관/외국인/개인. Header (line 90). ScrollView → LazyVStack (line 61) → ForEach(dailyRecords) at line 62 → dataRow (line 115)." color="amber">
+      기관 +2,340 | 외국인 -1,200
+    </ScreenSubRegion>
+
+    <ScreenSubRegion label="Tab 4: AnalystOpinionTabView — 의견" file="Features/StockDetailPage/Components/StockDetailSectionsView.swift" description="Nested struct at line 150. Body (line 161): consensus summary HStack (line 164), opinion pills ForEach (line 167), distribution bar GeometryReader (line 188) → HStack(spacing: 2) segments at line 196. ScrollView → LazyVStack at line 217." color="jade">
+      목표가 85,000 | BUY 12 HOLD 3
+    </ScreenSubRegion>
+
+    <ScreenSubRegion label="Tab 5: ReportsTabView — 리포트" file="Features/StockDetailPage/Components/StockDetailSectionsView.swift" description="Nested struct at line 283. Body (line 291): VStack (line 292) with content type filter HStack (line 306), ForEach filter Buttons (line 313). ScrollView → LazyVStack → ForEach(filteredArticles) at line 350 → articleRow (line 350). Broker icon via brokerIcon (line 385)." color="blue">
+      📄 삼성전자 실적 전망... — 한국투자
+    </ScreenSubRegion>
+
+    <ScreenSubRegion label="Tab 6: DividendTabView — 배당" file="Features/StockDetailPage/Components/StockDetailSectionsView.swift" description="Nested struct at line 390. Body (line 401): VStack (line 402) with summarySection (line 53), dividendChart (line 459), tableHeader (line 160), ForEach(dividendYearGroups) at line 41. Chart: HStack bar visualization at line 133." color="amber">
+      배당수익률 2.1% | 주당배당 1,444원
+    </ScreenSubRegion>
+
+    <ScreenSubRegion label="Tab 7: FinancialTabView — 재무" file="Features/StockDetailPage/Components/StockDetailSectionsView.swift" description="Nested struct at line 516. Body (line 527): VStack (line 528). KPI row HStack (line 536). KLSegmentedControl tab toggle (line 52) for quarterly/annual. periodHeader (line 93). ScrollView → VStack (line 69) with dataRow calls (line 118) for 매출, 영업이익, 순이익, etc." color="jade">
+      매출 302.2조 | 영업이익 36.8조
+    </ScreenSubRegion>
+
+  </ScreenGroup>
+
+  <ScreenRegion
+    label="Sheets & Modals"
+    file="Features/StockDetailPage/"
+    description="Sheet modals accessible from the Stock Detail page."
+    link="/ios-source/feature-modules#stock-detail-components-17-files"
+    color="purple"
+  >
+    <ScreenSubRegion label="ChartSettingsSheet" file="Features/StockDetailPage/Components/ChartSettingsSheet.swift (327 lines)" description="Struct at line 33. Body (line 44): VStack (line 45) → sheetHeader (line 71) with reset Button (line 74), tabBar KLSegmentedControl (line 104). ScrollView (line 53) switches on selectedTab: chartTypeContent (line 118) with ForEach(ChartType.allCases) at line 120, overlayContent (line 171) with ForEach(OverlayIndicator.allCases) at line 173, subIndicatorsContent (line 223) with ForEach(SubIndicatorCatalog.allByCategory) at line 225." color="purple">
+      차트유형 | 오버레이 | 보조지표
+    </ScreenSubRegion>
+    <ScreenSubRegion label="StockInfoEditSheet" file="Features/StockDetailPage/Components/StockInfoEditSheet.swift (137 lines)" description="Struct at line 17. Body (line 21): VStack (line 22) with '종목정보 편집' title (line 24). Selected items: ForEach at line 44 with remove Button (line 52). Unselected items: ForEach at line 96 with add Button (line 104). Drag-to-reorder support." color="amber">
+      ☰ 전일 ✓ | ☰ 시가 ✓ | ☰ PER ✓
+    </ScreenSubRegion>
+    <ScreenSubRegion label="StockInfoExplanationSheet" file="Features/StockDetailPage/Components/StockInfoExplanationSheet.swift (126 lines)" description="Struct at line 17. Body (line 28): VStack (line 29) with '종목정보' title (line 31). Horizontal tab selector: ScrollView (line 40) → HStack (line 41) → ForEach(items) at line 42 with matchedGeometryEffect capsule (line 57). Content: ScrollView (line 83) with value section (line 86), explanation Text (line 111). .onChange (line 72) auto-scrolls to selected tab." color="blue">
+      PER (주가수익비율): 주가 / 주당순이익
+    </ScreenSubRegion>
+    <ScreenSubRegion label="MarketVenueSheet" file="Features/StockDetailPage/Components/StockPriceHeaderView.swift" description="Private struct at StockPriceHeaderView.swift line 149. Body (line 156): VStack (line 157) with '시세 선택' title (line 159), ForEach(MarketVenue.allCases) at line 167 with radio button selection rows." color="blue">
+      통합 ● | 정규장 ○ | NXT ○
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Lifecycle — .task / .onDisappear"
+    file="Features/StockDetailPage/StockDetailPageView.swift"
+    description=".task at line 166: await viewModel.loadDetail() + viewModel.startLiveUpdates(). .onDisappear at line 170: viewModel.stopLiveUpdates(). Ensures WebSocket subscription is managed with view lifecycle."
+    color="blue"
+  >
+    .task → loadDetail + startLiveUpdates | .onDisappear → stopLiveUpdates
+  </ScreenRegion>
+
+</ScreenMap>
+
+---
+
+## Search Screen 검색 화면
+
+<ScreenMap title="SearchView.swift (732 lines) → Features/Search/SearchView.swift">
+
+  <ScreenRegion
+    label="Category Tabs — KLSegmentedControl (line 44)"
+    file="Features/Search/SearchView.swift"
+    description="KLSegmentedControl at line 44 inside VStack (line 43). Tabs from SearchTab enum (SearchViewModel.swift line 6): .recent ('최근'), .domestic ('국내'), .us ('해외'), .etf ('ETF'), .theme ('테마'). Binding to viewModel.selectedTab. .onChange at line 86 triggers loadStocks()."
+    link="/ios-source/feature-modules#searchviewswift"
+    color="amber"
+  >
+    최근 | [국내] | 해외 | ETF | 테마
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="ETF Sub-Filters (line 203)"
+    file="Features/Search/SearchView.swift"
+    description="Private computed var etfSubFilters at line 203. Conditional: only shown when selectedTab == .etf. HStack (line 204) with ForEach over ETFFilter enum (SearchViewModel.swift line 22): .all ('전체'), .domestic ('국내'), .foreign ('해외'). Button at line 206, selected gets jade capsule background."
+    link="/ios-source/feature-modules#searchviewswift"
+    color="blue"
+  >
+    [전체] &nbsp; 국내 &nbsp; 해외
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Autocomplete Suggestions (line 114)"
+    file="Features/Search/SearchView.swift"
+    description="Private computed var autocompleteSuggestionsView at line 114. Conditional: shown when isSearching && !suggestions.isEmpty. VStack with ForEach(suggestions) at line 116. Each suggestion is a Button (line 117) that sets searchQuery. Max 3 suggestions from autocompleteSuggestions computed property (SearchViewModel.swift line 199): prefix matches prioritized over substring."
+    link="/ios-source/feature-modules#searchviewmodelswift"
+    color="jade"
+  >
+    <ScreenSubRegion label="Suggestion Row Button (line 117)" file="Features/Search/SearchView.swift" description="Button at line 117: action sets viewModel.searchQuery = suggestion, unfocuses keyboard. HStack (line 121) with magnifyingglass icon + suggestion text. Divider between rows." color="jade">
+      삼성전자 | 삼성SDI | 삼성바이오
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Content Area — contentArea (line 237)"
+    file="Features/Search/SearchView.swift"
+    description="Private computed var contentArea at line 237. ScrollView (line 238) → LazyVStack (line 239). Switches on selectedTab to render different list views."
+    link="/ios-source/feature-modules#searchviewswift"
+    color="jade"
+  >
+    <ScreenSubRegion label="Recent Tab — recentSearchList (line 263)" file="Features/Search/SearchView.swift" description="Private computed var recentSearchList at line 263. When not searching: ForEach(viewModel.recentSearches) at line 264 shows history items with HStack (line 265). When searching: renders searchResultsList." color="blue">
+      🕐 삼성전자 &nbsp;&nbsp;&nbsp; 2시간 전
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Cross-Category Results — searchResultsList (line 291)" file="Features/Search/SearchView.swift" description="Private computed var searchResultsList at line 291. Renders grouped results: domestic stocks with SearchCategoryBand (line 305), ForEach at line 305 up to 5 SearchStockRows. US stocks section (line 328). Theme section (line 352) with SearchThemeRows." color="jade">
+      국내주식 (12) | 해외주식 (3) | 테마 (2)
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Stock List — stockList (line 405)" file="Features/Search/SearchView.swift" description="Private computed var stockList at line 405. For .domestic and .us tabs. If domestic: includes nxtToggle (line 375). ForEach(viewModel.filteredStocks) at line 408 renders SearchStockRow for each." color="jade">
+      full stock listing for selected exchange
+    </ScreenSubRegion>
+    <ScreenSubRegion label="NXT Toggle (line 375)" file="Features/Search/SearchView.swift" description="Private computed var nxtToggle at line 375. HStack (line 376) with 'NXT 종목만' Text + Toggle (line 378) binding to viewModel.nxtOnly. Only visible on .domestic tab." color="blue">
+      NXT 종목만 보기 [○]
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Theme List — themeList (line 441)" file="Features/Search/SearchView.swift" description="Private computed var themeList at line 441. ForEach(viewModel.filteredThemes) at line 444 renders SearchThemeRow. ForEach skeleton at line 453 when loading." color="amber">
+      #반도체 +2.4% | #2차전지 -1.1%
+    </ScreenSubRegion>
+    <ScreenSubRegion label="ETF List — etfList (line 476)" file="Features/Search/SearchView.swift" description="Private computed var etfList at line 476. Split by ETF filter: domesticETFs (ForEach at line 479) and foreignETFs (ForEach at line 490). Each renders SearchStockRow." color="blue">
+      domestic ETFs + foreign ETFs
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenGroup label="Row Components">
+    <ScreenSubRegion label="SearchCategoryBand (line 528)" file="Features/Search/SearchView.swift" description="Struct at line 528. Properties: title (line 531), count (line 534), onTap (line 537). Body (line 539): tappable section header showing category name + count + '더보기' link. Tapping switches selectedTab to that category." color="amber">
+      국내주식 (12) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 더보기 →
+    </ScreenSubRegion>
+    <ScreenSubRegion label="SearchStockRow (line 577)" file="Features/Search/SearchView.swift" description="Struct at line 577. Properties: stock (line 580), isFavorite (line 583), onToggleFavorite (line 586), onTapRow (line 589). Body (line 591): HStack (line 592) with CompanyLogoView, name + exchange label, ticker code, StockTagPill badges (소수점/NXT), favorite star toggle Button (line 627)." color="jade">
+      🟦 삼성전자 KOSPI 005930 [소수점] ☆
+    </ScreenSubRegion>
+    <ScreenSubRegion label="StockTagPill (line 649)" file="Features/Search/SearchView.swift" description="Struct at line 649. Properties: text (line 652), color (line 655). Body (line 657): Text with bordered capsule pill styling. Used for '소수점' (fractional shares) and 'NXT' indicators." color="purple">
+      소수점
+    </ScreenSubRegion>
+    <ScreenSubRegion label="SearchThemeRow (line 673)" file="Features/Search/SearchView.swift" description="Struct at line 673. Property: theme (line 676). Body (line 678): HStack (line 679) with '#' + theme name Text, description Text (1-line), Spacer, change percentage Text with color coding." color="amber">
+      #반도체 반도체 산업 테마 +2.4%
+    </ScreenSubRegion>
+    <ScreenSubRegion label="SearchRowSkeletonView (line 707)" file="Features/Search/SearchView.swift" description="Struct at line 707. Shimmer-animated skeleton matching SearchStockRow layout." color="purple">
+      ⚪ ░░░░░░ &nbsp; ░░░
+    </ScreenSubRegion>
+  </ScreenGroup>
+
+  <ScreenRegion
+    label="Floating Search Pill — floatingSearchPill (line 152)"
+    file="Features/Search/SearchView.swift"
+    description="Private computed var floatingSearchPill at line 152. Bottom-pinned via ZStack(alignment: .bottom) at line 41. HStack at line 153."
+    link="/ios-source/feature-modules#searchviewswift"
+    color="jade"
+  >
+    <ScreenSubRegion label="Search TextField Capsule (line 155)" file="Features/Search/SearchView.swift" description="HStack at line 155 inside Capsule: magnifyingglass icon, TextField('종목명, 코드 검색...') binding to viewModel.searchQuery, .focused($isSearchFocused). Clear button (xmark.circle) visible when query non-empty. @FocusState isSearchFocused (line 30) set true on .task (line 82)." color="jade">
+      🔍 종목명, 코드 검색... &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ✕
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Dismiss Button (line 185)" file="Features/Search/SearchView.swift" description="Button at line 185 with xmark Image inside Circle. Calls dismiss() to close the fullScreenCover." color="red">
+      ✕
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Navigation — .fullScreenCover + .onReceive"
+    file="Features/Search/SearchView.swift"
+    description="Stock detail: .fullScreenCover(isPresented: $showStockPage) at line 95 presents StockDetailPageView with selectedStock. .onReceive(.navigateToHome) at line 105: sets showStockPage = false then dismiss()."
+    color="blue"
+  >
+    stock tap → StockDetailPageView | .navigateToHome → dismiss
+  </ScreenRegion>
+
+</ScreenMap>
+
+---
+
+## Market Overview Screen 시장 현황 화면
+
+<ScreenMap title="MarketOverviewDetailView.swift (344 lines) → Features/MarketOverview/">
+
+  <ScreenRegion
+    label="Tab Header — KLScrollableTabHeader (line 70)"
+    file="Components/KLScrollableTabHeader.swift (106 lines)"
+    description="Called at MarketOverviewDetailView line 70. Struct at KLScrollableTabHeader.swift line 19 (generic). Body (line 38): HStack (line 39) with dismiss Button (line 41, Image chevron.left at line 42), then GeometryReader (line 53) → ScrollViewReader (line 54) → ScrollView (line 55) → ForEach(items) at line 57 with matchedGeometryEffect capsule (line 74)."
+    link="/ios-source/reusable-components#klscrollabletabheaderswift"
+    color="purple"
+  >
+    <ScreenSubRegion label="Dismiss Button (line 41)" file="Components/KLScrollableTabHeader.swift" description="Button at line 41 calling onDismiss. Image(systemName: 'chevron.left') at line 42. Calls dismiss() at MarketOverviewDetailView." color="purple">
+      ←
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Tab Items — MarketOverviewTab (line 57)" file="Features/MarketOverview/MarketOverviewDetailView.swift" description="MarketOverviewTab enum at line 6: .indices ('지수'), .currency ('환율'). ForEach renders Button at line 58 with Text(label) at line 65. Selected tab gets jade Capsule via matchedGeometryEffect (line 77). Binding: $selectedTab (line 44)." color="blue">
+      [지수] &nbsp; 환율
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Indices List — MarketIndexRowView (line 85)"
+    file="Features/MarketOverview/MarketOverviewDetailView.swift"
+    description="Conditional at line 85: if selectedTab == .indices. Loading: skeleton ForEach at line 89. Loaded: ForEach(allIndices) at line 89 renders MarketIndexRowView (private struct, line 211)."
+    link="/frontend/screens/market-overview"
+    color="jade"
+  >
+    <ScreenSubRegion label="MarketIndexRowView (line 211)" file="Features/MarketOverview/MarketOverviewDetailView.swift" description="Private struct at line 211. Body (line 226): HStack (line 227). Flag ZStack (line 229): Circle(44pt) fill at line 230 + flag emoji Text (line 234). Name VStack (line 239): index name Text (line 240, .klSubheadline) + market status Text (line 251). Computed isKoreanIndex (line 217) → pulsing dot (line 243) for Korean indices. Value VStack (line 267): formatted value Text (line 268) + PriceChangeLabel (line 271)." color="jade">
+      🇰🇷 코스피 🟢거래중 &nbsp;&nbsp;&nbsp; 2,723 +0.46%
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Currency List — CurrencyRateRowView (line 96)"
+    file="Features/MarketOverview/MarketOverviewDetailView.swift"
+    description="Conditional else at line 96: selectedTab == .currency. ForEach(allRates) at line 100 renders CurrencyRateRowView (private struct, line 285)."
+    link="/frontend/screens/market-overview"
+    color="blue"
+  >
+    <ScreenSubRegion label="CurrencyRateRowView (line 285)" file="Features/MarketOverview/MarketOverviewDetailView.swift" description="Private struct at line 285. Body (line 290): HStack (line 291). Flag ZStack (line 293): Circle(44pt) + flag emoji Text (line 298). Country VStack (line 303): country name + code Text (line 304), unit label Text (line 307). Rate VStack (line 316): rate Text (line 317), daily change Text (line 320)." color="blue">
+      🇺🇸 미국 USD/KRW &nbsp;&nbsp;&nbsp; 1,481.60 +18.70
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Skeleton Rows — DetailRowSkeletonView (line 133)"
+    file="Features/MarketOverview/MarketOverviewDetailView.swift"
+    description="Private computed var skeletonRows at line 133: ForEach(0..<10) at line 134 renders DetailRowSkeletonView (private struct, line 178). Body (line 179): HStack (line 180) with Circle placeholder (line 182), name SkeletonBlocks (line 187), value SkeletonBlocks (line 196). .shimmer() modifier."
+    color="purple"
+  >
+    ⚪ ░░░░░░ &nbsp;&nbsp;&nbsp; ░░░░
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Data Loading + Error — .task / .alert"
+    file="Features/MarketOverview/MarketOverviewDetailView.swift"
+    description=".task at line 125: await loadInitialData(). Private func loadInitialData (line 149): fetches indices then rates sequentially, each can fail independently. .alert('데이터 로딩 실패') at line 117 with retry Button. .onChange(selectedTab) at line 111 → proxy.scrollTo('scrollTop')."
+    color="red"
+  >
+    .task → loadInitialData | .alert → retry
+  </ScreenRegion>
+
+</ScreenMap>
+
+---
+
+## News Detail Screen 뉴스 상세 화면
+
+<ScreenMap title="NewsDetailView.swift (262 lines) → Features/NewsDetail/">
+
+  <ScreenRegion
+    label="Category Tabs — KLScrollableTabHeader (line 35)"
+    file="Features/NewsDetail/NewsDetailView.swift"
+    description="KLScrollableTabHeader at line 35. Binding: viewModel.selectedCategory. Items from NewsCategory enum. Dismiss button calls dismiss(). .onChange at line 111 resets scroll position."
+    link="/ios-source/reusable-components#klscrollabletabheaderswift"
+    color="purple"
+  >
+    ← &nbsp; [전체] &nbsp; 경제 &nbsp; 산업 &nbsp; 기술 &nbsp; 에너지
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Content Type Filter Pills (line 44)"
+    file="Features/NewsDetail/NewsDetailView.swift"
+    description="ScrollView(.horizontal) at line 44. HStack at line 45. ForEach(NewsContentType.allCases) at line 46 → Button at line 47. Selected: jade background + white text. Binding: viewModel.selectedContentType."
+    color="amber"
+  >
+    <ScreenSubRegion label="Filter Pill Button (line 47)" file="Features/NewsDetail/NewsDetailView.swift" description="Button at line 47 with Text at line 52 showing content type label. Selected state: .baroTeal background, .white text, Capsule shape. Unselected: .klSurface background, .klTextSecondary text." color="amber">
+      [전체] &nbsp; 뉴스 &nbsp; 리포트 &nbsp; 공시
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Article List — LazyVStack (line 77)"
+    file="Features/NewsDetail/NewsDetailView.swift"
+    description="ScrollViewReader (line 75) → ScrollView (line 76) → LazyVStack (line 77). Color.clear anchor at line 78. Conditional: loading skeleton at line 82 or ForEach(filteredArticles) at line 98 → newsRow(article:)."
+    color="jade"
+  >
+    <ScreenSubRegion label="newsRow() (line 131)" file="Features/NewsDetail/NewsDetailView.swift" description="Private func newsRow at line 131. VStack (line 132): accent bar HStack (line 133) → RoundedRectangle with LinearGradient (line 135, category-specific gradient colors). Title VStack (line 146): article title Text (2-line limit), content type badge, source + time metadata HStack at line 152." color="jade">
+      ▌ 서울 강남 집값 상승세... &nbsp; 1시간 전
+    </ScreenSubRegion>
+    <ScreenSubRegion label="Category Accent Bar (line 135)" file="Features/NewsDetail/NewsDetailView.swift" description="RoundedRectangle(cornerRadius: 2) at line 135 with LinearGradient. 4px width. Color varies by category: Economy = jade gradient, Industry = blue, Tech = amber. Visual category indicator on left edge." color="jade">
+      ▌
+    </ScreenSubRegion>
+    <ScreenSubRegion label="AI Summary Toggle (line 177)" file="Features/NewsDetail/NewsDetailView.swift" description="Conditional at line 177: if article.aiSummary != nil → Button at line 178 toggles expandedSummaryId (line 29). When expanded: shows AI summary Text with .transition modifier. Smooth height animation." color="amber">
+      ✦ AI 요약 ▾ — 삼성전자는 2분기 실적...
+    </ScreenSubRegion>
+    <ScreenSubRegion label="AI Summary Expanded Section" file="Features/NewsDetail/NewsDetailView.swift" description="Conditional rendered when expandedSummaryId == article.id. RoundedRectangle background at line 212 with article.aiSummary Text. .transition(.asymmetric(insertion:, removal:)) for animation." color="amber">
+      AI-generated summary text...
+    </ScreenSubRegion>
+    <ScreenSubRegion label="NewsRowSkeletonView (line 239)" file="Features/NewsDetail/NewsDetailView.swift" description="Private struct at line 239. Body (line 240): HStack (line 241) with SkeletonBlock accent bar (line 242), title blocks VStack (line 244). .shimmer() modifier at line 89." color="purple">
+      ▌ ░░░░░░░░░░ &nbsp; ░░░░
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Lifecycle — .task / .onChange"
+    file="Features/NewsDetail/NewsDetailView.swift"
+    description=".task at line 120: await viewModel.loadNews(). .onChange(selectedCategory) at line 111: scrolls to top. .onChange(selectedContentType) at line 114: scrolls to top."
+    color="blue"
+  >
+    .task → loadNews | .onChange → scrollTo top
+  </ScreenRegion>
+
+</ScreenMap>
+
+---
+
+## Theme Detail Screen 테마 상세 화면
+
+<ScreenMap title="ThemeDetailView.swift (165 lines) → Features/ThemeDetail/">
+
+  <ScreenRegion
+    label="Category Tabs — KLScrollableTabHeader (line 28)"
+    file="Features/ThemeDetail/ThemeDetailView.swift"
+    description="KLScrollableTabHeader at line 28. Binding: viewModel.selectedCategory. Items from theme categories. Dismiss button calls dismiss() (line 22). .onChange at line 81 scrolls to top."
+    link="/ios-source/reusable-components#klscrollabletabheaderswift"
+    color="purple"
+  >
+    ← &nbsp; [전체] &nbsp; 산업 &nbsp; 정책 &nbsp; 기술 &nbsp; 에너지
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Reference Date Label (line 43)"
+    file="Features/ThemeDetail/ThemeDetailView.swift"
+    description="HStack at line 43 with Spacer + date label Text (line 44). Shows data reference: 'MM.dd 장마감 기준'. Font: .klCaption, color: .klTextTertiary. Right-aligned via Spacer()."
+    color="blue"
+  >
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 03.09 장마감 기준
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Theme Ranking List — LazyVStack (line 39)"
+    file="Features/ThemeDetail/ThemeDetailView.swift"
+    description="ScrollViewReader (line 37) → ScrollView (line 38) → LazyVStack (line 39). Color.clear anchor at line 40. Skeleton ForEach(0..<8) at line 59 or theme ForEach at line 68. Each row calls themeRow(rank:theme:) (line 100)."
+    color="jade"
+  >
+    <ScreenSubRegion label="themeRow() (line 100)" file="Features/ThemeDetail/ThemeDetailView.swift" description="Private func themeRow at line 100. HStack at line 101: rank Text (line 103, fixed width, .klTitle .bold, jade color), theme name+description VStack (line 109) with '#' prefix Text (line 110, .klSubhead .bold) + description Text (line 114, .klCaption, 1-line limit), Spacer (line 120), change % Text (line 124, PriceChangeLabel colors: jade for +, red for -)." color="jade">
+      1 &nbsp; #반도체 반도체 산업 테마 &nbsp;&nbsp; +2.4%
+    </ScreenSubRegion>
+    <ScreenSubRegion label="ThemeRowSkeletonView (line 136)" file="Features/ThemeDetail/ThemeDetailView.swift" description="Private struct at line 136. Body (line 137): HStack (line 138) with SkeletonBlock rank (line 139), Circle placeholder (line 141), name blocks VStack (line 145), value block (line 152). .shimmer() at line 66." color="purple">
+      ░ &nbsp; ░░░░░░ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ░░░
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+</ScreenMap>
+
+---
+
+## Stock List Screen 종목 전체 화면
+
+<ScreenMap title="StockDetailView.swift (200 lines) → Features/StockDetail/">
+
+  <ScreenRegion
+    label="Filter Tabs — KLScrollableTabHeader (line 38)"
+    file="Features/StockDetail/StockDetailView.swift"
+    description="KLScrollableTabHeader at line 38. Binding: viewModel.selectedFilter (StockFilter cases). Dismiss button calls dismiss() (line 25). .onChange at line 81 scrolls to top on filter change, .onChange at line 84 scrolls on exchange change."
+    link="/ios-source/reusable-components#klscrollabletabheaderswift"
+    color="purple"
+  >
+    ← &nbsp; [시가총액] &nbsp; 거래량 &nbsp; 상승률 &nbsp; 하락률 &nbsp; 배당
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Stock Ranking List — LazyVStack (line 49)"
+    file="Features/StockDetail/StockDetailView.swift"
+    description="ScrollViewReader (line 47) → ScrollView (line 48) → LazyVStack (line 49). Color.clear anchor at line 50. Skeleton: ForEach(0..<10) at line 54. Loaded: ForEach(viewModel.stocks) at line 63 with .onTapGesture (line 67) setting selectedStock."
+    color="jade"
+  >
+    <ScreenSubRegion label="StockRowView (line 63)" file="Features/Home/Components/StockRowView.swift" description="Reused from Home module. ForEach at StockDetailView line 63. .contentShape(Rectangle()) at line 66 + .onTapGesture at line 67: sets selectedStock → triggers .fullScreenCover at line 107 presenting StockDetailPageView." color="jade">
+      1 &nbsp; 🟦 삼성전자 005930 &nbsp; 72,300 -0.28%
+    </ScreenSubRegion>
+    <ScreenSubRegion label="DetailRowSkeletonView (line 162)" file="Features/StockDetail/StockDetailView.swift" description="Private struct at line 162. Body (line 163): HStack (line 164) with rank SkeletonBlock (line 165), Circle logo placeholder (line 168), name VStack (line 173), value VStack (line 180). 10 skeleton rows shown during loading." color="purple">
+      ░ &nbsp; ⚪ ░░░░░░ &nbsp; ░░░░
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Floating Exchange Pill — floatingExchangePill (line 126)"
+    file="Features/StockDetail/StockDetailView.swift"
+    description="Private computed var floatingExchangePill at line 126. Bottom-pinned via ZStack(alignment: .bottom) at line 36. Button at line 127 sets showExchangeSheet = true."
+    color="amber"
+  >
+    <ScreenSubRegion label="Pill Content (line 128)" file="Features/StockDetail/StockDetailView.swift" description="HStack at line 128: exchange flag emoji, exchange name Text (.klSubhead .bold), market status label Text (.klCaption, green for open), chevron.down Image. Capsule shape with .ultraThinMaterial background and shadow." color="amber">
+      🇰🇷 KOSPI &nbsp; 🟢거래중 &nbsp; ▾
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+  <ScreenRegion
+    label="Sheets & Navigation"
+    file="Features/StockDetail/StockDetailView.swift"
+    description=".sheet(isPresented: $showExchangeSheet) at line 97: ExchangeSelectionSheet. .fullScreenCover(item: $selectedStock) at line 107: StockDetailPageView. .onReceive(.navigateToHome) at line 115: selectedStock = nil, dismiss()."
+    color="purple"
+  >
+    <ScreenSubRegion label="ExchangeSelectionSheet (line 97)" file="Features/Home/Components/ExchangeSelectionSheet.swift" description=".sheet at StockDetailView line 97 presents ExchangeSelectionSheet (reused from Home module, 109 lines). Binding: viewModel.selectedExchange." color="blue">
+      🇰🇷 KOSPI 🟢 | 🇺🇸 NASDAQ ⚪
+    </ScreenSubRegion>
+    <ScreenSubRegion label="→ StockDetailPageView (line 107)" file="Features/StockDetailPage/StockDetailPageView.swift" description=".fullScreenCover(item: $selectedStock) at line 107. Presents StockDetailPageView with selectedStock and repository." color="jade">
+      → StockDetailPageView (full screen)
+    </ScreenSubRegion>
+  </ScreenRegion>
+
+</ScreenMap>
+
+---
+
+## Quick File Lookup 파일 빠른 참조
+
+Use this table to find any source file by the UI element you see on screen:
+
+| Visual Element | Source File | Lines | Documentation |
+|---------------|-------------|-------|---------------|
+| **App & Navigation** | | | |
+| App launch | `BAROApp.swift` | — | [Architecture](/ios-source/architecture) |
+| Tab bar (floating) | `MainTabView.swift` | 327 | [Feature Modules](/ios-source/feature-modules#maintabviewswift--root-navigation) |
+| FloatingTabBar struct | `MainTabView.swift:114` | — | [Feature Modules](/ios-source/feature-modules#maintabviewswift--root-navigation) |
+| TabBarButton struct | `MainTabView.swift:279` | — | [Feature Modules](/ios-source/feature-modules#maintabviewswift--root-navigation) |
+| **Home Screen** | | | |
+| Home screen | `HomeView.swift` | 142 | [Feature Modules](/ios-source/feature-modules#home-module) |
+| Home header | `HomeHeaderView.swift` | 52 | [Feature Modules](/ios-source/feature-modules#home-components-18-files) |
+| Banner carousel | `BannerCarouselView.swift` | 141 | [Feature Modules](/ios-source/feature-modules#home-components-18-files) |
+| Date display | `DateDisplayView.swift` | 101 | [Feature Modules](/ios-source/feature-modules#home-components-18-files) |
+| Market indices row | `MarketOverviewRowView.swift` | 114 | [Feature Modules](/ios-source/feature-modules#home-components-18-files) |
+| Index card | `MarketIndexCardView.swift` | 133 | [Feature Modules](/ios-source/feature-modules#home-components-18-files) |
+| Currency rate card | `CurrencyRatesRowView.swift` | 63 | [Feature Modules](/ios-source/feature-modules#home-components-18-files) |
+| Stock list section | `StockListView.swift` | 173 | [Feature Modules](/ios-source/feature-modules#home-components-18-files) |
+| Stock row | `StockRowView.swift` | 134 | [Feature Modules](/ios-source/feature-modules#home-components-18-files) |
+| Filter tabs | `FilterTabsView.swift` | 50 | [Feature Modules](/ios-source/feature-modules#home-components-18-files) |
+| Stock filter sheet | `StockFilterSheet.swift` | 123 | [Feature Modules](/ios-source/feature-modules#home-components-18-files) |
+| Exchange selection | `ExchangeSelectionSheet.swift` | 109 | [Feature Modules](/ios-source/feature-modules#home-components-18-files) |
+| AI market themes | `AIMarketIssuesView.swift` | 125 | [Feature Modules](/ios-source/feature-modules#home-components-18-files) |
+| Bubble chart | `MarketThemeBubbleChartView.swift` | 198 | [Feature Modules](/ios-source/feature-modules#home-components-18-files) |
+| News section | `NewsSectionView.swift` | 315 | [Feature Modules](/ios-source/feature-modules#home-components-18-files) |
+| News card | `NewsCardView.swift` | 89 | [Feature Modules](/ios-source/feature-modules#home-components-18-files) |
+| News filter | `NewsFilterSheet.swift` | 119 | [Feature Modules](/ios-source/feature-modules#home-components-18-files) |
+| Skeleton views | `SkeletonViews.swift` | 277 | [Feature Modules](/ios-source/feature-modules#home-components-18-files) |
+| **Stock Detail** | | | |
+| Stock detail page | `StockDetailPageView.swift` | 389 | [Feature Modules](/ios-source/feature-modules#stock-detail-page-module-primary) |
+| Price header | `StockPriceHeaderView.swift` | 211 | [Feature Modules](/ios-source/feature-modules#stock-detail-components-17-files) |
+| Venue sheet | `StockPriceHeaderView.swift:149` | — | [Feature Modules](/ios-source/feature-modules#stock-detail-components-17-files) |
+| Chart (main) | `StockChartView.swift` | 1,376 | [Feature Modules](/ios-source/feature-modules#stock-detail-components-17-files) |
+| Sub-indicators | `SubIndicatorChartView.swift` | 386 | [Feature Modules](/ios-source/feature-modules#stock-detail-components-17-files) |
+| Period tabs | `StockDetailPeriodTabsView.swift` | 62 | [Feature Modules](/ios-source/feature-modules#stock-detail-components-17-files) |
+| Indicator pills | `IndicatorPillsView.swift` | 65 | [Feature Modules](/ios-source/feature-modules#stock-detail-components-17-files) |
+| Chart settings | `ChartSettingsSheet.swift` | 327 | [Feature Modules](/ios-source/feature-modules#stock-detail-components-17-files) |
+| Content tabs namespace | `StockDetailSectionsView.swift` | 1,200 | [Feature Modules](/ios-source/feature-modules#stock-detail-components-17-files) |
+| Info grid | `StockInfoGridView.swift` | 168 | [Feature Modules](/ios-source/feature-modules#stock-detail-components-17-files) |
+| Info edit | `StockInfoEditSheet.swift` | 137 | [Feature Modules](/ios-source/feature-modules#stock-detail-components-17-files) |
+| Info explanation | `StockInfoExplanationSheet.swift` | 126 | [Feature Modules](/ios-source/feature-modules#stock-detail-components-17-files) |
+| Order book | `StockOrderBookView.swift` | 256 | [Feature Modules](/ios-source/feature-modules#stock-detail-components-17-files) |
+| Daily prices | `StockDailyPriceView.swift` | 190 | [Feature Modules](/ios-source/feature-modules#stock-detail-components-17-files) |
+| Investor flow | `InvestorFlowDetailView.swift` | 163 | [Feature Modules](/ios-source/feature-modules#stock-detail-components-17-files) |
+| Analyst opinions | `AnalystOpinionDetailView.swift` | 197 | [Feature Modules](/ios-source/feature-modules#stock-detail-components-17-files) |
+| Reports list | `ReportDetailView.swift` | 225 | [Feature Modules](/ios-source/feature-modules#stock-detail-components-17-files) |
+| Dividends | `DividendDetailView.swift` | 230 | [Feature Modules](/ios-source/feature-modules#stock-detail-components-17-files) |
+| Financials | `FinancialDetailView.swift` | 169 | [Feature Modules](/ios-source/feature-modules#stock-detail-components-17-files) |
+| **Search** | | | |
+| Search screen | `SearchView.swift` | 732 | [Feature Modules](/ios-source/feature-modules#search-module) |
+| Search view model | `SearchViewModel.swift` | 343 | [Feature Modules](/ios-source/feature-modules#search-module) |
+| SearchCategoryBand | `SearchView.swift:528` | — | [Feature Modules](/ios-source/feature-modules#search-module) |
+| SearchStockRow | `SearchView.swift:577` | — | [Feature Modules](/ios-source/feature-modules#search-module) |
+| StockTagPill | `SearchView.swift:649` | — | [Feature Modules](/ios-source/feature-modules#search-module) |
+| SearchThemeRow | `SearchView.swift:673` | — | [Feature Modules](/ios-source/feature-modules#search-module) |
+| **Other Screens** | | | |
+| Market overview | `MarketOverviewDetailView.swift` | 344 | [Screens](/frontend/screens/market-overview) |
+| MarketIndexRowView | `MarketOverviewDetailView.swift:211` | — | [Screens](/frontend/screens/market-overview) |
+| CurrencyRateRowView | `MarketOverviewDetailView.swift:285` | — | [Screens](/frontend/screens/market-overview) |
+| News detail | `NewsDetailView.swift` | 262 | [Feature Modules](/ios-source/feature-modules) |
+| Theme detail | `ThemeDetailView.swift` | 165 | [Feature Modules](/ios-source/feature-modules) |
+| Stock list | `StockDetailView.swift` | 200 | [Feature Modules](/ios-source/feature-modules) |
+| **Shared Components** | | | |
+| Company logo | `CompanyLogoView.swift` | 82 | [Components](/ios-source/reusable-components#companylogoviewswift) |
+| Detail nav bar | `KLDetailNavBar.swift` | 87 | [Components](/ios-source/reusable-components#kldetailnavbarswift) |
+| Segmented control | `KLSegmentedControl.swift` | 89 | [Components](/ios-source/reusable-components#klsegmentedcontrolswift) |
+| Scrollable tab header | `KLScrollableTabHeader.swift` | 106 | [Components](/ios-source/reusable-components#klscrollabletabheaderswift) |
+| Price change label | `PriceChangeLabel.swift` | 64 | [Components](/ios-source/reusable-components#pricechangelabelswift) |
+| More button | `KLMoreButton.swift` | 32 | [Components](/ios-source/reusable-components) |
+| Brand mark | `BAROMarkView.swift` | 90 | [Components](/ios-source/reusable-components) |
+| **Design System** | | | |
+| Colors | `BAROColors.swift` | — | [Core Infrastructure](/ios-source/core-infrastructure#barocolorsswift) |
+| Fonts | `BAROFonts.swift` | — | [Core Infrastructure](/ios-source/core-infrastructure#barofontsswift) |
+| Spacing | `BAROSpacing.swift` | — | [Core Infrastructure](/ios-source/core-infrastructure) |
+| Shimmer modifier | `ShimmerModifier.swift` | — | [Core Infrastructure](/ios-source/core-infrastructure) |
+| Scroll indicator | `KLScrollIndicator.swift` | — | [Core Infrastructure](/ios-source/core-infrastructure) |
+| Loading overlay | `LoadingOverlayView.swift` | — | [Core Infrastructure](/ios-source/core-infrastructure) |
+| **Core** | | | |
+| API client | `APIClient.swift` | — | [Core Infrastructure](/ios-source/core-infrastructure#apiclientswift) |
+| WebSocket | `WebSocketManager.swift` | — | [Core Infrastructure](/ios-source/core-infrastructure#websocketmanagerswift) |
+| DI container | `DependencyContainer.swift` | — | [Architecture](/ios-source/architecture#dependency-injection) |

@@ -1,0 +1,115 @@
+<PageMeta status="live" layer="frontend" />
+
+# All Screens
+
+<InfoBox type="fun" title="What's a screen?">
+A **screen** is like a page in a book. When you open BARO, you see one screen at a time. You tap buttons to flip to a different screen — just like turning pages! BARO has **13 screens**, and each one has a special job.
+</InfoBox>
+
+---
+
+## Live Screens
+
+These screens are built and working right now! <StatusBadge status="live">Live</StatusBadge>
+
+<FeatureGrid columns={2}>
+  <FeatureCard icon="🏠" title="Home" description="Your starting page — see your portfolio, watchlist, and market highlights all in one place" href="/screens/home" color="jade" />
+  <FeatureCard icon="📈" title="Stock Detail" description="Tap any stock to see its price chart, order book, news, and all the details" href="/screens/stock-detail" color="blue" />
+  <FeatureCard icon="🌍" title="Market Overview" description="Browse the whole market — indices, sectors, top movers, and trending stocks" href="/screens/market-overview" color="purple" />
+  <FeatureCard icon="🔍" title="Search" description="Find any stock, ETF, or currency by typing its name or code" href="/screens/search" color="teal" />
+  <FeatureCard icon="🔐" title="Login / Register" description="Sign in with email or Apple ID, create a new account with validation" href="/screens/login" color="blue" />
+  <FeatureCard icon="🎬" title="Splash" description="Branded launch screen with animated progress — checks auth and routes to login or home" href="/screens/splash" color="purple" />
+  <FeatureCard icon="📰" title="News Detail" description="Full article view with AI summary, source attribution, and related stocks" href="/screens/news-detail" color="teal" />
+  <FeatureCard icon="🏷️" title="Theme Detail" description="Market theme breakdown with related stocks and sentiment visualization" href="/screens/theme-detail" color="amber" />
+  <FeatureCard icon="👤" title="My Page" description="Profile, investment summary, services, app settings, and legal information" href="/screens/my-page" color="jade" />
+  <FeatureCard icon="🎉" title="Events" description="Promotions, competitions, and trading events with participation tracking" href="/screens/events" color="red" />
+  <FeatureCard icon="🔔" title="Notifications" description="Price alerts, news updates, and event notifications with preference settings" href="/screens/notifications" color="amber" />
+  <FeatureCard icon="🧠" title="Intelligence Hub" description="AI-powered market analysis, stock insights, and risk assessment reports" href="/screens/intelligence-hub" color="purple" />
+</FeatureGrid>
+
+---
+
+## Planned Screens
+
+These screens are coming soon! <StatusBadge status="planned">Planned</StatusBadge>
+
+<FeatureGrid columns={2}>
+  <FeatureCard icon="💰" title="Trading Floor" description="Place buy and sell orders with a beautiful, easy-to-use interface — Phase 3 feature" href="/screens/trading-floor" color="red" />
+</FeatureGrid>
+
+---
+
+## Build Progress
+
+<ProgressBar value={92} label="Screens completed" color="jade" />
+
+<StatGrid columns={4}>
+  <StatCard value="12" label="Live" />
+  <StatCard value="1" label="Planned" />
+  <StatCard value="13" label="Total" />
+  <StatCard value="92%" label="Done" />
+</StatGrid>
+
+---
+
+## How Screens Connect
+
+When you use BARO, you jump from screen to screen. Here's how they link together:
+
+<Diagram title="Screen Navigation Flow">
+  <DiagramRow>
+    <DiagramNode type="view" icon="🎬" label="Splash" sublabel="Check auth token" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="routes to" />
+  <DiagramRow>
+    <DiagramNode type="view" icon="🔐" label="Login / Register" sublabel="Sign in first" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="authenticated" />
+  <DiagramRow>
+    <DiagramNode type="view" icon="🏠" label="Home" sublabel="Your main hub" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="tap a stock or explore" />
+  <DiagramRow>
+    <DiagramNode type="view" icon="📈" label="Stock Detail" sublabel="Deep dive" />
+    <DiagramNode type="view" icon="🌍" label="Market Overview" sublabel="Browse everything" />
+    <DiagramNode type="view" icon="🔍" label="Search" sublabel="Find anything" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="explore more" />
+  <DiagramRow>
+    <DiagramNode type="view" icon="📰" label="News Detail" sublabel="Full article" />
+    <DiagramNode type="view" icon="🏷️" label="Theme Detail" sublabel="Market themes" />
+    <DiagramNode type="view" icon="🧠" label="Intelligence Hub" sublabel="Smart analysis" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="tabs" />
+  <DiagramRow>
+    <DiagramNode type="view" icon="🎉" label="Events" sublabel="Promotions" />
+    <DiagramNode type="view" icon="👤" label="My Page" sublabel="Profile & Settings" />
+    <DiagramNode type="view" icon="🔔" label="Notifications" sublabel="Alerts" />
+  </DiagramRow>
+</Diagram>
+
+<InfoBox type="tip" title="The Home screen is the center of everything">
+No matter where you are in the app, you can always get back to the **Home** screen. It's like the living room of a house — all the hallways lead back to it!
+</InfoBox>
+
+---
+
+## What Every Screen Has
+
+Every screen in BARO follows the same pattern:
+
+<StepGuide>
+  <Step number={1} title="A View (the pretty part)">
+    This is the SwiftUI code that draws everything you see — buttons, text, charts, and colors.
+  </Step>
+  <Step number={2} title="A ViewModel (the brain)">
+    This is the code that decides *what* to show. It grabs data and gets it ready for the View.
+  </Step>
+  <Step number={3} title="A Repository (the helper)">
+    This fetches data from the internet or from saved files on your phone.
+  </Step>
+</StepGuide>
+
+<InfoBox type="info" title="Want to learn more about a screen?">
+Click any screen card above to see its full documentation — including what it looks like, how it's built, and what components it uses.
+</InfoBox>

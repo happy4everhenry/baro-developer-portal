@@ -1,0 +1,99 @@
+---
+title: Data Layer
+description: How BARO remembers things and organizes information — the app's brain!
+---
+
+<PageMeta status="live" layer="shared" />
+
+# Data Layer
+
+## What is a Data Layer?
+
+Think of the data layer as the app's **memory and filing system**. When the app shows you a stock price or a list of companies, that information has to come from somewhere, travel through the app, and end up on your screen.
+
+The data layer is the part of the app that:
+- **Fetches** information (goes and gets it from the server)
+- **Organizes** it (puts it in neat folders)
+- **Delivers** it (hands it to the screen so you can see it)
+
+It's like a super-organized librarian who knows exactly where every book is and can grab it for you in a flash!
+
+## By the Numbers
+
+<StatGrid columns={3}>
+  <StatCard value="29" label="Data Models" />
+  <StatCard value="4" label="Repository Protocols" />
+  <StatCard value="2" label="Data Modes (Mock & Real)" />
+</StatGrid>
+
+## How Data Flows Through the App
+
+BARO uses a pattern called **MVVM** (Model-View-ViewModel). Don't worry about the fancy name — here's how it works:
+
+<Diagram title="MVVM Data Flow">
+  <DiagramRow>
+    <DiagramNode type="view" icon="📱" label="View" sublabel="What you see on screen" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="asks for data" />
+  <DiagramRow>
+    <DiagramNode type="vm" icon="🧠" label="ViewModel" sublabel="The brain that prepares data" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="requests from" />
+  <DiagramRow>
+    <DiagramNode type="repo" icon="📚" label="Repository" sublabel="The librarian" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="fetches from" />
+  <DiagramRow>
+    <DiagramNode type="service" icon="🌐" label="API / Mock Data" sublabel="Real server or practice data" />
+  </DiagramRow>
+</Diagram>
+
+<InfoBox type="fun" title="Practice Mode vs Real Game">
+Imagine you're learning to play basketball. You wouldn't start in a real NBA game, right? You'd practice first!
+
+BARO works the same way. It has **Mock data** (practice mode) with fake stock prices for testing, and **Real data** (game day) with actual live prices from the market. Developers can switch between them anytime. This means you can build and test features without needing the real server to be running!
+</InfoBox>
+
+## Explore by Topic
+
+<Tabs>
+  <Tab label="Models" icon="🧱">
+    **Data Models** are like containers that hold specific types of information. Each model knows exactly what shape the data should be.
+
+    For example, a `StockPrice` model holds the stock's name, its current price, whether it went up or down, and by how much. We have **29 models** covering everything from individual stocks to entire market overviews.
+
+    Think of them like different shaped cookie cutters — each one makes sure the data comes out in exactly the right shape!
+  </Tab>
+  <Tab label="Repositories" icon="📚">
+    **Repositories** are the librarians of the app. When the ViewModel needs data, it asks a Repository to go get it.
+
+    The clever part? The Repository could fetch data from the **real server** or from **mock data** — and the ViewModel doesn't even know the difference! We have **4 repository protocols**:
+
+    - **MarketRepository** — Stocks, indices, currency rates, themes, and chart data
+    - **BannerRepository** — Promotional banner content
+    - **NewsRepository** — News articles and reports
+    - **EventRepository** — Events, promotions, and competitions
+  </Tab>
+  <Tab label="Data Flow" icon="🔄">
+    Data in BARO flows in **one direction**, like a river:
+
+    1. The **View** (screen) tells the **ViewModel** what it needs
+    2. The **ViewModel** asks the **Repository** for data
+    3. The **Repository** fetches it from the **API** (or mock data)
+    4. The data flows back up: API → Repository → ViewModel → View
+
+    This one-way flow keeps everything organized and predictable. You always know where data is coming from and where it's going!
+  </Tab>
+</Tabs>
+
+## Dive Deeper
+
+<FeatureGrid columns={2}>
+  <FeatureCard icon="🔄" title="Data Flow" description="Follow the journey of data from server to screen, step by step." href="/data/data-flow" color="blue" />
+  <FeatureCard icon="🧱" title="Data Models" description="All 29 data models — the containers that hold every piece of information." href="/data/models" color="jade" />
+  <FeatureCard icon="📚" title="Repositories" description="The librarians that fetch, organize, and deliver data to the app." href="/data/repositories" color="purple" />
+</FeatureGrid>
+
+<InfoBox type="note" title="Why this matters">
+A clean data layer makes the app **fast**, **reliable**, and **easy to change**. When you want to add a new feature, you just create a new model, update the repository, and the rest of the app barely notices. It's like adding a new book to a library — you don't have to rebuild the whole building!
+</InfoBox>

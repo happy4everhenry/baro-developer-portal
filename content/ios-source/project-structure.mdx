@@ -1,0 +1,301 @@
+# Project Structure 프로젝트 구조
+
+<PageMeta status="live" layer="frontend" />
+
+Complete directory layout and file inventory of the BARO iOS application.
+
+## Root Directory
+
+```
+ios/BARO/
+├── BARO/                          # Main app target
+│   ├── BAROApp.swift              # @main entry point
+│   ├── BARO-Info.plist            # App configuration
+│   ├── App/                       # Application configuration
+│   │   └── DependencyContainer.swift
+│   ├── Core/                      # Shared infrastructure
+│   │   ├── Auth/                  # Authentication (AuthManager, KeychainHelper)
+│   │   ├── Network/               # HTTP client
+│   │   ├── WebSocket/             # Real-time streaming
+│   │   ├── DesignSystem/          # Colors, fonts, spacing, animations
+│   │   ├── Extensions/            # Swift type extensions
+│   │   ├── FavoritesManager.swift # Favorites state management
+│   │   └── Utilities/             # Keyboard prewarmer, etc.
+│   ├── Models/                    # Domain data models (19 files)
+│   ├── Repositories/              # Data access layer
+│   │   ├── Protocols/             # Repository interfaces (4 files)
+│   │   ├── API/                   # Live API implementations
+│   │   └── Mock/                  # Mock data implementations
+│   ├── Features/                  # Feature modules (screens)
+│   │   ├── MainTabView.swift      # Root tab navigation
+│   │   ├── Splash/                # Splash screen with animated progress
+│   │   ├── Auth/                  # Login + Register screens
+│   │   ├── Home/                  # Home screen + 18 components
+│   │   ├── Search/                # Stock search
+│   │   ├── StockDetailPage/       # Stock detail (primary)
+│   │   ├── StockDetail/           # Stock detail (legacy)
+│   │   ├── NewsDetail/            # News article view
+│   │   ├── ThemeDetail/           # Market theme view
+│   │   ├── MarketOverview/        # Market indices detail
+│   │   ├── AIInsights/            # AI-powered insights hub
+│   │   ├── MyPage/                # Profile, settings, services
+│   │   ├── Events/                # Promotions and competitions
+│   │   ├── Notifications/         # Notification feed + settings
+│   │   └── Placeholders/          # Tab placeholder screens
+│   └── Components/                # Reusable UI components (10 files)
+├── BAROTests/                     # Unit tests
+└── BAROUITests/                   # UI tests
+```
+
+## File Inventory by Layer
+
+### Entry Point & Configuration (2 files)
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `BAROApp.swift` | ~20 | `@main` app entry, creates `DependencyContainer`, sets up `WindowGroup` |
+| `App/DependencyContainer.swift` | ~30 | `@Observable` DI container, manages repository instances, mock/API toggle |
+
+### Core Infrastructure (20 files)
+
+#### Authentication (2 files)
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `Core/Auth/AuthManager.swift` | ~200 | `@Observable` JWT authentication manager — login, register, Apple Sign In, token refresh, logout |
+| `Core/Auth/KeychainHelper.swift` | ~80 | Secure credential storage via Keychain Services — save, read, delete tokens |
+
+#### Favorites & Utilities (2 files)
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `Core/FavoritesManager.swift` | ~60 | `@Observable` shared state for stock/theme/article favorites with toggle methods |
+| `Core/Utilities/KeyboardPrewarmer.swift` | ~50 | Prewarms keyboard for text input fields to reduce first-display latency |
+
+#### Network (2 files)
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `Core/Network/APIClient.swift` | ~80 | HTTP client with `GET` support, JSON decoding, error handling |
+| `Core/Network/PaginatedResponse.swift` | ~15 | Generic `PaginatedResponse<T>` wrapper for API responses |
+
+#### WebSocket (2 files)
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `Core/WebSocket/WebSocketManager.swift` | ~250 | Singleton WebSocket connection manager, subscription/reconnection |
+| `Core/WebSocket/PriceUpdate.swift` | ~20 | Real-time price update model from WebSocket stream |
+
+#### Design System (6 files)
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `Core/DesignSystem/BAROColors.swift` | ~100 | Color palette: brand, semantic, company-specific colors |
+| `Core/DesignSystem/BAROFonts.swift` | ~40 | Typography scale and font definitions |
+| `Core/DesignSystem/BAROSpacing.swift` | ~30 | Spacing constants and layout scale |
+| `Core/DesignSystem/LoadingOverlayView.swift` | ~30 | Full-screen loading overlay |
+| `Core/DesignSystem/ShimmerModifier.swift` | ~40 | Shimmer/skeleton loading animation modifier |
+| `Core/DesignSystem/KLScrollIndicator.swift` | ~25 | Custom scroll position indicator |
+
+#### Extensions (4 files)
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `Core/Extensions/Color+Hex.swift` | ~25 | `Color(hex:)` initializer for hex color strings |
+| `Core/Extensions/Double+Currency.swift` | ~50 | Number formatting: `formattedWon`, `formattedIndex`, `formattedPercent` |
+| `Core/Extensions/Date+Korean.swift` | ~20 | Korean date formatting with locale |
+| `Core/Extensions/Notification+App.swift` | ~10 | Custom `Notification.Name` constants |
+
+### Data Models (19 files)
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `Models/Stock.swift` | ~120 | Core stock model with logo mapping |
+| `Models/StockDetailInfo.swift` | ~200 | Comprehensive stock detail with 20+ nested types |
+| `Models/StockExchange.swift` | ~30 | Exchange enum (KOSPI, KOSDAQ, NASDAQ, NYSE, AMEX) |
+| `Models/StockFilter.swift` | ~30 | Filter enum (marketCap, volume, gainers, losers, etc.) |
+| `Models/MarketVenue.swift` | ~15 | Trading venue enum (KRX, NXT, Combined) |
+| `Models/MarketIndex.swift` | ~20 | Market index data (KOSPI, S&P 500, etc.) |
+| `Models/CurrencyRate.swift` | ~20 | Foreign exchange rate model |
+| `Models/NewsArticle.swift` | ~50 | News article with region, category, content type |
+| `Models/MarketTheme.swift` | ~40 | Market sector theme with sentiment |
+| `Models/BannerItem.swift` | ~15 | Promotional banner content |
+| `Models/ChartSettings.swift` | ~100 | Technical chart indicator configuration |
+| `Models/ChartSettingsData.swift` | ~20 | Chart configuration data transfer object |
+| `Models/IndicatorComputation.swift` | ~30 | Computed indicator results (MA, BB, RSI, etc.) |
+| `Models/StatisticItem.swift` | ~30 | Stock info grid field definitions |
+| `Models/StatisticPreferences.swift` | ~25 | User-customizable statistic display preferences |
+| `Models/AuthModels.swift` | ~50 | LoginRequest, RegisterRequest, AppleSignInRequest, AuthTokenResponse |
+| `Models/User.swift` | ~30 | Authenticated user profile (id, name, email, authProvider) |
+| `Models/EventItem.swift` | ~62 | Event/promotion model with EventStatus and EventCategory enums |
+| `Models/MarketSessionStatus.swift` | ~129 | Market session status enum with countdown timer logic |
+
+### Repository Layer (9 files)
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `Repositories/Protocols/MarketRepositoryProtocol.swift` | ~25 | Market data access protocol (9 methods) |
+| `Repositories/Protocols/BannerRepositoryProtocol.swift` | ~10 | Banner data protocol |
+| `Repositories/Protocols/NewsRepositoryProtocol.swift` | ~10 | News data protocol |
+| `Repositories/Protocols/EventRepositoryProtocol.swift` | ~10 | Event/promotion data protocol |
+| `Repositories/API/APIMarketRepository.swift` | ~360 | Live API implementation with mock fallback |
+| `Repositories/Mock/MockMarketRepository.swift` | ~1,070 | Complete mock data generation |
+| `Repositories/Mock/MockBannerRepository.swift` | ~30 | Mock banner data |
+| `Repositories/Mock/MockNewsRepository.swift` | ~80 | Mock news data |
+| `Repositories/Mock/MockEventRepository.swift` | ~50 | Mock event/promotion data |
+
+### Feature Modules (66 files)
+
+#### Main Navigation (1 file)
+| File | Purpose |
+|------|---------|
+| `Features/MainTabView.swift` | Root tab bar with 5 tabs, floating tab bar, search modal |
+
+#### Splash Screen (1 file)
+| File | Purpose |
+|------|---------|
+| `Features/Splash/SplashView.swift` | Branded launch screen with animated progress bar |
+
+#### Authentication (2 files)
+| File | Purpose |
+|------|---------|
+| `Features/Auth/LoginView.swift` | Email/password login + Apple Sign In with AuthTextField component |
+| `Features/Auth/RegisterView.swift` | User registration form with validation |
+
+#### Home Screen (20 files)
+| File | Purpose |
+|------|---------|
+| `Features/Home/HomeView.swift` | Home screen layout with scrollable sections |
+| `Features/Home/HomeViewModel.swift` | Data loading, filtering, WebSocket subscription |
+| `Features/Home/Components/HomeHeaderView.swift` | User greeting header |
+| `Features/Home/Components/BannerCarouselView.swift` | Horizontal banner carousel |
+| `Features/Home/Components/DateDisplayView.swift` | Korean date display |
+| `Features/Home/Components/MarketOverviewRowView.swift` | Market indices row |
+| `Features/Home/Components/CurrencyRatesRowView.swift` | FX rates display |
+| `Features/Home/Components/StockListView.swift` | Filtered stock list with live prices |
+| `Features/Home/Components/StockRowView.swift` | Individual stock row |
+| `Features/Home/Components/FilterTabsView.swift` | Filter pill selector |
+| `Features/Home/Components/StockFilterSheet.swift` | Filter selection modal |
+| `Features/Home/Components/ExchangeSelectionSheet.swift` | Exchange selection modal |
+| `Features/Home/Components/AIMarketIssuesView.swift` | Market themes section |
+| `Features/Home/Components/MarketThemeBubbleChartView.swift` | Bubble chart visualization |
+| `Features/Home/Components/NewsSectionView.swift` | News feed section |
+| `Features/Home/Components/NewsCardView.swift` | News article card |
+| `Features/Home/Components/NewsFilterSheet.swift` | News filter modal |
+| `Features/Home/Components/MarketIndexCardView.swift` | Index display card |
+| `Features/Home/Components/SkeletonViews.swift` | Loading skeleton components |
+
+#### Search (2 files)
+| File | Purpose |
+|------|---------|
+| `Features/Search/SearchView.swift` | Full-screen search with tabbed categories |
+| `Features/Search/SearchViewModel.swift` | Search logic, autocomplete, favorites |
+
+#### Stock Detail Page — Primary (19 files)
+| File | Purpose |
+|------|---------|
+| `Features/StockDetailPage/StockDetailPageView.swift` | Main stock detail screen |
+| `Features/StockDetailPage/StockDetailPageViewModel.swift` | Detail data, chart, WebSocket |
+| `Features/StockDetailPage/Components/StockPriceHeaderView.swift` | Price header with venue selector |
+| `Features/StockDetailPage/Components/StockChartView.swift` | Candlestick/line chart |
+| `Features/StockDetailPage/Components/SubIndicatorChartView.swift` | RSI, MACD, Volume charts |
+| `Features/StockDetailPage/Components/StockDetailPeriodTabsView.swift` | Period selector (1D–3Y) |
+| `Features/StockDetailPage/Components/StockDetailSectionsView.swift` | Content tab container |
+| `Features/StockDetailPage/Components/StockInfoGridView.swift` | Fundamentals grid |
+| `Features/StockDetailPage/Components/StockInfoEditSheet.swift` | Info field editor |
+| `Features/StockDetailPage/Components/StockInfoExplanationSheet.swift` | Info field tooltips |
+| `Features/StockDetailPage/Components/StockOrderBookView.swift` | Bid/Ask order book |
+| `Features/StockDetailPage/Components/StockDailyPriceView.swift` | Daily price table |
+| `Features/StockDetailPage/Components/AnalystOpinionDetailView.swift` | Analyst consensus |
+| `Features/StockDetailPage/Components/ReportDetailView.swift` | Research reports list |
+| `Features/StockDetailPage/Components/DividendDetailView.swift` | Dividend history |
+| `Features/StockDetailPage/Components/FinancialDetailView.swift` | Financial statements |
+| `Features/StockDetailPage/Components/InvestorFlowDetailView.swift` | Investor flow charts |
+| `Features/StockDetailPage/Components/IndicatorPillsView.swift` | Indicator chips |
+| `Features/StockDetailPage/Components/ChartSettingsSheet.swift` | Indicator config modal |
+
+#### Stock Detail — Legacy (2 files)
+| File | Purpose |
+|------|---------|
+| `Features/StockDetail/StockDetailView.swift` | Legacy detail view (superseded) |
+| `Features/StockDetail/StockDetailViewModel.swift` | Legacy detail view model |
+
+#### Other Features (8 files)
+| File | Purpose |
+|------|---------|
+| `Features/NewsDetail/NewsDetailView.swift` | News article detail |
+| `Features/NewsDetail/NewsArticleDetailView.swift` | Full article content view |
+| `Features/NewsDetail/NewsDetailViewModel.swift` | News detail data |
+| `Features/ThemeDetail/ThemeDetailView.swift` | Market theme detail |
+| `Features/ThemeDetail/ThemeDetailPageView.swift` | Extended theme detail page |
+| `Features/ThemeDetail/ThemeDetailViewModel.swift` | Theme detail data |
+| `Features/MarketOverview/MarketOverviewDetailView.swift` | Full market indices view |
+| `Features/StockDetailPage/Components/CompanyProfileCard.swift` | Company profile display card |
+
+#### AI Insights (1 file)
+| File | Purpose |
+|------|---------|
+| `Features/AIInsights/AIInsightsView.swift` | AI-powered insights hub with structured reports, categories, and visual types |
+
+#### My Page (2 files)
+| File | Purpose |
+|------|---------|
+| `Features/MyPage/MyPageView.swift` | User profile hub — investment summary, services, settings, legal info |
+| `Features/MyPage/MyPageDetailViews.swift` | Detail views for notification settings, reports, AI settings, favorites, browsing history, theme, font, language, FAQ, terms, privacy, licenses |
+
+#### Events (2 files)
+| File | Purpose |
+|------|---------|
+| `Features/Events/EventsView.swift` | Event/promotion listing with category and status filters |
+| `Features/Events/EventDetailView.swift` | Event detail — dates, rewards, conditions, participants, related stocks |
+
+#### Notifications (2 files)
+| File | Purpose |
+|------|---------|
+| `Features/Notifications/NotificationView.swift` | Notification feed with read/unread state |
+| `Features/Notifications/NotificationSettingsView.swift` | Notification preferences — price alerts, news, events toggles |
+
+#### Placeholder Screens (4 files)
+| File | Purpose |
+|------|---------|
+| `Features/Placeholders/ProductsPlaceholderView.swift` | Products tab placeholder |
+| `Features/Placeholders/AssetsPlaceholderView.swift` | Assets tab placeholder |
+| `Features/Placeholders/StocksPlaceholderView.swift` | Stocks tab placeholder |
+| `Features/Placeholders/MenuPlaceholderView.swift` | Menu tab placeholder |
+
+### Reusable Components (10 files)
+
+| File | Purpose |
+|------|---------|
+| `Components/CompanyLogoView.swift` | Company logo renderer (text/initials/symbol) |
+| `Components/KLDetailNavBar.swift` | Detail page navigation bar |
+| `Components/KLSegmentedControl.swift` | Custom segmented control |
+| `Components/KLScrollableTabHeader.swift` | Scrollable tab header |
+| `Components/KLMoreButton.swift` | "More" action button |
+| `Components/BAROMarkView.swift` | BARO brand logo mark |
+| `Components/PriceChangeLabel.swift` | Price change display with color coding |
+| `Components/AIGlowOverlay.swift` | Animated glow effect overlay for AI-related UI elements |
+| `Components/FavoriteToastPill.swift` | Toast notification pill for favorite toggle feedback |
+| `Components/FloatingAIButton.swift` | Floating action button for quick AI insights access |
+
+### Tests (3 files)
+
+| File | Purpose |
+|------|---------|
+| `BAROTests/BAROTests.swift` | Unit test target |
+| `BAROUITests/BAROUITests.swift` | UI test target |
+| `BAROUITests/BAROUITestsLaunchTests.swift` | Launch performance tests |
+
+## Naming Conventions
+
+| Pattern | Convention | Example |
+|---------|-----------|---------|
+| Views | `XyzView.swift` | `HomeView.swift`, `SearchView.swift` |
+| ViewModels | `XyzViewModel.swift` | `HomeViewModel.swift` |
+| Components | Descriptive name | `StockRowView.swift`, `BannerCarouselView.swift` |
+| Design System | `KL` or `BARO` prefix | `KLSegmentedControl.swift`, `BAROColors.swift` |
+| Extensions | `Type+Feature.swift` | `Color+Hex.swift`, `Double+Currency.swift` |
+| Protocols | `XyzProtocol.swift` | `MarketRepositoryProtocol.swift` |
+| Mock impl | `MockXyz.swift` | `MockMarketRepository.swift` |
+| API impl | `APIXyz.swift` | `APIMarketRepository.swift` |
+| Sheet/Modal | `XyzSheet.swift` | `StockFilterSheet.swift` |

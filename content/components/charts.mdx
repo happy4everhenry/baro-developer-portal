@@ -1,0 +1,282 @@
+# Charts <KoreanLabel>차트 엔진</KoreanLabel>
+
+<PageMeta status="live" layer="frontend" />
+
+BARO's interactive chart system draws financial data using SwiftUI `Canvas` for silky smooth 60fps rendering. You can pinch to zoom, drag to scrub, and pick from tons of chart styles!
+
+<StatGrid columns={4}>
+  <StatCard value="23" label="Chart Types" />
+  <StatCard value="17" label="Overlay Indicators" />
+  <StatCard value="155+" label="Sub-Indicators" />
+  <StatCard value="5x" label="Max Zoom Level" />
+</StatGrid>
+
+<InfoBox type="fun" title="What is a chart engine?">
+Think of the chart engine as a super-powered drawing tool. You give it a bunch of numbers (stock prices over time), and it paints a beautiful picture that updates in real time. It can draw candles, lines, bars, and many more shapes!
+</InfoBox>
+
+<Tabs>
+<Tab label="Chart Types" icon="📊">
+
+## StockChartView <KoreanLabel>주식 차트</KoreanLabel>
+
+The core chart component rendered using SwiftUI `Canvas` for high-performance drawing. It switches rendering logic based on `ChartType` and all data is pre-downsampled by the ViewModel.
+
+<PropsTable>
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `points` | `[ChartPoint]` | Required | Full data for gesture hit-testing (unsampled) |
+| `displayPoints` | `[ChartPoint]` | Required | Pre-downsampled data for rendering (LTTB ~300 points) |
+| `chartType` | `ChartType` | Required | Active chart rendering mode (candle, line, bar, etc.) |
+| `isPositive` | `Bool` | Required | Overall trend direction for base line color |
+| `minPrice` | `Double` | Required | Pre-computed minimum price (avoids per-frame scan) |
+| `maxPrice` | `Double` | Required | Pre-computed maximum price |
+| `priceRange` | `Double` | Required | Pre-computed `maxPrice - minPrice` |
+| `scrubbingPrice` | `Binding<Double?>` | Required | Currently scrubbed price (nil when not scrubbing) |
+| `scrubbingDate` | `Binding<Date?>` | Required | Date of the scrubbed data point |
+| `referencePrice` | `Double` | Required | Previous close price for color comparison |
+| `chartSettings` | `ChartSettings` | Required | Observable zoom/pan state object |
+</PropsTable>
+
+### Layout Constants
+
+- **Chart height**: 200pt
+- **Price badge width**: 62pt
+- **Top/Bottom padding**: 32pt each
+- **Drawable area**: 136pt (200 - 32 - 32)
+
+### Chart Type Catalog
+
+| Category | Chart Types | Renderer |
+|----------|-------------|----------|
+| **Candlestick** | Candle, HeikinAshi, CandleVolume | `candlestickCanvas` -- Korean style: hollow up (red), filled down (blue) |
+| **OHLC Bar** | Bar, BarOHLC | `ohlcBarCanvas` -- Vertical line + left/right ticks |
+| **Line** | Line, AreaLine | `multiColorLineCanvas` + optional `gradientFill` |
+| **Step** | Step | `stepLineCanvas` -- Horizontal/vertical staircase |
+| **Specialized** | Flow, PnF, Renko, Kagi, ThreeLineBreak, Swing, InverseClock, Scatter, Equivolume, etc. | Falls back to `multiColorLineCanvas` |
+
+<Accordion>
+<AccordionItem title="Candlestick Rendering" icon="🕯️" badge="Korean Style" defaultOpen={true}>
+
+Korean-convention candlestick chart drawn via SwiftUI `Canvas`. Up candles are **hollow outlined** (red), down candles are **filled** (blue) -- the opposite of typical Western charting.
+
+<InfoBox type="warning" title="Korean vs Western convention">
+In Korean charts, UP candles are hollow red outlines and DOWN candles are filled blue. This is the reverse of what most Western charting apps show!
+</InfoBox>
+
+- **Up Candle** <KoreanLabel>양봉</KoreanLabel> -- Hollow body, red outline. Condition: `close >= open`
+- **Down Candle** <KoreanLabel>음봉</KoreanLabel> -- Filled body, blue. Condition: `close < open`
+
+```swift filename="StockChartView+Candlestick.swift"
+Canvas { context, size in
+    let barWidth = max(2.0, (width / CGFloat(dp.count)) * 0.6)
+    let wickWidth: CGFloat = 1.0
+
+    for (index, point) in dp.enumerated() {
+        let isUp = point.close >= point.open
+        let color = isUp ? Color.klPriceUp : Color.klPriceDown
+
+        // Wick: thin vertical line from high to low
+        context.fill(Path(wickRect), with: .color(color))
+
+        // Body: open-to-close rectangle
+        if isUp {
+            // Hollow (outlined) for up candles
+            context.stroke(Path(bodyRect), with: .color(color),
+                           style: StrokeStyle(lineWidth: 1))
+        } else {
+            // Filled for down candles
+            context.fill(Path(bodyRect), with: .color(color))
+        }
+    }
+}
+```
+
+</AccordionItem>
+
+<AccordionItem title="Multi-Color Line" icon="🌈" badge="Line">
+
+Line segments change color based on direction: red for going up, blue for going down. A faint continuous background line prevents visual gaps at color transitions.
+
+```swift filename="StockChartView+MultiColorLine.swift"
+// Pass 1: Continuous background line (30% opacity)
+context.stroke(continuousPath, with: .color(baseLineColor.opacity(0.3)),
+    style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round))
+
+// Pass 2: Multi-color segments on top
+for index in 1..<dp.count {
+    let segUp = dp[index].price >= dp[index - 1].price
+    if segUp != currentIsUp {
+        // Color changed — flush current path and start new one
+        context.stroke(currentPath,
+            with: .color(currentIsUp ? Color.klPriceUp : Color.klPriceDown), ...)
+        currentPath = Path()
+        currentIsUp = segUp
+    }
+    currentPath.addLine(to: CGPoint(x: toX, y: toY))
+}
+```
+
+</AccordionItem>
+
+<AccordionItem title="High/Low Annotations" icon="📌" badge="Labels">
+
+Text labels showing the highest and lowest prices within the visible chart window. Positioned above the peak and below the trough, clamped to avoid clipping at edges.
+
+```swift filename="StockChartView+Annotations.swift"
+// High label — red color, positioned 14pt above chart peak
+Text("최고 \(Int(maxPrice).formattedWon)")
+    .font(.system(size: 9, weight: .medium))
+    .foregroundStyle(Color.klPriceUp)
+    .position(x: min(max(highX, 45), width - 45), y: highY - 14)
+
+// Low label — blue color, positioned 14pt below chart trough
+Text("최저 \(Int(minPrice).formattedWon)")
+    .font(.system(size: 9, weight: .medium))
+    .foregroundStyle(Color.klPriceDown)
+    .position(x: min(max(lowX, 45), width - 45), y: lowY + 14)
+```
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+
+<Tab label="Indicators" icon="📉">
+
+## Overlay & Sub-Indicators
+
+BARO supports a huge library of technical indicators that can be layered on top of charts.
+
+<Accordion>
+<AccordionItem title="IndicatorPillsView" icon="💊" badge="UI" defaultOpen={true}>
+
+Horizontally scrollable row of small capsule pills showing which overlay indicators and sub-indicators are currently active on the chart.
+
+<PropsTable>
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `overlays` | `Set<OverlayIndicator>` | Active overlay indicators (MA, Bollinger, etc.) |
+| `subIndicators` | `Set<String>` | Active sub-indicator IDs (resolved to names via catalog) |
+</PropsTable>
+
+Each pill is a small capsule with 10px font, `#F2F3F5` background, and `0.5px` border. Example pills: MA, Bollinger, RSI, MACD.
+
+</AccordionItem>
+
+<AccordionItem title="Overlay Indicators (17)" icon="📐" badge="Overlays">
+
+These are drawn directly on top of the price chart.
+
+**Available overlays:** MA, Bollinger, Ichimoku, Parabolic SAR, DEMA, TEMA, Envelope, Pivot, Price Channel, STARC, Volume Profile, and more.
+
+Each overlay can be toggled on or off independently using checkboxes in the ChartSettingsSheet.
+
+</AccordionItem>
+
+<AccordionItem title="Sub-Indicators (155+)" icon="🔬" badge="Sub">
+
+Sub-indicators appear in a separate panel below the main chart. They are organized by category in an expandable accordion inside the ChartSettingsSheet.
+
+<InfoBox type="info" title="That is a LOT of indicators!">
+155+ sub-indicators means BARO supports almost every technical analysis tool a trader could want. They are grouped by category (momentum, volatility, volume, trend, etc.) so they are easy to find.
+</InfoBox>
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+
+<Tab label="Controls & Settings" icon="⚙️">
+
+## Chart Controls
+
+<Accordion>
+<AccordionItem title="Zoom & Scrubbing" icon="🔎" badge="Gestures" defaultOpen={true}>
+
+Interactive gestures: pinch-to-zoom (1x-5x), drag-to-scrub with crosshair, edge-pan for auto-scrolling when zoomed, and double-tap to reset.
+
+| Gesture | Behavior | Animation |
+|---------|----------|-----------|
+| **Pinch** (`MagnifyGesture`) | Scales chart data window from 1x to 5x | Real-time during gesture, commits on end |
+| **Drag** (`DragGesture(minimumDistance: 0)`) | Shows scrub line at finger position with price + date | Direct manipulation (no animation) |
+| **Edge-pan** | When zoomed >1x, finger in 25px edge zone auto-scrolls | `maxPanSpeed: 0.008`, intensity-based |
+| **Double-tap** | Resets zoom to 1x and pan to center | `.easeOut(duration: 0.25)` |
+
+When scrubbing is active, a vertical line with a filled circle appears at the data point. The scrubbing color compares the scrubbed price to the reference price (previous close).
+
+```swift filename="StockChartView+Scrubbing.swift"
+// Edge zones: 25px from each side of the chart
+if zoom > 1.0 {
+    let edgeZone: CGFloat = 25
+    let maxPanSpeed: CGFloat = 0.008
+
+    if x < edgeZone {
+        let intensity = min(1.0, (edgeZone - x) / edgeZone)
+        chartSettings.panOffset = chartSettings.clampedPanOffset(
+            chartSettings.panOffset - maxPanSpeed * intensity
+        )
+    } else if x > chartWidth - edgeZone {
+        let intensity = min(1.0, (x - (chartWidth - edgeZone)) / edgeZone)
+        chartSettings.panOffset = chartSettings.clampedPanOffset(
+            chartSettings.panOffset + maxPanSpeed * intensity
+        )
+    }
+}
+```
+
+</AccordionItem>
+
+<AccordionItem title="StockDetailPeriodTabsView" icon="📆" badge="Period">
+
+Horizontal period selector for chart time ranges. Includes a gear icon button that opens the `ChartSettingsSheet`.
+
+<PropsTable>
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `selectedPeriod` | `Binding<ChartPeriod>` | Currently selected time period |
+| `chartSettings` | `ChartSettings` | Observable settings passed to the chart settings sheet |
+</PropsTable>
+
+### Period Options
+
+| Period | Korean Label |
+|--------|-------------|
+| 1D | <KoreanLabel>1일</KoreanLabel> |
+| 1W | <KoreanLabel>1주</KoreanLabel> |
+| 1M | <KoreanLabel>1개월</KoreanLabel> |
+| 3M | <KoreanLabel>3개월</KoreanLabel> |
+| 1Y | <KoreanLabel>1년</KoreanLabel> |
+| 5Y | <KoreanLabel>5년</KoreanLabel> |
+
+The selected period has bold black text with a 2px bottom border. Unselected periods are gray. A gear icon at the trailing edge opens settings.
+
+</AccordionItem>
+
+<AccordionItem title="ChartSettingsSheet" icon="🛠️" badge="Settings">
+
+Bottom sheet for configuring chart type, overlay indicators, and sub-indicators. Presented as a `.medium` detent sheet with three tabs.
+
+### Tabs
+
+| Tab | Korean | UI Pattern | Content |
+|-----|--------|------------|---------|
+| Chart Type | <KoreanLabel>차트유형</KoreanLabel> | Radio buttons (single select) | 23 chart types: Candle, Bar, BarOHLC, Line, Flow, Step, PnF, ThreeLineBreak, Swing, Renko, Kagi, AreaLine, InverseClock, Scatter, HeikinAshi, CandleVolume, Equivolume, etc. |
+| Overlay | <KoreanLabel>오버레이</KoreanLabel> | Checkboxes (multi select) | MA, Bollinger, Ichimoku, Parabolic SAR, DEMA, TEMA, Envelope, Pivot, Price Channel, STARC, Volume Profile, etc. |
+| Sub-Indicators | <KoreanLabel>보조지표</KoreanLabel> | Expandable accordion by category | 155+ indicators grouped by category, each with a checkbox toggle |
+
+```swift filename="ChartSettingsSheet.swift"
+private func resetSettings() {
+    withAnimation(.easeInOut(duration: 0.2)) {
+        settings.selectedChartType = .candle        // Default chart type
+        settings.selectedOverlays.removeAll()       // Clear all overlays
+        settings.selectedSubIndicators.removeAll()   // Clear all sub-indicators
+    }
+}
+```
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+</Tabs>

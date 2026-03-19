@@ -1,0 +1,147 @@
+# Radii & Shadows <KoreanLabel>라운딩 & 그림자</KoreanLabel>
+
+<PageMeta status="live" layer="frontend" />
+
+Corner radius tokens and elevation system for BARO. Rounded corners follow iOS HIG conventions with five tiers. Shadows are deliberately subtle for a clean, paper-like look.
+
+<StatGrid columns={4}>
+  <StatCard value="5" label="Radius Tokens" />
+  <StatCard value="10--24" label="Range (pt)" />
+  <StatCard value="4" label="Shadow Levels" />
+  <StatCard value="iOS" label="HIG Aligned" />
+</StatGrid>
+
+<InfoBox type="tip" title="Corners tell you what things are">
+Smaller rounded corners (10pt) mean small, tappable things like buttons. Bigger rounded corners (24pt) mean large containers like carousel cards. The rounder something is, the bigger and more spacious it usually is.
+</InfoBox>
+
+<Tabs>
+<Tab label="Corner Radius" icon="square">
+
+## Corner Radius Tokens
+
+Five radius values create a consistent rounding language. Smaller radii = compact, functional elements. Larger radii = spacious containers.
+
+| Token | Value | Component | Description |
+|-------|-------|-----------|-------------|
+| `radiusSmall` | 10pt | Buttons | Compact interactive elements |
+| `radiusMedium` | 14pt | Cards | Default card radius, most frequently used |
+| `radiusLarge` | 16pt | Large cards | Visually dense card content |
+| `radiusPill` | 20pt | Pill buttons | Fully rounded ends on ~40pt tall elements |
+| `radiusXLarge` | 24pt | Carousels | Maximum radius for outermost containers |
+
+<Accordion>
+<AccordionItem title="Detailed Token Reference" icon="list" defaultOpen={false}>
+
+| Token | Value | Components | Notes |
+|-------|-------|------------|-------|
+| `radiusSmall` | `10pt` | Buttons, tab pills, filter chips, badges, logo containers | Compact interactive elements. Pairs with `sm` (8pt) padding. |
+| `radiusMedium` | `14pt` | Stock row cards, news cards, index cards, chart containers | Default card radius. Most frequently used value across the app. |
+| `radiusLarge` | `16pt` | Large content cards, modal sheets, expanded detail views | Used when card content is visually dense and needs more breathing room. |
+| `radiusPill` | `20pt` | Pill-shaped buttons, search bar, floating action buttons | Creates fully rounded ends on elements ~40pt tall. |
+| `radiusXLarge` | `24pt` | Banner carousel containers, full-width hero cards | Maximum radius. Reserved for outermost container-level elements. |
+
+</AccordionItem>
+<AccordionItem title="Contextual Examples" icon="eye" defaultOpen={false}>
+
+**radiusSmall (10pt) -- Buttons:** Tab filter pills with 8pt vertical / 20pt horizontal padding. Active tabs use `klTabActive` (#1A1A1A); inactive use `klTabInactive` (#ECEDF0).
+
+**radiusMedium (14pt) -- Cards:** Standard stock row cards with 1px `klBorder` stroke and `klSurface` background. Logo containers inside use `radiusSmall` (10pt).
+
+**radiusPill (20pt) -- Pills:** "More" buttons and AI analysis pills with fully rounded radius. Background uses `klMoreButtonBg` (#F6F7F9).
+
+**radiusXLarge (24pt) -- Carousel:** Banner carousel cards with maximum radius and banner gradient background.
+
+</AccordionItem>
+<AccordionItem title="Special Radius Contexts" icon="info" defaultOpen={false}>
+
+| Element | Radius | Notes |
+|---------|--------|-------|
+| **Company logo container** | `10pt` | Matches `radiusSmall`. Square icon (36pt/40pt) with rounded corners |
+| **Circular avatars** | `.infinity` | Uses `.clipShape(Circle())` in SwiftUI. Not a fixed radius |
+| **Navigation bar** | `0pt` | Full-width bars have no corner rounding (edge-to-edge) |
+| **Sheet presentations** | `System` | iOS system sheet radius (~16pt). Managed by UIKit |
+| **Chart containers** | `14pt` | Uses `radiusMedium` to match surrounding card context |
+| **Input fields** | `10pt` | Uses `radiusSmall` for consistency with button tier |
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+<Tab label="Shadows" icon="layers">
+
+## Elevation & Shadows
+
+BARO uses a minimal, 4-level shadow system aligned with iOS design language. Shadows are subtle and structural -- they show elevation hierarchy, not decoration.
+
+| Level | Name | Shadow Value | Components | State |
+|-------|------|-------------|------------|-------|
+| **Level 0** | Flat | `border only` | List items, dividers | Default |
+| **Level 1** | Subtle | `0 2 4 / 0.04` | Cards, buttons (rest) | Rest |
+| **Level 2** | Elevated | `0 4 12 / 0.06` | Hover, floating nav | Hover / Active |
+| **Level 3** | Overlay | `0 8 32 / 0.12` | Modals, popovers | Overlay |
+
+<InfoBox type="info" title="Shadow Philosophy">
+BARO follows the iOS light theme convention of very subtle shadows. Elevation is mostly communicated through border color changes and background shifts rather than heavy drop shadows. This creates a clean, paper-like aesthetic consistent with Korean fintech design standards.
+</InfoBox>
+
+## Shadow Specifications
+
+Exact CSS and SwiftUI values for each level.
+
+| Level | CSS Value | SwiftUI | Components | State |
+|-------|-----------|---------|------------|-------|
+| <StatusBadge status="live">Level 0</StatusBadge> | `none` | `none` | Inline list items, divider rows | Default |
+| <StatusBadge status="live">Level 1</StatusBadge> | `0 2px 4px rgba(0,0,0,0.04)` | `.shadow(color: .black.opacity(0.04), radius: 2, y: 2)` | Cards, stat cards, buttons | Rest |
+| <StatusBadge status="live">Level 2</StatusBadge> | `0 4px 12px rgba(0,0,0,0.06)` | `.shadow(color: .black.opacity(0.06), radius: 6, y: 4)` | Hovered cards, floating nav | Hover / Active |
+| <StatusBadge status="live">Level 3</StatusBadge> | `0 8px 32px rgba(0,0,0,0.12)` | `.shadow(color: .black.opacity(0.12), radius: 16, y: 8)` | Modals, search overlay, popovers | Overlay |
+
+</Tab>
+<Tab label="Usage Guide" icon="book">
+
+## Swift Implementation
+
+Radius tokens are defined alongside spacing in `KLINESpacing` because radii and spacing are closely related dimensional values.
+
+```swift filename="KLINESpacing.swift (Corner Radius section)"
+// MARK: - Corner Radius
+/// 10pt -- Buttons
+static let radiusSmall: CGFloat = 10
+/// 14pt -- Cards
+static let radiusMedium: CGFloat = 14
+/// 16pt -- Large cards
+static let radiusLarge: CGFloat = 16
+/// 20pt -- Pill buttons
+static let radiusPill: CGFloat = 20
+/// 24pt -- Carousel containers
+static let radiusXLarge: CGFloat = 24
+```
+
+```swift filename="Usage Example"
+// Standard card with Level 1 shadow
+RoundedRectangle(cornerRadius: KLINESpacing.radiusMedium)
+    .fill(Color.klSurface)
+    .shadow(color: .black.opacity(0.04), radius: 2, y: 2)
+
+// Pill-shaped CTA button
+Text("AI 분석")
+    .font(.klBody)
+    .padding(.horizontal, KLINESpacing.lg)
+    .padding(.vertical, KLINESpacing.sm)
+    .background(Color.klJade.opacity(0.1))
+    .clipShape(RoundedRectangle(cornerRadius: KLINESpacing.radiusPill))
+
+// Carousel banner with max radius
+BannerCarouselCard()
+    .clipShape(RoundedRectangle(cornerRadius: KLINESpacing.radiusXLarge))
+```
+
+## Guidelines
+
+<FeatureGrid columns={2}>
+  <FeatureCard icon="check" title="Do" description="Use radiusMedium (14pt) as the default for all cards. Use radiusSmall (10pt) for buttons and chips. Use radiusPill (20pt) for search bars and pill CTAs. Apply Level 1 shadow to cards at rest. Transition to Level 2 on hover/press. Match inner radius to outer minus padding." />
+  <FeatureCard icon="x" title="Don't" description="Don't use arbitrary radius values (8pt, 12pt). Don't mix radius tokens at the same level. Don't use heavy shadows -- keep opacity below 0.12. Don't apply colored shadows. Don't use rounded corners on full-width containers. Don't skip shadow levels (0 to 3 directly). Don't use radiusXLarge on small components." />
+</FeatureGrid>
+
+</Tab>
+</Tabs>

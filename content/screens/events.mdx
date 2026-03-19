@@ -1,0 +1,57 @@
+# Events <KoreanLabel>이벤트</KoreanLabel>
+
+<PageMeta status="live" layer="frontend" since="2025" />
+
+<InfoBox type="fun" title="What are events?">
+**Events** are special promotions and competitions run by BARO — like trading challenges, educational programs, or reward campaigns. Think of them as fun activities you can join!
+</InfoBox>
+
+## What You See
+
+```
+┌─────────────────────────────┐
+│  Event List                 │
+│  ┌───────────────────────┐  │
+│  │ 🏆 Trading Challenge  │  │  ← Gradient card
+│  │ Status: Active         │  │  ← Status badge
+│  │ 1,234 participants     │  │  ← Participant count
+│  └───────────────────────┘  │
+│  ┌───────────────────────┐  │
+│  │ 📚 Education Program  │  │
+│  │ Status: Upcoming       │  │
+│  └───────────────────────┘  │
+│  Category Filters           │  ← Trading, Reward, Education, etc.
+│  Status Filters             │  ← Upcoming, Active, Ended
+└─────────────────────────────┘
+```
+
+## Event Detail
+
+When you tap an event, you see its full detail:
+
+| Section | Content |
+|---------|---------|
+| Header | Title, icon, gradient, status badge |
+| Dates | Start/end dates with countdown for upcoming events |
+| Description | Full event details and rules |
+| Conditions | List of participation requirements |
+| Rewards | Prize description and eligibility |
+| Participants | Current participant count |
+| Related Stocks | Stock codes linked to the event |
+
+## Event Categories
+
+| Category | Description |
+|----------|-------------|
+| Trading 거래 | Trading volume or PnL competitions |
+| Reward 리워드 | Reward campaigns for activity |
+| Education 교육 | Learning programs and tutorials |
+| Competition 대회 | Investment competitions |
+| Announcement 공지 | Important announcements |
+
+## Source Files
+
+| File | Purpose |
+|------|---------|
+| `Features/Events/EventsView.swift` | Event listing with category/status filters |
+| `Features/Events/EventDetailView.swift` | Full event detail page |

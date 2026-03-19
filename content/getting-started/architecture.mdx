@@ -1,0 +1,262 @@
+# Architecture <KoreanLabel>아키텍처</KoreanLabel>
+
+<PageMeta status="live" layer="shared" />
+
+BARO uses the **MVVM + Repository** pattern. This page explains what that means, how each layer works, and how they all fit together.
+
+An **AI Platform layer** is currently being built on top of this architecture (Phase 3). It will add intelligent recommendation services, market sentiment analysis, and personalized insights that feed into the existing ViewModel layer via new AI-specific repositories.
+
+<InfoBox type="fun" title="Think of it like a restaurant">
+**Views** are the menu (what customers see). **ViewModels** are the waiters (they take orders and deliver food). **Repositories** are the kitchen (they prepare the actual data). **Models** are the recipes (they define the shape of the food).
+</InfoBox>
+
+---
+
+<Tabs>
+
+<Tab label="Big Picture" icon="🗺️">
+
+## The Full Architecture
+
+This diagram shows every layer of BARO, from what you see on screen all the way down to the raw data models.
+
+<Diagram title="BARO Architecture — All Layers">
+  <DiagramRow>
+    <DiagramGroup label="Presentation Layer" color="jade">
+      <DiagramNode type="view" icon="📱" label="HomeView" sublabel="Main screen" />
+      <DiagramNode type="view" icon="🔍" label="SearchView" sublabel="Stock search" />
+      <DiagramNode type="view" icon="📈" label="StockDetailPageView" sublabel="Detail screen" />
+      <DiagramNode type="view" icon="🧭" label="MainTabView" sublabel="Navigation" />
+      <DiagramNode type="view" icon="🔐" label="LoginView" sublabel="Authentication" />
+      <DiagramNode type="view" icon="🧠" label="AIInsightsView" sublabel="AI Hub" />
+    </DiagramGroup>
+  </DiagramRow>
+  <DiagramArrow direction="down" label="@Observable binding" />
+  <DiagramRow>
+    <DiagramGroup label="Business Logic Layer" color="blue">
+      <DiagramNode type="vm" icon="🧠" label="HomeViewModel" />
+      <DiagramNode type="vm" icon="🧠" label="SearchViewModel" />
+      <DiagramNode type="vm" icon="🧠" label="StockDetailPageViewModel" />
+      <DiagramNode type="vm" icon="🔐" label="AuthManager" />
+    </DiagramGroup>
+  </DiagramRow>
+  <DiagramArrow direction="down" label="async/await" />
+  <DiagramRow>
+    <DiagramGroup label="Data Access Layer" color="purple">
+      <DiagramNode type="repo" icon="📚" label="MarketRepository" sublabel="Protocol" />
+      <DiagramNode type="repo" icon="📚" label="BannerRepository" sublabel="Protocol" />
+      <DiagramNode type="repo" icon="📚" label="NewsRepository" sublabel="Protocol" />
+      <DiagramNode type="repo" icon="📚" label="EventRepository" sublabel="Protocol" />
+    </DiagramGroup>
+  </DiagramRow>
+  <DiagramArrow direction="down" label="implementation" />
+  <DiagramRow>
+    <DiagramGroup label="Implementations" color="amber">
+      <DiagramNode type="service" icon="🧪" label="MockMarketRepo" sublabel="Fake data" />
+      <DiagramNode type="service" icon="🌐" label="APIMarketRepo" sublabel="Real API" />
+      <DiagramNode type="service" icon="🧪" label="MockBannerRepo" sublabel="Fake data" />
+      <DiagramNode type="service" icon="🧪" label="MockNewsRepo" sublabel="Fake data" />
+      <DiagramNode type="service" icon="🧪" label="MockEventRepo" sublabel="Fake data" />
+    </DiagramGroup>
+  </DiagramRow>
+  <DiagramArrow direction="down" />
+  <DiagramRow>
+    <DiagramGroup label="Real-time Layer" color="blue">
+      <DiagramNode type="service" icon="📱" label="WebSocketManager" sublabel="iOS client" />
+      <DiagramNode type="service" icon="🔄" label="FastAPI WS Relay" sublabel="Backend bridge" />
+      <DiagramNode type="service" icon="📊" label="KIS WebSocket" sublabel="Market feed" />
+    </DiagramGroup>
+  </DiagramRow>
+  <DiagramArrow direction="down" />
+  <DiagramRow>
+    <DiagramGroup label="Domain Layer" color="jade">
+      <DiagramNode type="model" icon="💎" label="Stock" />
+      <DiagramNode type="model" icon="💎" label="MarketIndex" />
+      <DiagramNode type="model" icon="💎" label="StockDetailInfo" />
+      <DiagramNode type="model" icon="💎" label="PriceUpdate" />
+      <DiagramNode type="model" icon="💎" label="ChartSettings" />
+    </DiagramGroup>
+  </DiagramRow>
+</Diagram>
+
+</Tab>
+
+
+<Tab label="Each Layer" icon="🧅">
+
+## Layer-by-Layer Breakdown
+
+<Accordion>
+
+<AccordionItem title="Presentation Layer — What you see" icon="📱" badge="Views">
+
+These are the SwiftUI screens the user interacts with. They don't contain any business logic — they just display what the ViewModel tells them to show.
+
+<InfoBox type="info" title="Analogy">
+Views are like **TV screens**. They show whatever signal (data) is sent to them, but they don't decide what's on TV.
+</InfoBox>
+
+**Key views:**
+- `HomeView` — The main screen with stock rankings, indices, and banners
+- `SearchView` — Type a stock name or code to find it
+- `StockDetailPageView` — Full detail page for a single stock
+- `MainTabView` — The tab bar at the bottom that switches between screens
+
+</AccordionItem>
+
+
+<AccordionItem title="Business Logic Layer — The brains" icon="🧠" badge="ViewModels">
+
+ViewModels sit between the View and the data. They fetch data from Repositories, process it, and expose it to Views using Swift's `@Observable` macro.
+
+<InfoBox type="info" title="Analogy">
+ViewModels are like **TV producers**. They decide what content to show, gather it from different sources, and send it to the screen.
+</InfoBox>
+
+**Key ViewModels:**
+- `HomeViewModel` — Loads market overview, top stocks, banners, and news
+- `SearchViewModel` — Handles search queries and filters results
+- `StockDetailPageViewModel` — Manages stock detail, chart settings, and real-time price updates
+
+</AccordionItem>
+
+<AccordionItem title="Data Access Layer — The librarians" icon="📚" badge="Repositories">
+
+Repositories are defined as **protocols** (interfaces). This means you can swap between fake data and real API data without changing any other code.
+
+<InfoBox type="tip" title="Analogy">
+A Repository is like a **librarian**. You ask for a book (data), and the librarian knows exactly where to find it — whether it's on the shelf (mock data) or needs to be ordered from another library (API call). You don't need to know how they got it.
+</InfoBox>
+
+**Repository protocols:**
+- `MarketRepositoryProtocol` — Stocks, indices, market overview
+- `BannerRepositoryProtocol` — Promotional banners
+- `NewsRepositoryProtocol` — Market news articles
+
+**Each protocol has two implementations:**
+- `Mock___Repository` — Returns hardcoded sample data (great for development and previews)
+- `API___Repository` — Makes real HTTP calls to the backend
+
+</AccordionItem>
+
+<AccordionItem title="Real-time Layer — Live prices" icon="⚡" badge="WebSocket">
+
+BARO uses WebSockets for live stock price updates. The data flows through three hops:
+
+<Diagram title="Real-time data flow">
+  <DiagramRow>
+    <DiagramNode type="service" icon="📊" label="KIS WebSocket" sublabel="Korean market feed" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="raw market data" />
+  <DiagramRow>
+    <DiagramNode type="service" icon="🐍" label="FastAPI WS Relay" sublabel="Backend parses & forwards" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="clean JSON" />
+  <DiagramRow>
+    <DiagramNode type="service" icon="📱" label="WebSocketManager" sublabel="iOS app receives updates" />
+  </DiagramRow>
+</Diagram>
+
+<InfoBox type="info" title="Why a relay?">
+The KIS WebSocket sends raw binary data in a Korean-market-specific format. Our Python backend translates it into clean JSON that the iOS app can easily understand.
+</InfoBox>
+
+</AccordionItem>
+
+
+<AccordionItem title="Domain Layer — The data shapes" icon="💎" badge="Models">
+
+Models define the shape of the data that flows through the app. They're plain Swift structs — no logic, just data.
+
+<InfoBox type="info" title="Analogy">
+Models are like **blueprints**. A `Stock` model says "every stock has a name, a price, and a change percentage" — but it doesn't know how to fetch or display that data.
+</InfoBox>
+
+**Key models:**
+- `Stock` — Stock code, name, price, change, volume
+- `MarketIndex` — KOSPI, KOSDAQ index values
+- `StockDetailInfo` — Extended stock information for detail pages
+- `PriceUpdate` — Real-time price tick from WebSocket
+- `ChartSettings` — User's chart configuration (time range, chart type)
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+
+<Tab label="Code Examples" icon="💻">
+
+## How It Works in Code
+
+<Accordion>
+
+<AccordionItem title="Dependency Injection — Switching between mock and real data" icon="🔌">
+
+All services are injected through a `DependencyContainer` that's passed via SwiftUI's environment. Flip the `useMocks` flag to switch between fake and live data.
+
+```swift filename="DependencyContainer.swift"
+@Observable
+final class DependencyContainer {
+    let marketRepository: any MarketRepositoryProtocol
+    let bannerRepository: any BannerRepositoryProtocol
+    let newsRepository: any NewsRepositoryProtocol
+
+    init(useMocks: Bool = true) {
+        if useMocks {
+            self.marketRepository = MockMarketRepository()
+            self.bannerRepository = MockBannerRepository()
+            self.newsRepository = MockNewsRepository()
+        } else {
+            self.marketRepository = APIMarketRepository()
+            self.bannerRepository = MockBannerRepository()
+            self.newsRepository = MockNewsRepository()
+        }
+    }
+}
+```
+
+<InfoBox type="tip" title="Why start with mocks?">
+During development, mocks let you work on the UI without needing the backend server running. When you're ready to test with real data, just set `useMocks: false`.
+</InfoBox>
+
+</AccordionItem>
+
+
+<AccordionItem title="API Client — How the app talks to the backend" icon="🌐">
+
+The `APIClient` is a simple, reusable struct that makes HTTP GET requests and decodes JSON responses.
+
+```swift filename="APIClient.swift"
+struct APIClient: Sendable {
+    let baseURL: URL
+    // Simulator: 127.0.0.1:8000
+    // Device:    192.168.68.57:8000
+
+    func get<T: Decodable>(
+        _ path: String,
+        queryItems: [URLQueryItem]? = nil
+    ) async throws -> T {
+        // 1. Build URL with path + query params
+        // 2. Validate URL → throws APIError.invalidURL
+        // 3. Fetch data via URLSession
+        // 4. Validate HTTP 200-299 → throws APIError.httpError
+        // 5. Decode JSON (snakeCase strategy) → returns T
+    }
+}
+
+enum APIError: LocalizedError {
+    case invalidURL
+    case invalidResponse
+    case httpError(statusCode: Int)
+}
+```
+
+<InfoBox type="info" title="What's Sendable?">
+`Sendable` is a Swift 6 feature that tells the compiler this struct is safe to use across different threads. Since network requests run in the background, this is important!
+</InfoBox>
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+</Tabs>

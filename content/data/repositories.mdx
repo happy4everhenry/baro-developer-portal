@@ -1,0 +1,260 @@
+# Repository Layer
+
+<PageMeta status="live" layer="frontend" />
+
+<InfoBox type="info" title="What is the repository pattern?">
+Think of a repository like a librarian. When your app needs data, it asks the librarian (repository) instead of going to the bookshelf (API) itself. The librarian can get books from the real library (API) or from a practice set (mock data). The app does not care where the data comes from -- it just asks the librarian.
+</InfoBox>
+
+<StatGrid columns={4}>
+  <StatCard value="4" label="Protocols" />
+  <StatCard value="5" label="Implementations" />
+  <StatCard value="11" label="API Methods" />
+  <StatCard value="1" label="DI Container" />
+</StatGrid>
+
+---
+
+## How It All Fits Together
+
+<Diagram title="Repository Pattern">
+  <DiagramRow>
+    <DiagramNode type="view" icon="📱" label="SwiftUI Views" sublabel="HomeView, StockDetailView, etc." />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="Calls ViewModel" />
+  <DiagramRow>
+    <DiagramNode type="vm" icon="🧠" label="ViewModels" sublabel="HomeViewModel, StockDetailPageViewModel" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="Uses protocol" />
+  <DiagramRow>
+    <DiagramNode type="repo" icon="📚" label="Repository Protocol" sublabel="MarketRepositoryProtocol" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="Swappable implementation" />
+  <DiagramRow>
+    <DiagramNode type="service" icon="🧪" label="MockMarketRepository" sublabel="Static data + simulated delays" />
+    <DiagramNode type="service" icon="🌐" label="APIMarketRepository" sublabel="Live KIS API calls" />
+  </DiagramRow>
+</Diagram>
+
+<InfoBox type="tip" title="Why use protocols?">
+By coding against a protocol (a set of rules), we can swap between mock data and real API data with a single switch. This makes testing easy and development fast -- you can build the whole UI without a live server.
+</InfoBox>
+
+---
+
+<Tabs>
+<Tab label="Protocols" icon="📜">
+
+## MarketRepositoryProtocol
+
+The main data access protocol for all market data. All methods are `async throws` and the protocol is `Sendable` for safe concurrent access.
+
+```swift filename="MarketRepositoryProtocol.swift"
+protocol MarketRepositoryProtocol: Sendable {
+    func fetchIndices() async throws -> [MarketIndex]
+    func fetchAllIndices() async throws -> [MarketIndex]
+    func fetchStocks(filter: StockFilter, exchange: StockExchange) async throws -> [Stock]
+    func fetchDetailStocks(filter: StockFilter, exchange: StockExchange) async throws -> [Stock]
+    func fetchCurrencyRates() async throws -> [CurrencyRate]
+    func fetchSearchStocks(domestic: Bool) async throws -> [Stock]
+    func fetchStockDetail(id: String, exchange: StockExchange, name: String, venue: MarketVenue) async throws -> StockDetailInfo
+    func fetchChartData(code: String, exchange: StockExchange, period: String, venue: MarketVenue) async throws -> [ChartPoint]
+    func fetchMarketThemes() async throws -> [MarketTheme]
+}
+```
+
+### Default Venue Parameter
+
+Backward-compatible extension provides default `venue: .combined` for callers that do not specify a venue:
+
+```swift
+extension MarketRepositoryProtocol {
+    func fetchStockDetail(id: String, exchange: StockExchange, name: String) async throws -> StockDetailInfo {
+        try await fetchStockDetail(id: id, exchange: exchange, name: name, venue: .combined)
+    }
+}
+```
+
+---
+
+## BannerRepositoryProtocol
+
+```swift filename="BannerRepositoryProtocol.swift"
+protocol BannerRepositoryProtocol: Sendable {
+    func fetchBanners() async throws -> [BannerItem]
+}
+```
+
+---
+
+## NewsRepositoryProtocol
+
+```swift filename="NewsRepositoryProtocol.swift"
+protocol NewsRepositoryProtocol: Sendable {
+    func fetchLatestNews() async throws -> [NewsArticle]
+}
+```
+
+</Tab>
+<Tab label="Mock Implementation" icon="🧪">
+
+## MockMarketRepository
+
+Static data with simulated delays (200--400ms). Uses deterministic seeded random for consistent mock data across runs.
+
+<InfoBox type="fun" title="Why mock data?">
+Mock data is like a practice dummy. It lets you build and test the whole app without needing a real server or internet connection. The mock data looks realistic because it uses seeded random numbers -- the same "random" values every time.
+</InfoBox>
+
+### Mock Data Coverage
+
+| Data | Count | Details |
+|------|-------|---------|
+| Market indices | 10 | KOSPI, KOSDAQ, NASDAQ, Dow, S&P 500, Nikkei, Hang Seng, Shanghai, FTSE, DAX |
+| Currency rates | 5 | USD, HKD, CNY, JPY, EUR |
+| Base stocks | 50 | 10 per exchange (KOSPI, KOSDAQ, NASDAQ, NYSE, AMEX) with full detail |
+| Generated stocks | 700 | 140 per exchange via `generateStocks()` with seeded random |
+| Market themes | 28 | Across 5 categories (tech, industry, energy, finance, bio) |
+| Chart data | 1,095 days | Multi-phase trend generation with intraday (120 points for 1D) |
+| Order book | 10+10 | 10 ask levels + 10 bid levels |
+| Analyst opinions | 15+ | From 18 Korean brokerages with brand colors |
+| Financial records | 8+ quarters | Quarterly + annual detail records |
+| Dividend records | 4+ years | Quarterly dividend groups |
+
+### Stock Detail Generation
+
+<Accordion>
+<AccordionItem title="What fetchStockDetail() generates" icon="📦" badge="Comprehensive" defaultOpen={true}>
+
+`fetchStockDetail()` generates a full mock detail view including:
+
+- **Venue-aware pricing** -- KRX, NXT, or Combined with slight price offsets
+- **1,095-day chart data** -- Multi-phase trends (4 phases of varying direction)
+- **Intraday data** -- 120 points for 1D charts
+- **Investor flow** -- 15 days of foreign/individual/institutional net buying
+- **Analyst opinions** -- 15 broker opinions with target prices
+- **Research reports** -- 12 reports from different brokerages
+- **Dividends** -- Quarterly groups over 4 years
+- **Financials** -- Quarterly + annual detail records for 15 metrics
+- **Full order book** -- 10 ask + 10 bid levels
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+<Tab label="API Implementation" icon="🌐">
+
+## APIMarketRepository
+
+Live API calls via the FastAPI backend with automatic mock fallback on API failure.
+
+<InfoBox type="tip" title="Built-in safety net">
+Every API method wraps the network call in a `do/catch` block. If the real API fails for any reason, the app automatically falls back to mock data so the user always sees something on screen.
+</InfoBox>
+
+### API Endpoints
+
+| Method | Endpoint | Source |
+|--------|----------|--------|
+| `fetchIndices()` | `GET /api/market/indices` | Yahoo Finance via backend |
+| `fetchAllIndices()` | `GET /api/market/indices/all` | Yahoo Finance via backend |
+| `fetchCurrencyRates()` | `GET /api/market/currency-rates` | Yahoo Finance via backend |
+| `fetchStocks()` | `GET /api/stocks?filter=&exchange=` | KIS Open API |
+| `fetchDetailStocks()` | `GET /api/stocks?filter=&exchange=&detail=true` | KIS Open API |
+| `fetchStockDetail()` | `GET /api/stocks/{id}/detail?exchange=&venue=` | KIS Open API |
+| `fetchChartData()` | `GET /api/stocks/{code}/chart?exchange=&period=&venue=` | KIS Open API |
+| `fetchSearchStocks()` | Mock fallback | No KIS search API |
+| `fetchMarketThemes()` | Mock fallback | No KIS equivalent |
+
+### Fallback Strategy
+
+```swift filename="APIMarketRepository.swift"
+func fetchIndices() async throws -> [MarketIndex] {
+    do {
+        return try await apiClient.get("/api/market/indices")
+    } catch {
+        print("[API] Indices failed, using mock: \(error)")
+        return try await MockMarketRepository().fetchIndices()
+    }
+}
+```
+
+### MockDataFiller
+
+For `fetchStockDetail()`, the API response from KIS only includes price/chart data. Additional sections are filled with deterministic mock data:
+
+| Section | Source |
+|---------|--------|
+| Price, Chart, Order Book | KIS Open API (real data) |
+| Analyst Opinions | `MockDataFiller` (15 opinions from 18 brokerages) |
+| Research Reports | `MockDataFiller` (12 reports) |
+| Dividends | `MockDataFiller` (quarterly groups, 4 years) |
+| Financials | `MockDataFiller` (quarterly + annual, 15 metrics) |
+| Investor Flow | `MockDataFiller` (15 days) |
+
+---
+
+## DependencyContainer
+
+Observable DI container injected via SwiftUI `@Environment`. Controls mock vs. API repository selection.
+
+```swift filename="DependencyContainer.swift"
+@Observable
+final class DependencyContainer {
+    let marketRepository: any MarketRepositoryProtocol
+    let bannerRepository: any BannerRepositoryProtocol
+    let newsRepository: any NewsRepositoryProtocol
+
+    init(useMocks: Bool = false) {
+        if useMocks {
+            self.marketRepository = MockMarketRepository()
+            self.bannerRepository = MockBannerRepository()
+            self.newsRepository = MockNewsRepository()
+        } else {
+            self.marketRepository = APIMarketRepository()
+            self.bannerRepository = MockBannerRepository()  // Still mock
+            self.newsRepository = MockNewsRepository()       // Still mock
+        }
+    }
+}
+```
+
+### Injection
+
+```swift filename="KLINEApp.swift"
+@main
+struct KLINEApp: App {
+    @State private var container = DependencyContainer(useMocks: true)
+
+    var body: some Scene {
+        WindowGroup {
+            MainTabView()
+                .environment(container)
+        }
+    }
+}
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## File Map <KoreanLabel>파일 구조</KoreanLabel>
+
+```
+Repositories/
+  ├── Protocols/
+  │   ├── MarketRepositoryProtocol.swift
+  │   ├── BannerRepositoryProtocol.swift
+  │   └── NewsRepositoryProtocol.swift
+  ├── Mock/
+  │   ├── MockMarketRepository.swift    (1,069 lines)
+  │   ├── MockBannerRepository.swift
+  │   └── MockNewsRepository.swift
+  └── API/
+      └── APIMarketRepository.swift     (357 lines)
+
+App/
+  └── DependencyContainer.swift
+```

@@ -1,0 +1,399 @@
+# Data Models 데이터 모델
+
+<PageMeta status="live" layer="frontend" />
+
+Complete reference for all 19 data model files in `Models/`. All models conform to `Sendable` and `Identifiable` for safe concurrent access and SwiftUI list rendering.
+
+> **See also:** [Data Models (Frontend)](/frontend/data-layer/models) for a concise summary of each model.
+
+<StatGrid columns={3}>
+  <StatCard value="19" label="Model Files" />
+  <StatCard value="35+" label="Types Defined" />
+  <StatCard value="12" label="Enum Types" />
+</StatGrid>
+
+---
+
+## Core Market Models
+
+### Stock.swift <StatusBadge status="error">Core</StatusBadge>
+
+**Location:** `Models/Stock.swift` (~120 lines)
+
+The primary stock data model used throughout the application.
+
+**Fields:**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `id` | `String` | Unique identifier (stock code) |
+| `rank` | `Int` | Ranking position in current filter |
+| `name` | `String` | Company name (Korean or English) |
+| `code` | `String` | Stock ticker code (e.g., "005930") |
+| `exchange` | `StockExchange` | Exchange enum value |
+| `marketCap` | `String` | Formatted market capitalization |
+| `price` | `Int` | Current price in KRW or USD cents |
+| `change` | `Int` | Price change from previous close |
+| `changePercent` | `Double` | Change as percentage |
+| `volume` | `Int64` | Trading volume |
+| `dividendYield` | `Double` | Annual dividend yield percentage |
+| `logoStyle` | `LogoStyle` | Logo rendering style |
+| `isNXT` | `Bool` | Whether stock trades on NXT venue |
+| `isFractional` | `Bool` | Whether fractional shares are available |
+
+**Computed Properties:**
+
+| Property | Returns | Description |
+|----------|---------|-------------|
+| `isPositive` | `Bool` | `change >= 0` |
+| `tradingValue` | `Int64` | `price * volume` |
+| `formattedPrice` | `String` | Locale-formatted price |
+| `formattedChange` | `String` | Signed change with formatting |
+
+**LogoStyle Enum:**
+
+```swift
+enum LogoStyle {
+    case text(String, logoColor: Color)       // Full name: "SAMSUNG"
+    case initials(String, logoColor: Color)   // Abbreviation: "H", "LG"
+    case symbol(String, logoColor: Color)     // SF Symbol: "sun.max.fill"
+}
+```
+
+**LogoStyleMapper:**
+
+Static mapping class that returns the correct `LogoStyle` for known companies (Samsung, SK, Hyundai, LG, Apple, Tesla, etc.). Falls back to auto-generated initials for unknown stocks.
+
+### StockDetailInfo.swift <StatusBadge status="error">Core</StatusBadge>
+
+**Location:** `Models/StockDetailInfo.swift` (~200 lines)
+
+The largest model in the app — comprehensive stock detail with 20+ nested types.
+
+**Primary Sections:**
+
+| Section | Fields | Description |
+|---------|--------|-------------|
+| Price | `prevClose`, `open`, `high`, `low` | OHLC price data |
+| Fundamentals | `per`, `eps`, `pbr`, `bps`, `dividendPerShare` | Valuation metrics |
+| Range | `week52High`, `week52Low` | 52-week trading range |
+| Market | `tradingValueFormatted`, `marketCapFormatted`, `foreignOwnership` | Market stats |
+| Chart | `chartData: [ChartPoint]` | Historical price data |
+| Status | `marketStatus`, `nxtStatus` | Market session status |
+
+**Extended Data Sections (Nested Types):**
+
+| Type | Structure | Purpose |
+|------|-----------|---------|
+| `ChartPoint` | `date`, `open`, `high`, `low`, `close`, `volume` | Single candlestick data point |
+| `InvestorFlow` | `days: [DayFlow]` with `foreign`, `individual`, `institution` | Net buying by investor type |
+| `AnalystOpinion` | `buyCount`, `holdCount`, `sellCount`, `avgTargetPrice`, `opinions: [BrokerOpinion]` | Analyst consensus |
+| `AnalystReport` | `title`, `broker`, `date`, `targetPrice`, `recommendation` | Individual research report |
+| `OrderBook` | `asks: [Level]`, `bids: [Level]` (10 levels each) | Real-time order book |
+| `DividendRecord` | `year`, `amount`, `yield`, `paymentDate` | Annual dividend record |
+| `DividendYearGroup` | `year`, `quarters: [QuarterDividend]` | Quarterly dividend breakdown |
+| `FinancialRecord` | `period`, `revenue`, `operatingProfit`, `netIncome` | Summary financials |
+| `FinancialDetailRecord` | 15 metrics across quarterly/annual periods | Detailed financial metrics |
+
+### MarketIndex.swift
+
+**Location:** `Models/MarketIndex.swift` (~20 lines)
+
+| Property | Type | Example |
+|----------|------|---------|
+| `id` | `String` | `"kospi"` |
+| `name` | `String` | `"코스피"` |
+| `flag` | `String` | `"🇰🇷"` |
+| `value` | `Double` | `2723.06` |
+| `change` | `Double` | `+12.50` |
+| `changePercent` | `Double` | `+0.46` |
+| `status` | `String` | `"장종료"` |
+
+### CurrencyRate.swift
+
+**Location:** `Models/CurrencyRate.swift` (~20 lines)
+
+| Property | Type | Example |
+|----------|------|---------|
+| `id` | `String` | `"usd"` |
+| `country` | `String` | `"미국"` |
+| `code` | `String` | `"USD"` |
+| `flag` | `String` | `"🇺🇸"` |
+| `rate` | `Double` | `1481.60` |
+| `change` | `Double` | `+18.70` |
+| `changePercent` | `Double` | `+1.28` |
+| `unit` | `Int` | `1` |
+
+---
+
+## Enum Models
+
+### StockExchange.swift
+
+**Location:** `Models/StockExchange.swift` (~30 lines)
+
+```swift
+enum StockExchange: String, CaseIterable, Sendable {
+    case kospi = "KOSPI"
+    case kosdaq = "KOSDAQ"
+    case nasdaq = "NASDAQ"
+    case nyse = "NYSE"
+    case amex = "AMEX"
+}
+```
+
+**Computed Properties:**
+
+| Property | Returns | Description |
+|----------|---------|-------------|
+| `flag` | `String` | `"🇰🇷"` for Korean, `"🇺🇸"` for US |
+| `statusLabel` | `String` | Market status in Korean |
+| `apiValue` | `String` | Lowercase string for API queries |
+
+### StockFilter.swift
+
+**Location:** `Models/StockFilter.swift` (~30 lines)
+
+```swift
+enum StockFilter: String, CaseIterable, Sendable {
+    case marketCap = "시가총액"
+    case volume = "거래량"
+    case popular = "거래대금"
+    case gainers = "상승"
+    case losers = "하락"
+    case dividend = "배당"
+}
+```
+
+Each case has `subtitle`, `tagline`, and `apiValue` computed properties.
+
+### MarketVenue.swift
+
+**Location:** `Models/MarketVenue.swift` (~15 lines)
+
+```swift
+enum MarketVenue: String, CaseIterable, Sendable {
+    case combined = "통합"     // Combined KRX + NXT
+    case krx = "정규장"        // Korea Exchange
+    case nxt = "NXT"          // New Exchange (alternative venue)
+}
+```
+
+---
+
+## Content Models
+
+### NewsArticle.swift
+
+**Location:** `Models/NewsArticle.swift` (~50 lines)
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `id` | `String` | Unique article ID |
+| `title` | `String` | Article headline |
+| `source` | `String` | Publisher name |
+| `timeAgo` | `String` | Relative time (e.g., "1시간 전") |
+| `region` | `NewsRegion` | `.domestic`, `.overseas`, `.all` |
+| `category` | `NewsCategory` | `.market`, `.stocks`, `.themes`, `.economy`, `.international` |
+| `contentType` | `NewsContentType` | `.news`, `.report`, `.disclosure` |
+| `tags` | `[String]` | Hashtags (e.g., "#경제") |
+| `relatedStockCodes` | `[String]` | Stock codes mentioned |
+| `broker` | `String?` | Brokerage name (for reports) |
+| `aiSummary` | `String?` | AI-generated summary |
+| `gradientColors` | `[Color]` | Card gradient colors |
+
+**Associated Enums:** `NewsRegion`, `NewsCategory`, `NewsContentType` — each with `CaseIterable` and display labels.
+
+### MarketTheme.swift
+
+**Location:** `Models/MarketTheme.swift` (~40 lines)
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `id` | `String` | Unique theme ID |
+| `name` | `String` | Theme name (e.g., "HBM", "반도체") |
+| `changePercent` | `Double` | Theme performance percentage |
+| `description` | `String` | Summary text |
+| `weight` | `Double` | Bubble chart size (0–1) |
+| `category` | `ThemeCategory` | `.tech`, `.energy`, `.industry`, `.bio`, `.finance` |
+| `sentiment` | `Sentiment` | `.positive`, `.negative`, `.neutral` |
+
+**Computed:** `bubbleColor` returns blue (positive), red (negative), or gray (neutral).
+
+### BannerItem.swift
+
+**Location:** `Models/BannerItem.swift` (~15 lines)
+
+Simple promotional banner model with `title`, `subtitle`, `icon`, and `gradientColors`.
+
+---
+
+## Authentication & User Models
+
+### AuthModels.swift <StatusBadge status="live">Core</StatusBadge>
+
+**Location:** `Models/AuthModels.swift` (~50 lines)
+
+Request and response types for the authentication system:
+
+**Request Types:**
+
+| Type | Fields | Description |
+|------|--------|-------------|
+| `LoginRequest` | `email`, `password` | Email/password login |
+| `RegisterRequest` | `name`, `email`, `password` | New account registration |
+| `RefreshRequest` | `refreshToken` | Token refresh |
+| `AppleSignInRequest` | `identityToken`, `authorizationCode`, `fullName` | Apple Sign In |
+
+**Response Types:**
+
+| Type | Fields | Description |
+|------|--------|-------------|
+| `AuthTokenResponse` | `accessToken`, `refreshToken`, `tokenType`, `expiresIn` | JWT token pair |
+| `AuthErrorResponse` | `detail` | Error message from server |
+
+### User.swift <StatusBadge status="live">Core</StatusBadge>
+
+**Location:** `Models/User.swift` (~30 lines)
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `id` | `String` | UUID identifier |
+| `name` | `String` | Display name |
+| `email` | `String` | Email address |
+| `authProvider` | `String` | `"email"` or `"apple"` |
+| `createdAt` | `String` | ISO-8601 creation timestamp |
+
+---
+
+## Event & Session Models
+
+### EventItem.swift
+
+**Location:** `Models/EventItem.swift` (~62 lines)
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `id` | `String` | Unique event ID |
+| `title` | `String` | Event title |
+| `subtitle` | `String` | Short description |
+| `description` | `String` | Full description |
+| `icon` | `String` | Emoji icon |
+| `gradientColors` | `[Color]` | Card gradient |
+| `category` | `EventCategory` | `.trading`, `.reward`, `.education`, `.competition`, `.announcement` |
+| `status` | `EventStatus` | `.upcoming`, `.active`, `.ended` |
+| `startDate` | `String` | Start date ("2025.03.01") |
+| `endDate` | `String` | End date |
+| `participants` | `Int` | Number of participants |
+| `reward` | `String?` | Reward description |
+| `conditions` | `[String]` | Participation conditions |
+| `details` | `String` | Detailed description |
+| `relatedStockCodes` | `[String]` | Related stock ticker codes |
+
+### MarketSessionStatus.swift
+
+**Location:** `Models/MarketSessionStatus.swift` (~129 lines)
+
+Enum managing market session state with countdown logic:
+
+```swift
+enum MarketSessionStatus {
+    case preMarket(countdown: TimeInterval)
+    case regularSession
+    case nxtSession
+    case postMarket
+    case closed(nextOpen: Date?)
+}
+```
+
+**Computed Properties:**
+- `displayLabel` — Korean label ("장전", "거래중", "NXT 거래중", "장후", "장마감")
+- `isLive` — Whether prices are streaming
+- `currentStatus(for exchange:)` — Static method to compute current session based on KST time
+
+---
+
+## Chart & Technical Analysis Models
+
+### ChartSettings.swift
+
+**Location:** `Models/ChartSettings.swift` (~100 lines)
+
+`@Observable` class managing all chart configuration:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `selectedChartType` | `ChartType` | Candle, line, area, etc. (23 types) |
+| `selectedOverlays` | `Set<OverlayIndicator>` | MA, BB, Ichimoku, etc. (17 types) |
+| `selectedSubIndicators` | `Set<String>` | Volume, RSI, MACD, etc. (155+ types across 9 categories) |
+| `zoomScale` | `CGFloat` | Current zoom level |
+| `panOffset` | `CGFloat` | Pan position (0 = oldest, 1 = newest) |
+
+**Key Methods:** `effectiveZoom`, `clampedPanOffset(_:)`, `resetZoom()`, `commitZoomGesture()`
+
+### ChartSettingsData.swift
+
+**Location:** `Models/ChartSettingsData.swift` (~20 lines)
+
+Data transfer object for chart configuration parameters (MA periods, Bollinger Band std dev, etc.).
+
+### IndicatorComputation.swift
+
+**Location:** `Models/IndicatorComputation.swift` (~30 lines)
+
+Holds computed indicator results:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `movingAverages` | `[String: [CGFloat?]]` | Per-period MA values |
+| `bollingerBands` | `(upper: [CGFloat?], middle: [CGFloat?], lower: [CGFloat?])` | BB bands |
+| `rsi` | `[CGFloat?]` | RSI values |
+| `macd` | `(macd: [CGFloat?], signal: [CGFloat?], histogram: [CGFloat?])` | MACD components |
+
+---
+
+## UI Preference Models
+
+### StatisticItem.swift
+
+**Location:** `Models/StatisticItem.swift` (~30 lines)
+
+Enum defining all available stock info grid fields:
+
+```swift
+enum StatisticItem: String, CaseIterable, Identifiable {
+    case prevClose = "전일"
+    case open = "시가"
+    case high = "고가"
+    case low = "저가"
+    case volume = "거래량"
+    case tradingValue = "거래대금"
+    case marketCap = "시가총액"
+    case foreignOwnership = "외국인비율"
+    case week52High = "52주 최고"
+    case week52Low = "52주 최저"
+    case per = "PER"
+    case eps = "EPS"
+    case pbr = "PBR"
+    case bps = "BPS"
+    case dividendPerShare = "주당배당금"
+}
+```
+
+### StatisticPreferences.swift
+
+**Location:** `Models/StatisticPreferences.swift` (~25 lines)
+
+`@Observable` class managing user-customizable statistic field visibility:
+
+```swift
+@Observable
+final class StatisticPreferences {
+    var selected: [StatisticItem]      // Visible in info grid
+    var unselected: [StatisticItem]    // Hidden from grid
+
+    func move(_ item: StatisticItem, to section: Section)
+}
+```
+
+Allows users to reorder and show/hide fields in the stock detail info grid.

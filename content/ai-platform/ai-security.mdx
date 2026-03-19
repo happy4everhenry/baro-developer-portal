@@ -1,0 +1,963 @@
+# AI Security
+
+<PageMeta status="in_progress" layer="backend" />
+
+8 AI-specific threat vectors, 4 firewall layers, and layered defenses designed for every stage of the AI lifecycle — from training to inference. Threat model is fully specified. Security defenses are being implemented alongside Phase 1 agent development.
+
+<InfoBox type="fun" title="Think of it like a castle with many walls">
+  AI security is like protecting a castle with multiple walls. Each wall stops a different kind of attack — one blocks poisoned data, another catches prompt tricks, another guards the model weights. No single wall is enough, but together they make the castle very hard to breach.
+</InfoBox>
+
+<StatGrid columns={4}>
+  <StatCard value="8" label="Threat Vectors" />
+  <StatCard value="4" label="Firewall Layers" />
+  <StatCard value="8" label="Lifecycle Stages" />
+  <StatCard value="6" label="Governance Pillars" />
+</StatGrid>
+
+<InfoBox type="warning" title="Launch Blocker: Infection / Backdoor (Threat 3)">
+  Threat vector #3 (Infection / Backdoor) is classified as **CRITICAL** and is a launch blocker. Neural Cleanse/STRIP detection, MNTD scans, HMAC request signing, and a 200+ canary test suite are being addressed as part of Phase 1 development. Implementation is underway alongside the Security Monitor agent build.
+</InfoBox>
+
+---
+
+<Tabs>
+  <Tab label="Threat Overview">
+
+## All 8 Threat Vectors
+
+| # | Threat | Severity | Status | Description |
+|---|--------|----------|--------|-------------|
+| 1 | Model Hijacking | <StatusBadge status="red" label="CRITICAL" /> | <StatusBadge status="amber" label="Partially" /> | Poisoned training data, malicious base models, prompt template and API parameter manipulation |
+| 2 | Prompt Injection | <StatusBadge status="red" label="CRITICAL" /> | <StatusBadge status="jade" label="Addressed" /> | Multi-turn injection, encoded instructions, structured data injection, cross-agent injection |
+| 3 | Infection / Backdoor | <StatusBadge status="red" label="CRITICAL" /> | <StatusBadge status="amber" label="In Progress (Phase 1)" /> | Training-time backdoors, supply chain backdoors, plugin backdoors, inference-time infection |
+| 4 | Data Poisoning | <StatusBadge status="red" label="CRITICAL" /> | <StatusBadge status="amber" label="Partially" /> | Market data, news sentiment, feedback, label, and embedding poisoning |
+| 5 | Evasion Attacks | <StatusBadge status="amber" label="HIGH" /> | <StatusBadge status="amber" label="Planned (Phase 2)" /> | Adversarial attacks on XGBoost, Isolation Forest, KoBERT, and CUI models |
+| 6 | Model Extraction / Theft | <StatusBadge status="amber" label="HIGH" /> | <StatusBadge status="amber" label="Planned (Phase 2)" /> | Stealing model weights or replicating model behavior through query access |
+| 7 | Membership Inference | <StatusBadge status="amber" label="HIGH" /> | <StatusBadge status="amber" label="Partially" /> | Determining whether specific data was used in training |
+| 8 | AI-Specific DoS | <StatusBadge status="amber" label="HIGH" /> | <StatusBadge status="amber" label="Planned (Phase 1-2)" /> | Resource exhaustion attacks targeting AI inference pipelines |
+
+### Defense Coverage
+
+<ProgressBar value={25} max={100} label="Fully Addressed" sublabel="2 of 8 vectors" />
+<ProgressBar value={50} max={100} label="Partially Addressed or In Progress" sublabel="4 of 8 vectors" />
+<ProgressBar value={25} max={100} label="Planned" sublabel="2 of 8 vectors (scheduled for Phase 2)" />
+
+</Tab>
+  <Tab label="Critical Threats">
+
+## Critical Threat Vectors (1-4)
+
+<Accordion>
+  <AccordionItem title="1. Model Hijacking — CRITICAL, Partially Addressed">
+
+Four attack surfaces and their defenses:
+
+| Attack Vector | Technique | Defense |
+|---------------|-----------|---------|
+| Fine-tuning hijacking | Poison training data | Anomaly detection, behavioral canary tests |
+| Supply chain hijacking | Malicious base model | Only verified checksummed models, SHA-256 verification |
+| Prompt template hijacking | Discover system prompt | System prompt never exposed to user, rate limiting |
+| API parameter manipulation | Modify temperature/top_p | All LLM calls from backend only, hardcoded parameters |
+
+<InfoBox type="note" title="Key defense">
+  All API parameters (temperature, top_p, etc.) are hardcoded on the backend. Users never have direct access to LLM API calls — every request is proxied through our backend services.
+</InfoBox>
+
+</AccordionItem>
+  <AccordionItem title="2. Prompt Injection — CRITICAL, Addressed">
+
+Four attack surfaces and their defenses:
+
+| Attack Vector | Technique | Defense |
+|---------------|-----------|---------|
+| Multi-turn injection | Build malicious context across turns | History sanitized, max context window enforced |
+| Encoded injection | Base64/Unicode encoded instructions | Input normalization layer strips encoded payloads |
+| Structured data injection | Malicious JSON/CSV payloads | Schema validation on all structured inputs |
+| Cross-agent injection | Inject into one agent to affect another | Structured schemas for A2A communication, no free-form text as instructions |
+
+<InfoBox type="success" title="Fully addressed">
+  This is one of only two threat vectors fully addressed. Structured A2A schemas prevent cross-agent contamination, and the input normalization layer catches encoded injection attempts.
+</InfoBox>
+
+</AccordionItem>
+  <AccordionItem title="3. Infection / Backdoor — CRITICAL, NOT Addressed (Launch Blocker)">
+
+Four attack surfaces and planned defenses:
+
+| Attack Vector | Technique | Planned Defense |
+|---------------|-----------|-----------------|
+| Training-time backdoor | Hidden triggers in fine-tuned models | Neural Cleanse / STRIP detection |
+| Supply chain backdoor | Compromised pre-trained models | MNTD scan, checksum verification |
+| Plugin / tool backdoor | Malicious MCP server code | All MCP servers internal, npm audit |
+| Inference-time infection | Tampered requests mid-flight | HMAC request signing, TLS |
+
+**Canary Test Suite:** 200+ standardized inputs executed after every fine-tuning run to detect behavioral anomalies introduced by backdoors.
+
+<InfoBox type="warning" title="Launch blocker — In Progress">
+  This threat vector must be fully addressed before launch. Implementation is underway as part of Phase 1 development, alongside the Security Monitor agent (Agent 11). Neural Cleanse/STRIP detection and the canary test suite are being built first.
+</InfoBox>
+
+</AccordionItem>
+  <AccordionItem title="4. Data Poisoning — CRITICAL, Partially Addressed">
+
+Five poisoning surfaces and their defenses:
+
+| Attack Vector | Technique | Defense |
+|---------------|-----------|---------|
+| Market data poisoning | Tampered price/volume feeds | Cross-validation KIS vs Naver Finance (0.5% threshold) |
+| News sentiment poisoning | Fake or biased news articles | Whitelisted sources only |
+| Feedback poisoning | Fake user feedback to skew models | KYC makes fake accounts expensive |
+| Label poisoning | Corrupted compliance labels | Dual review process for all compliance labels |
+| Embedding poisoning | Adversarial vectors in embedding space | Distribution monitoring, outlier quarantine |
+
+<InfoBox type="note" title="Cross-validation threshold">
+  Market data is cross-validated between KIS (Korea Investment & Securities) and Naver Finance. Any discrepancy exceeding **0.5%** triggers an automatic quarantine and manual review.
+</InfoBox>
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+  <Tab label="High Threats">
+
+## High Threat Vectors (5-8)
+
+<Accordion>
+  <AccordionItem title="5. Evasion Attacks — HIGH, NOT Addressed">
+
+Adversarial inputs crafted to fool production models:
+
+| Target Model | Use Case | Planned Defense |
+|--------------|----------|-----------------|
+| XGBoost signal model | Trade buy/sell/hold signals | Adversarial training, ensemble with LSTM |
+| Isolation Forest | Fraud detection | Monthly retraining, parallel rule-based system |
+| KoBERT sentiment | Korean news sentiment scoring | Ensemble approach (KoBERT + FinBERT + Claude) |
+| CUI intent model | Voice/text command parsing | Always narrated to user, explicit confirmation required |
+
+<InfoBox type="note" title="Defense strategy">
+  The primary defense against evasion is **ensemble diversity** — combining multiple model architectures (XGBoost + LSTM, KoBERT + FinBERT + Claude) so that adversarial inputs crafted for one model are caught by another.
+</InfoBox>
+
+</AccordionItem>
+  <AccordionItem title="6. Model Extraction / Theft — HIGH, NOT Addressed">
+
+Attackers query the model systematically to build a functional replica, effectively stealing proprietary model behavior without accessing weights directly.
+
+**Status:** <StatusBadge status="red" label="NOT addressed" />
+
+| Attack Vector | Technique | Planned Defense |
+|---------------|-----------|-----------------|
+| Query-based extraction | Systematic API queries to map decision boundaries | Rate limiting per user/session |
+| Behavior cloning | Record input/output pairs to train a clone | Query pattern detection (anomalous volume/distribution) |
+| Weight theft | Direct access to model files | Model watermarking for provenance verification |
+
+<InfoBox type="danger" title="Not yet implemented">
+  Rate limiting, query pattern detection, and model watermarking are all planned but not yet in place. Until implemented, models are vulnerable to systematic extraction.
+</InfoBox>
+
+</AccordionItem>
+  <AccordionItem title="7. Membership Inference — HIGH, Partially Addressed">
+
+Attackers determine whether specific data points were part of the training set. In a financial context, this could reveal private portfolio data, trading patterns, or client relationships.
+
+**Status:** <StatusBadge status="amber" label="Partially addressed" />
+
+| Attack Vector | Risk | Planned Defense |
+|---------------|------|-----------------|
+| Confidence-based inference | Model shows higher confidence on training data | Output perturbation (adding calibrated noise) |
+| Shadow model attacks | Train shadow models to detect membership | Differential privacy in training pipeline |
+| Overfitting exploitation | Memorized training examples leak via queries | Regularization, early stopping, training data deduplication |
+
+**Risk:** Reveals private portfolio holdings, trading history, and client financial data — a serious regulatory and privacy violation under PIPA.
+
+<InfoBox type="note" title="Partial mitigation">
+  Some mitigations are in place (regularization, data deduplication), but full differential privacy mechanisms and systematic output perturbation are still planned.
+</InfoBox>
+
+</AccordionItem>
+  <AccordionItem title="8. AI-Specific DoS — HIGH, NOT Addressed">
+
+Attackers craft expensive queries specifically designed to consume maximum compute resources, causing service degradation or cost explosion.
+
+**Status:** <StatusBadge status="red" label="NOT addressed" />
+
+| Attack Vector | Technique | Planned Defense |
+|---------------|-----------|-----------------|
+| Token-maximizing prompts | Craft inputs that generate maximum-length outputs | Per-user token budgets with hard caps |
+| Complexity bombing | Queries requiring expensive reasoning chains | Query complexity scoring before execution |
+| Queue flooding | Overwhelm BullMQ with high-priority tasks | BullMQ queue limits, priority throttling |
+| Concurrent session abuse | Open many sessions to exhaust resources | Per-user concurrent session limits |
+
+**Risk:** Service degradation for all users, unexpected cost explosion from token overconsumption, and potential SLA violations.
+
+<InfoBox type="danger" title="Not yet implemented">
+  Per-user token budgets, query complexity scoring, and BullMQ queue limits are all planned but not yet in place.
+</InfoBox>
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+  <Tab label="Defenses">
+
+## Key Defense Strategies
+
+<FeatureGrid columns={3}>
+  <FeatureCard
+    icon="🐤"
+    title="Canary Test Suite"
+    description="200+ standardized inputs run after every fine-tuning to detect behavioral backdoors and anomalies."
+    color="purple"
+  />
+  <FeatureCard
+    icon="🔏"
+    title="HMAC Request Signing"
+    description="All inference requests are HMAC-signed to prevent tampering between services. Combined with TLS for transport security."
+    color="blue"
+  />
+  <FeatureCard
+    icon="🔐"
+    title="SHA-256 Model Checksums"
+    description="Every base model is verified with SHA-256 checksums before loading. Only verified, checksummed models are allowed."
+    color="green"
+  />
+  <FeatureCard
+    icon="🧹"
+    title="Input Normalization"
+    description="All user inputs pass through a normalization layer that strips Base64, Unicode, and other encoded injection attempts."
+    color="orange"
+  />
+  <FeatureCard
+    icon="🔄"
+    title="Cross-Validation (0.5%)"
+    description="Market data is cross-validated between KIS and Naver Finance. Discrepancies above 0.5% trigger automatic quarantine."
+    color="red"
+  />
+  <FeatureCard
+    icon="🛡️"
+    title="Row-Level Security (RLS)"
+    description="Database-level isolation ensures AI agents only access data they are authorized to see — enforced at the Supabase layer."
+    color="indigo"
+  />
+  <FeatureCard
+    icon="🤖"
+    title="Structured A2A Schemas"
+    description="Agent-to-agent communication uses strict schemas — no free-form text as instructions, preventing cross-agent injection."
+    color="teal"
+  />
+  <FeatureCard
+    icon="📊"
+    title="Ensemble Diversity"
+    description="Critical models use multi-architecture ensembles (XGBoost + LSTM, KoBERT + FinBERT + Claude) to resist evasion attacks."
+    color="amber"
+  />
+  <FeatureCard
+    icon="🔍"
+    title="Neural Cleanse / STRIP"
+    description="Planned backdoor detection via Neural Cleanse and STRIP algorithms applied after fine-tuning and on supply chain models."
+    color="gray"
+  />
+</FeatureGrid>
+
+---
+
+### Monitoring
+
+<StatGrid columns={2}>
+  <StatCard value="24/7" label="Continuous Monitoring" />
+  <StatCard value="FSC 2024" label="AI Guidelines Compliance" />
+</StatGrid>
+
+<InfoBox type="note" title="Regulatory alignment">
+  All defense strategies are designed to comply with the **FSC AI Guidelines 2024** (Financial Services Commission of Korea). 24/7 monitoring covers all 8 threat vectors with automated alerting.
+</InfoBox>
+
+</Tab>
+
+  <Tab label="Agent 11 Schedule" icon="🕵️">
+
+## Agent 11 — Security Monitor Schedule
+
+Agent 11 is the dedicated AI security monitor. It runs on a fixed schedule with event-triggered overrides, scanning for threats across all 8 vectors continuously.
+
+<Accordion>
+  <AccordionItem title="Hourly Checks" icon="⏱️" defaultOpen={true}>
+
+| Check | Description |
+|-------|-------------|
+| MITRE ATLAS feed | Scan for new AI-specific attack techniques and tactics |
+| KISA feed | Korea Internet and Security Agency threat intelligence updates |
+| FSC emergency feed | Financial Services Commission emergency security bulletins |
+
+</AccordionItem>
+
+  <AccordionItem title="Daily Checks" icon="📅">
+
+| Check | Description |
+|-------|-------------|
+| Full AI-SPM posture scan | Security Posture Management scan across all agents and models |
+| Compliance sampling | Random sample of interactions verified against compliance rules |
+| Model drift detection | Statistical comparison of model outputs against baseline distributions |
+| Canary test suite | Run 200+ standardized canary inputs to detect behavioral anomalies |
+
+</AccordionItem>
+
+  <AccordionItem title="Weekly Checks" icon="📆">
+
+| Check | Description |
+|-------|-------------|
+| Full threat intel report | Consolidated threat intelligence across all sources |
+| Shadow AI audit | Scan for unauthorized AI usage or undocumented model deployments |
+| Regulatory monitoring | Scan for new or updated AI regulations across jurisdictions |
+| Horizon scan | Emerging threats, new attack research, industry incident review |
+
+</AccordionItem>
+
+  <AccordionItem title="Monthly Checks" icon="🗓️">
+
+| Check | Description |
+|-------|-------------|
+| Full regulatory review | Comprehensive compliance gap analysis against all applicable regulations |
+| Bias audit | Fairness metrics across demographics, model output distribution analysis |
+| Lifecycle governance | Review all model versions, deprecation schedules, update plans |
+| Third-party risk | Assessment of all external dependencies (APIs, models, data sources) |
+
+</AccordionItem>
+
+  <AccordionItem title="Event-Triggered Checks" icon="⚡">
+
+These checks fire immediately when a trigger condition is met, regardless of schedule.
+
+| Trigger | Response |
+|---------|----------|
+| New model deployment | Full canary suite + posture scan before production traffic |
+| Control Tower anomaly | Targeted investigation of flagged agent or service |
+| Security incident | Full incident response protocol, evidence preservation, escalation |
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+
+  <Tab label="Agent 12 Signals" icon="📡">
+
+## Agent 12 — Control Tower Monitoring Signals
+
+Agent 12 is the Control Tower, continuously monitoring operational signals across all agents. When a signal crosses its anomaly threshold, an automated response fires immediately.
+
+| Signal | Anomaly Threshold | Automated Response |
+|--------|-------------------|--------------------|
+| Prompt injection rate | Spike above 50/hr | Quarantine agent + activate Classic Mode |
+| HITL bypass attempt | Any single instance | Immediate compliance alert to Compliance Officer |
+| Output quality score | Below 0.70 | Fallback to Claude API direct (bypass local model) |
+| Cross-agent anomaly | 3+ agents spike simultaneously | Coordinated attack protocol activated |
+| Compliance presence | Below 0.95 coverage | Suspend AI output until compliance restored |
+| Token consumption | Above 3x baseline | Rate limit applied + DoS investigation triggered |
+
+<InfoBox type="warning" title="Zero tolerance for HITL bypass">
+  Any attempt to bypass Human-in-the-Loop controls — whether by an agent, a user, or a system error — triggers an immediate compliance alert. There is no threshold, no grace period, and no exception. A single instance is treated as a critical incident.
+</InfoBox>
+
+<InfoBox type="fun" title="Think of it like a control room">
+  Agent 12 is like the person watching all the security screens in a building. Most of the time, everything is normal. But if one camera shows something unusual, they zoom in. If three cameras show problems at the same time, they hit the big red alarm button because that is probably not a coincidence.
+</InfoBox>
+
+</Tab>
+</Tabs>
+
+---
+
+## AI-Specific Firewall — 4 Layers
+
+<InfoBox type="fun" title="Think of it like airport security checkpoints">
+  Imagine going through an airport with four security checkpoints. The first checks your bag before you board (Input Firewall). The second checks what you are carrying off the plane (Output Firewall). The third checks packages being passed between airline staff (Inter-agent Firewall). And the fourth checks the food before it goes into the airport kitchen (Training Pipeline Firewall). Every layer catches something different.
+</InfoBox>
+
+BARO operates a four-layer AI firewall that inspects data at every critical boundary in the system. No single layer is sufficient — together they provide defense-in-depth from user input all the way back to the training pipeline.
+
+<Diagram title="AI Firewall — 4 Layers in Sequence">
+  <DiagramRow>
+    <DiagramNode label="User Input" type="start" />
+    <DiagramArrow label="" />
+    <DiagramNode label="Layer 1: Input Firewall" type="process" />
+    <DiagramArrow label="Clean input" />
+    <DiagramNode label="AI Model (Inference)" type="process" />
+  </DiagramRow>
+  <DiagramRow>
+    <DiagramNode label="AI Model (Inference)" type="process" />
+    <DiagramArrow label="Raw output" />
+    <DiagramNode label="Layer 2: Output Firewall" type="process" />
+    <DiagramArrow label="Safe output" />
+    <DiagramNode label="User" type="end" />
+  </DiagramRow>
+  <DiagramRow>
+    <DiagramNode label="Agent A" type="process" />
+    <DiagramArrow label="A2A message" />
+    <DiagramNode label="Layer 3: Inter-agent Firewall" type="process" />
+    <DiagramArrow label="Validated message" />
+    <DiagramNode label="Agent B" type="process" />
+  </DiagramRow>
+  <DiagramRow>
+    <DiagramNode label="Raw Training Data" type="start" />
+    <DiagramArrow label="" />
+    <DiagramNode label="Layer 4: Training Pipeline Firewall" type="process" />
+    <DiagramArrow label="Vetted data" />
+    <DiagramNode label="Fine-tuning Pipeline" type="end" />
+  </DiagramRow>
+</Diagram>
+
+<Accordion>
+  <AccordionItem title="Layer 1 — Input Firewall (Before user input reaches the model)" defaultOpen={true}>
+
+**Position:** Between user input and the AI model.
+
+**What it catches:** Prompt injection, encoded instructions (Base64, Unicode), jailbreak templates, excessive input length, and PII leakage.
+
+**Implementation:** LLM Guard (open-source) combined with custom financial-domain rules. Any blocked input returns a structured error message to the user — the prompt never reaches the model.
+
+| Check | Tool | Action on Failure |
+|-------|------|-------------------|
+| Prompt injection patterns | LLM Guard + custom rules | Block input, return error |
+| Encoded instructions | Input normalization layer | Strip payload, block if malicious |
+| Jailbreak templates | Pattern matching library | Block input, log attempt |
+| Input length validation | Hard token cap | Truncate or reject |
+| PII detection | Regex + NER scanner | Redact or block |
+
+</AccordionItem>
+  <AccordionItem title="Layer 2 — Output Firewall (After AI generates, before delivery)">
+
+**Position:** Between AI model output and user delivery.
+
+**What it catches:** Missing FSC disclaimers, financial guarantees (prohibited language), PII in output, successful jailbreak output, and low-confidence responses.
+
+**Implementation:** Rule-based scanner combined with LLM Guard output scanner. Any blocked output is replaced with a safe fallback response — the user never sees the raw problematic output.
+
+| Check | Tool | Action on Failure |
+|-------|------|-------------------|
+| FSC disclaimer presence | Rule-based scanner | Inject disclaimer or block |
+| Financial guarantee language | Keyword + semantic scan | Replace with safe fallback |
+| PII in output | Regex + NER scanner | Redact before delivery |
+| Jailbreak success indicators | LLM Guard output scanner | Replace with safe fallback |
+| Low confidence detection | Confidence threshold check | Escalate to human or fallback |
+
+</AccordionItem>
+  <AccordionItem title="Layer 3 — Inter-agent Firewall (Between LangGraph agents)">
+
+**Position:** Between agents in A2A (Agent-to-Agent) communication within LangGraph workflows.
+
+**What it catches:** Cross-agent injection, unexpected message formats, privilege escalation attempts, and unauthorized tool invocations.
+
+**Implementation:** Strict JSON schema validation on every inter-agent message. Free-form text is never treated as executable instructions — only structured, schema-validated payloads are accepted.
+
+| Check | Tool | Action on Failure |
+|-------|------|-------------------|
+| Schema validation | JSON Schema validator | Reject message, alert |
+| Free-form text as instructions | Schema enforcement | Never processed as instructions |
+| Privilege escalation | Role-based access control | Block and log |
+| Unexpected tool calls | Allowlist per agent | Reject and alert |
+
+<InfoBox type="note" title="Why this matters">
+  Without an inter-agent firewall, a compromised agent could inject malicious instructions into another agent's context. By enforcing strict schemas, we ensure that even if one agent is compromised, it cannot cascade an attack to others.
+</InfoBox>
+
+</AccordionItem>
+  <AccordionItem title="Layer 4 — Training Pipeline Firewall (Before data enters training)">
+
+**Position:** Between raw training data and the fine-tuning pipeline.
+
+**What it catches:** Anomalous training examples, injection payloads hidden in training data, and adversarial data poisoning attempts.
+
+**Implementation:** Isolation Forest anomaly detection combined with an injection pattern scanner. Any flagged example is quarantined for manual review — it never enters the training pipeline.
+
+| Check | Tool | Action on Failure |
+|-------|------|-------------------|
+| Anomalous examples | Isolation Forest | Quarantine for review |
+| Injection in training data | Injection pattern scanner | Quarantine for review |
+| Adversarial poisoning | Distribution analysis | Quarantine batch |
+| Label consistency | Dual-review verification | Hold until resolved |
+
+</AccordionItem>
+</Accordion>
+
+---
+
+## AI Penetration Testing Schedule
+
+<InfoBox type="fun" title="Think of it like hiring friendly burglars">
+  Penetration testing is like hiring someone to try to break into your own house — on purpose. If they find a way in, you fix it before a real burglar does. We do this regularly for every part of our AI system.
+</InfoBox>
+
+Seven categories of AI-specific penetration tests are performed on a recurring schedule. Each test category targets a different attack surface.
+
+<Accordion>
+  <AccordionItem title="1. Prompt Injection Red Team" defaultOpen={true}>
+
+- **Scope:** 500+ injection attempts across all agent categories
+- **Tools:** Garak (open-source red teaming framework) + custom BARO financial injection library
+- **Schedule:** Pre-launch and monthly thereafter
+- **Pass criteria:** Zero successful injections that bypass both input and output firewalls
+
+</AccordionItem>
+  <AccordionItem title="2. Jailbreak Resistance">
+
+- **Scope:** DAN-style attacks, roleplay-based jailbreaks, hypothetical framing, token manipulation techniques
+- **Tools:** Custom jailbreak suite + manual red team testing
+- **Schedule:** Pre-launch and quarterly thereafter
+- **Pass criteria:** Model refuses all jailbreak attempts and returns safe fallback
+
+</AccordionItem>
+  <AccordionItem title="3. Model Extraction Resistance">
+
+- **Scope:** Systematic querying to map decision boundaries, output similarity analysis to detect cloning feasibility
+- **Tools:** Custom extraction scripts + output distribution analysis
+- **Schedule:** Pre-launch and semi-annually thereafter
+- **Pass criteria:** Rate limiting and query pattern detection block extraction attempts
+
+</AccordionItem>
+  <AccordionItem title="4. Backdoor Detection">
+
+- **Scope:** Scan locally fine-tuned LLM for hidden triggers and backdoor behaviors
+- **Tools:** Neural Cleanse + STRIP algorithms
+- **Schedule:** After every fine-tuning cycle
+- **Pass criteria:** No anomalous trigger patterns detected in model weights or behavior
+
+</AccordionItem>
+  <AccordionItem title="5. Adversarial Input Testing">
+
+- **Scope:** Adversarial perturbations against XGBoost signal model and Isolation Forest fraud detector
+- **Tools:** Foolbox (adversarial attack library) + custom financial domain attacks
+- **Schedule:** Pre-launch and semi-annually thereafter
+- **Pass criteria:** Ensemble models maintain accuracy within 5% under adversarial conditions
+
+</AccordionItem>
+  <AccordionItem title="6. Data Pipeline Security">
+
+- **Scope:** Can an attacker inject malicious data into the training pipeline or RAG knowledge base?
+- **Tools:** Manual penetration test by security team
+- **Schedule:** Pre-launch and annually thereafter
+- **Pass criteria:** No unauthorized data injection path exists
+
+</AccordionItem>
+  <AccordionItem title="7. AI Firewall Bypass">
+
+- **Scope:** Encoding tricks, indirect injection via tool outputs, timing attacks, and novel bypass techniques against all 4 firewall layers
+- **Tools:** Manual testing + automated fuzzing
+- **Schedule:** Pre-launch and quarterly thereafter
+- **Pass criteria:** All 4 firewall layers resist bypass under adversarial conditions
+
+</AccordionItem>
+</Accordion>
+
+---
+
+## Agent 11 — LangGraph Node Workflow
+
+<InfoBox type="fun" title="Think of it like a night watchman's patrol route">
+  Agent 11 follows a fixed patrol route every time it runs — like a night watchman who checks the front door, then the windows, then the alarms, then writes a report. Each stop on the route is a "node" in the workflow, and Agent 11 visits them in the same order every time.
+</InfoBox>
+
+Agent 11 (Security Monitor) is implemented as a LangGraph state machine with 10 sequential nodes. Each node performs a specific security function, and the output of each node feeds into the next.
+
+<Diagram title="Agent 11 — LangGraph Node Sequence">
+  <DiagramRow>
+    <DiagramNode label="scheduled_trigger" type="start" />
+    <DiagramArrow label="" />
+    <DiagramNode label="scan_threat_intelligence" type="process" />
+    <DiagramArrow label="" />
+    <DiagramNode label="scan_regulatory_changes" type="process" />
+  </DiagramRow>
+  <DiagramRow>
+    <DiagramNode label="assess_system_impact" type="process" />
+    <DiagramArrow label="" />
+    <DiagramNode label="run_posture_scan" type="process" />
+    <DiagramArrow label="" />
+    <DiagramNode label="generate_security_alert" type="process" />
+  </DiagramRow>
+  <DiagramRow>
+    <DiagramNode label="generate_implementation_guide" type="process" />
+    <DiagramArrow label="" />
+    <DiagramNode label="notify_developers" type="process" />
+    <DiagramArrow label="" />
+    <DiagramNode label="update_security_baseline" type="process" />
+  </DiagramRow>
+  <DiagramRow>
+    <DiagramNode label="log_outcome" type="end" />
+  </DiagramRow>
+</Diagram>
+
+<Accordion>
+  <AccordionItem title="Node 1 — scheduled_trigger" defaultOpen={true}>
+
+Initiates the workflow on schedule (hourly, daily, weekly, or monthly depending on the check type) or in response to an event trigger (new deployment, Control Tower anomaly, security incident).
+
+</AccordionItem>
+  <AccordionItem title="Node 2 — scan_threat_intelligence">
+
+Scans external threat intelligence sources for new AI-specific threats:
+
+- **MITRE ATLAS** — AI attack technique taxonomy
+- **NIST AI RMF** — Risk management framework updates
+- **OWASP AI** — AI security top 10 and guidance
+- **AI Village** — Community threat research and disclosures
+- **KISA** — Korea Internet and Security Agency bulletins
+- **FSC** — Financial Services Commission emergency advisories
+
+</AccordionItem>
+  <AccordionItem title="Node 3 — scan_regulatory_changes">
+
+Monitors regulatory bodies for new or updated AI regulations:
+
+- **FSC** — Financial Services Commission guidelines
+- **PIPC** — Personal Information Protection Commission
+- **KoFIU** — Korea Financial Intelligence Unit (AML/CFT)
+- **KISA** — Technical security standards
+- **Court decisions** — Relevant AI-related judicial precedents
+- **EU AI Act** — Cross-jurisdictional monitoring for potential expansion
+
+</AccordionItem>
+  <AccordionItem title="Node 4 — assess_system_impact">
+
+Uses Claude to analyze discovered threats and regulatory changes against the BARO system. Determines which agents are affected and assigns an impact score (LOW, MEDIUM, HIGH, CRITICAL).
+
+</AccordionItem>
+  <AccordionItem title="Node 5 — run_posture_scan">
+
+Executes the AI Security Posture Management (AI-SPM) scan:
+
+- **Prompt security audit** — Test all system prompts against known injection patterns
+- **Drift check** — Statistical comparison of current model outputs vs. baseline
+- **Canary test suite** — Run 200+ standardized inputs to detect behavioral changes
+- **Shadow AI detection** — Scan for unauthorized AI usage or undocumented models
+- **Compliance sampling** — Random sample of recent interactions verified against rules
+
+</AccordionItem>
+  <AccordionItem title="Node 6 — generate_security_alert (HIGH/CRITICAL only)">
+
+For HIGH or CRITICAL findings, generates a structured security alert containing:
+
+- **Threat description** — What was found and why it matters
+- **Affected components** — Which agents, models, or pipelines are impacted
+- **Exploitation scenario** — How an attacker could exploit this vulnerability
+- **Recommended mitigations** — Specific actions to reduce risk
+
+</AccordionItem>
+  <AccordionItem title="Node 7 — generate_implementation_guide">
+
+Produces a developer-friendly implementation guide:
+
+- **What to change** — Specific code, configuration, or policy changes
+- **Where to change it** — File paths, services, or infrastructure components
+- **Effort estimate** — Estimated time and complexity for the fix
+
+</AccordionItem>
+  <AccordionItem title="Node 8 — notify_developers">
+
+Delivers alerts through appropriate channels based on severity:
+
+- **HIGH:** Slack notification + email to security team
+- **CRITICAL:** Slack + email + PagerDuty escalation for immediate response
+
+</AccordionItem>
+  <AccordionItem title="Node 9 — update_security_baseline">
+
+Persists findings to PostgreSQL for historical tracking:
+
+- **Threat registry** — All discovered threats with status and remediation tracking
+- **Regulatory tracker** — All regulatory changes with compliance gap analysis
+
+</AccordionItem>
+  <AccordionItem title="Node 10 — log_outcome">
+
+Final node. Logs the complete workflow execution — inputs, findings, actions taken, and notifications sent — for audit trail and compliance purposes.
+
+</AccordionItem>
+</Accordion>
+
+---
+
+## Agent 12 — Control Tower Full Details
+
+<InfoBox type="fun" title="Think of it like a hospital monitoring room">
+  Agent 12 is like the monitoring room in a hospital where nurses watch heart rate screens for every patient. Each screen shows a different vital sign. If one patient's heart rate spikes, they check on that patient. If every screen goes red at once, they call a code blue — something big is happening.
+</InfoBox>
+
+### Additional Monitored Signals
+
+Beyond the 6 core signals listed in the Agent 12 Signals tab, the Control Tower also monitors these additional behavioral indicators:
+
+| Signal | Normal Range | Anomaly Threshold | Automated Response |
+|--------|-------------|-------------------|--------------------|
+| Behavioral consistency vs. baseline | Above 0.90 | Below 0.80 | Triggers canary test suite on affected agent |
+| Training pipeline anomaly score | Below 0.3 | Above 0.6 | Suspends training pipeline immediately |
+| Feature request high-score rate | Below 30% | Above 70% | Flags potential manipulation, manual review |
+| Agent 11 posture scan failures | Zero failures | Any failure | Triggers immediate remediation workflow |
+
+### Agent 12 LangGraph Node Workflow
+
+<Diagram title="Agent 12 — Control Tower LangGraph Nodes">
+  <DiagramRow>
+    <DiagramNode label="collect_telemetry" type="start" />
+    <DiagramArrow label="" />
+    <DiagramNode label="compute_health_scores" type="process" />
+    <DiagramArrow label="" />
+    <DiagramNode label="detect_anomalies" type="process" />
+  </DiagramRow>
+  <DiagramRow>
+    <DiagramNode label="classify_anomaly" type="process" />
+    <DiagramArrow label="" />
+    <DiagramNode label="assess_blast_radius" type="process" />
+    <DiagramArrow label="" />
+    <DiagramNode label="automated_response" type="process" />
+  </DiagramRow>
+  <DiagramRow>
+    <DiagramNode label="alert_and_escalate" type="process" />
+    <DiagramArrow label="" />
+    <DiagramNode label="generate_incident_report" type="process" />
+    <DiagramArrow label="" />
+    <DiagramNode label="update_dashboard" type="process" />
+  </DiagramRow>
+  <DiagramRow>
+    <DiagramNode label="monitor_resolution" type="end" />
+  </DiagramRow>
+</Diagram>
+
+<Accordion>
+  <AccordionItem title="Node 1 — collect_telemetry" defaultOpen={true}>
+
+Gathers real-time telemetry from all 12 agents: response times, error rates, token consumption, compliance flags, and behavioral metrics.
+
+</AccordionItem>
+  <AccordionItem title="Node 2 — compute_health_scores">
+
+Computes a 0-100 health score across 6 dimensions for each agent: accuracy, latency, compliance, security, cost efficiency, and user satisfaction.
+
+</AccordionItem>
+  <AccordionItem title="Node 3 — detect_anomalies">
+
+Runs anomaly detection using two complementary approaches:
+
+- **Isolation Forest** — Detects point anomalies in current metrics
+- **LSTM time series** — Detects temporal anomalies and trend shifts
+
+Detection operates at three levels: per-agent, cross-agent correlation, and temporal (trend-based).
+
+</AccordionItem>
+  <AccordionItem title="Node 4 — classify_anomaly">
+
+Uses Claude to classify each detected anomaly into one of four categories:
+
+- **Security** — Potential attack or compromise
+- **Governance** — Compliance or regulatory violation
+- **Operational** — Performance degradation or system issue
+- **False positive** — Normal variation incorrectly flagged
+
+</AccordionItem>
+  <AccordionItem title="Node 5 — assess_blast_radius">
+
+Determines the scope of impact: which agents, services, and users are affected. Evaluates whether the anomaly is isolated or systemic.
+
+</AccordionItem>
+  <AccordionItem title="Node 6 — automated_response">
+
+Executes immediate automated responses based on anomaly type and severity:
+
+- **Quarantine** — Isolate affected agent from production traffic
+- **Classic Mode** — Fall back to non-AI rule-based system
+- **Revoke tokens** — Invalidate compromised API tokens or sessions
+
+</AccordionItem>
+  <AccordionItem title="Node 7 — alert_and_escalate">
+
+Routes alerts to the appropriate team based on classification:
+
+- **Slack** — All anomalies (security, governance, operational)
+- **PagerDuty** — CRITICAL severity only, for immediate human response
+- **Compliance team** — All governance-classified anomalies
+
+</AccordionItem>
+  <AccordionItem title="Node 8 — generate_incident_report">
+
+Uses Claude to generate a structured incident report:
+
+- **Timeline** — Sequence of events from detection to response
+- **Root cause** — Analysis of what caused the anomaly
+- **Evidence** — Relevant logs, metrics, and telemetry snapshots
+- **Remediation** — Steps taken and recommendations for prevention
+- **FSC 24-hour check** — Compliance verification within 24 hours as required by FSC guidelines
+
+</AccordionItem>
+  <AccordionItem title="Node 9 — update_dashboard">
+
+Pushes all findings, scores, and incident data to the real-time Control Tower dashboard.
+
+</AccordionItem>
+  <AccordionItem title="Node 10 — monitor_resolution">
+
+Continues monitoring the affected agent until health scores return to normal. Ensures remediation actions are effective and no regression occurs.
+
+</AccordionItem>
+</Accordion>
+
+### Control Tower Dashboard
+
+The Control Tower provides a real-time web interface with role-based access:
+
+| Role | Access Scope |
+|------|-------------|
+| CTO | Full view — all agents, all metrics, all incidents |
+| Security Lead | Full view — all agents, all metrics, all incidents |
+| Compliance Officer | Governance only — compliance metrics, regulatory incidents |
+| ML Engineer | Model health only — accuracy, drift, training pipeline status |
+
+**Dashboard panels:**
+
+- **12-agent health grid** — At-a-glance status of every agent (green, amber, red)
+- **Anomaly list with severity** — Active anomalies sorted by severity and time
+- **24-hour incident timeline** — Chronological view of all incidents in the last 24 hours
+- **System-wide health trend** — Historical health score graph across all agents
+- **Governance scorecard** — Compliance metrics and regulatory alignment status
+- **Security posture score** — Aggregate score across all 8 threat vectors
+
+---
+
+## AI Lifecycle Governance — 8 Stages
+
+<InfoBox type="fun" title="Think of it like raising a puppy">
+  Building an AI model is like raising a puppy. First you plan what kind of puppy to get (Design). Then you pick the right food (Data). You train it to sit and stay (Training). You test if it actually listens (Evaluation). You introduce it to the family (Deployment). You keep an eye on it every day (Monitoring). Sometimes you teach it new tricks (Retraining). And eventually, when it is very old, you retire it with love (Retirement). Every stage needs care and attention.
+</InfoBox>
+
+Every AI model in BARO follows a governed lifecycle from initial design through eventual retirement. Each stage has defined activities, governance checkpoints, and FSC regulatory requirements.
+
+<Diagram title="AI Lifecycle — 8 Stages">
+  <DiagramRow>
+    <DiagramNode label="1. Design & Spec" type="start" />
+    <DiagramArrow label="" />
+    <DiagramNode label="2. Data Collection" type="process" />
+    <DiagramArrow label="" />
+    <DiagramNode label="3. Training" type="process" />
+    <DiagramArrow label="" />
+    <DiagramNode label="4. Evaluation" type="process" />
+  </DiagramRow>
+  <DiagramRow>
+    <DiagramNode label="5. Deployment" type="process" />
+    <DiagramArrow label="" />
+    <DiagramNode label="6. Monitoring" type="process" />
+    <DiagramArrow label="" />
+    <DiagramNode label="7. Retraining" type="process" />
+    <DiagramArrow label="" />
+    <DiagramNode label="8. Retirement" type="end" />
+  </DiagramRow>
+</Diagram>
+
+<Accordion>
+  <AccordionItem title="Stage 1 — Design & Specification" defaultOpen={true}>
+
+- **Activities:** Define model purpose, identify data sources, specify HITL requirements, establish bias evaluation criteria
+- **Governance:** AI Impact Assessment completed, compliance team sign-off required
+- **FSC Requirement:** Pre-deployment risk assessment
+
+</AccordionItem>
+  <AccordionItem title="Stage 2 — Data Collection">
+
+- **Activities:** Gather training data, label datasets, obtain user consents where required
+- **Governance:** PIPA consent audit, training data documentation with provenance records
+- **FSC Requirement:** PIPA Article 29 compliance + FSC data governance standards
+
+</AccordionItem>
+  <AccordionItem title="Stage 3 — Training">
+
+- **Activities:** QLoRA fine-tuning on approved data, DP-SGD (Differentially Private Stochastic Gradient Descent) for privacy
+- **Governance:** Full run documentation including base model version, data version, hyperparameters, and privacy budget
+- **FSC Requirement:** Model documentation
+
+</AccordionItem>
+  <AccordionItem title="Stage 4 — Evaluation">
+
+- **Activities:** Canary test suite (200+ inputs), bias evaluation across demographics, adversarial testing
+- **Governance:** Minimum accuracy and fairness thresholds must pass. Any failed evaluation triggers a security review before proceeding
+- **FSC Requirement:** Pre-deployment testing
+
+</AccordionItem>
+  <AccordionItem title="Stage 5 — Deployment">
+
+- **Activities:** Staged rollout — 5% of traffic, then 25%, then 100% — with monitoring at each stage
+- **Governance:** Architecture Review Board approval required before each rollout expansion
+- **FSC Requirement:** Change management process
+
+</AccordionItem>
+  <AccordionItem title="Stage 6 — Monitoring">
+
+- **Activities:** Drift detection, bias monitoring, security scanning, usage analytics
+- **Governance:** Continuous dashboard monitoring, monthly bias audit, weekly security scan, quarterly regulatory review
+- **FSC Requirement:** Ongoing monitoring
+
+</AccordionItem>
+  <AccordionItem title="Stage 7 — Retraining">
+
+- **Activities:** Monthly retraining on new data (market data, user feedback, regulatory updates)
+- **Governance:** Full governance restarts from Stage 2 for every retraining cycle. Previous model version retained for 90 days as rollback
+- **FSC Requirement:** Material change notification to FSC
+
+</AccordionItem>
+  <AccordionItem title="Stage 8 — Retirement">
+
+- **Activities:** Model replaced by newer version, traffic migrated, old model decommissioned
+- **Governance:** Retirement documented with rationale. Model weights retained for 5 years for FSC audit purposes. All affected users notified of the transition
+- **FSC Requirement:** Record retention (5 years minimum)
+
+</AccordionItem>
+</Accordion>
+
+---
+
+## Regulatory Monitoring — Active Changes
+
+<InfoBox type="fun" title="Think of it like watching the weather forecast">
+  Regulatory monitoring is like checking the weather forecast every day. You need to know what rules are coming so you can prepare — just like carrying an umbrella before it rains. Agent 11 watches the regulatory forecast so BARO is never caught off guard.
+</InfoBox>
+
+BARO actively monitors five regulatory areas that may impact AI operations. Agent 11 tracks these as part of its weekly regulatory scan and monthly full regulatory review.
+
+<Accordion>
+  <AccordionItem title="FSC AI Guidelines 2024" defaultOpen={true}>
+
+- **Status:** Active and evolving
+- **Current impact:** Baseline compliance framework for all BARO AI agents
+- **Expected changes:** Stricter Human-in-the-Loop (HITL) requirements expected in 2026. Mandatory AI audit by external auditor also expected
+- **BARO preparation:** HITL already implemented for all high-risk decisions. Audit trail maintained for all agent actions
+
+</AccordionItem>
+  <AccordionItem title="PIPA Amendment 2024 (개인정보보호법)">
+
+- **Status:** Amendment in progress
+- **Current impact:** Governs all personal data processing in AI training and inference
+- **Expected changes:** Right to human review of AI-generated decisions expected to be strengthened significantly
+- **BARO preparation:** Human review already available for all AI decisions via Classic Mode fallback
+
+</AccordionItem>
+  <AccordionItem title="EU AI Act">
+
+- **Status:** Enacted, phased enforcement underway
+- **Current impact:** Not directly applicable (Korea-only operations)
+- **Expected changes:** Full compliance may be required if BARO expands to EU markets or serves EU citizens
+- **BARO preparation:** Architecture already aligns with EU AI Act high-risk requirements (transparency, HITL, documentation)
+
+</AccordionItem>
+  <AccordionItem title="금융소비자보호법 (Financial Consumer Protection Act)">
+
+- **Status:** Active, AI-specific guidance expected
+- **Current impact:** General consumer protection obligations apply to AI-generated recommendations
+- **Expected changes:** FSC expected to issue specific AI fair treatment guidelines in 2026 covering algorithmic transparency and non-discrimination
+- **BARO preparation:** Bias audits and fairness metrics already in place. Output firewall enforces disclaimer requirements
+
+</AccordionItem>
+  <AccordionItem title="특금법 — AI in AML/CFT (특정금융정보법)">
+
+- **Status:** Active, AI guidance pending
+- **Current impact:** AML/CFT obligations apply to AI-assisted transaction monitoring
+- **Expected changes:** KoFIU (Korea Financial Intelligence Unit) expected to issue specific AI-in-AML/CFT guidance in 2026
+- **BARO preparation:** Agent 5 (Compliance) already implements rule-based AML checks. AI-assisted detection maintains full audit trail for KoFIU reporting
+
+</AccordionItem>
+</Accordion>

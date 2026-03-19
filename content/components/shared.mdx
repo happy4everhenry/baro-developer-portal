@@ -1,0 +1,437 @@
+# Shared Components <KoreanLabel>공유 컴포넌트</KoreanLabel>
+
+<PageMeta status="live" layer="frontend" />
+
+These are the building blocks that show up everywhere in BARO. Think of them like LEGO pieces -- each one does one job really well, and you snap them together to build screens!
+
+<StatGrid columns={4}>
+  <StatCard value="13" label="Shared Components" />
+  <StatCard value="3" label="View Modifiers" />
+  <StatCard value="4" label="Extensions" />
+  <StatCard value="14" label="Spacing Tokens" />
+</StatGrid>
+
+<InfoBox type="fun" title="What are shared components?">
+Imagine you have a favorite sticker you use on every page of your notebook. Shared components work the same way -- they are reusable pieces that appear on many different screens in the app!
+</InfoBox>
+
+<Tabs>
+<Tab label="Components" icon="🧩">
+
+## Components
+
+All of these live in `BARO/Components/` and `Core/DesignSystem/`.
+
+<Accordion>
+<AccordionItem title="CompanyLogoView" icon="🏢" badge="Visual" defaultOpen={true}>
+
+Circular branded logo that supports three display modes: full text, initials, or SF Symbol. Each company gets its own brand color from `KLINEColors`.
+
+<PropsTable>
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `style` | `LogoStyle` | Required | One of `.text(String, Color)`, `.initials(String, Color)`, or `.symbol(String, Color)` |
+| `size` | `CGFloat` | `40` | Diameter of the circular logo in points |
+</PropsTable>
+
+**Variants:**
+
+- **.text** -- Full company name inside the circle (e.g., "SAMSUNG" in Samsung blue)
+- **.initials** -- 1-2 character abbreviation (e.g., "H" for Hyundai, "LG" for LG)
+- **.symbol** -- SF Symbol icon inside the circle
+
+```swift filename="CompanyLogoView.swift"
+// Text style — full company name inside circle
+CompanyLogoView(style: .text("SAMSUNG", logoColor: Color.klSamsung))
+
+// Initials style — 1-2 character abbreviation
+CompanyLogoView(style: .initials("H", logoColor: Color.klHyundai))
+
+// Symbol style — SF Symbol icon
+CompanyLogoView(style: .symbol("sun.max.fill", logoColor: Color.klHanwha))
+
+// Custom size (default is 40pt)
+CompanyLogoView(style: .initials("LG", logoColor: Color.klLG), size: 56)
+```
+
+</AccordionItem>
+
+<AccordionItem title="PriceChangeLabel" icon="📈" badge="Data">
+
+Shows price changes following Korean market colors: **Red = price went up**, **Blue = price went down**. Displays both the amount and percentage.
+
+<InfoBox type="tip" title="Korean color convention">
+In Korean markets, red means the price is going UP (good news for holders!) and blue means it is going DOWN. This is the opposite of Western markets!
+</InfoBox>
+
+<PropsTable>
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `change` | `Int` | Required | Absolute price change in won (e.g., `-3400`) |
+| `changePercent` | `Double` | Required | Percentage change (e.g., `-1.77`) |
+| `font` | `Font` | `.klCaptionBold` | Typography token for the label text |
+</PropsTable>
+
+**Variants:**
+
+- **Positive / Up** -- `+5,000 (+0.91%)` displayed in red (`#E04848`)
+- **Negative / Down** -- `-3,400 (-1.77%)` displayed in blue (`#3478F6`)
+- **Flat / Unchanged** -- `0 (0.00%)` displayed in gray (`#AAAAAA`)
+
+```swift filename="PriceChangeLabel.swift"
+// Standard usage in stock rows
+PriceChangeLabel(change: -3400, changePercent: -1.77)
+
+// With custom font for larger displays
+PriceChangeLabel(change: 5000, changePercent: 0.91, font: .klBody)
+
+// Color logic (Korean convention)
+// change >= 0 → Color.klPriceUp (#E04848, Red)
+// change < 0  → Color.klPriceDown (#3478F6, Blue)
+```
+
+</AccordionItem>
+
+<AccordionItem title="ShimmerModifier" icon="✨" badge="Animation">
+
+A view modifier that adds a shiny diagonal sweep animation over placeholder content. It makes loading screens look polished and alive.
+
+<InfoBox type="fun" title="What does shimmer look like?">
+Think of the way light slides across a shiny surface -- that is exactly what this modifier does! It makes gray placeholder shapes look like they are gently glowing while data loads.
+</InfoBox>
+
+<PropsTable>
+| Property | Type | Value | Description |
+|----------|------|-------|-------------|
+| `phase` | `CGFloat` | `-0.5 → 1.5` | Gradient sweep position, animates continuously |
+| `opacity` | `Double` | `0.4 → 1.0` | Content opacity, pulses with easeInOut |
+</PropsTable>
+
+**Animation Parameters:**
+
+- **Gradient sweep** -- `.linear(duration: 1.2)`, repeatForever, no reverse
+- **Opacity pulse** -- `.easeInOut(duration: 0.8)`, repeatForever, autoreverses
+- **Blend mode** -- `.sourceAtop`, gradient composited over content
+
+```swift filename="ShimmerModifier.swift"
+// Apply shimmer to any view
+RoundedRectangle(cornerRadius: 6)
+    .fill(Color(hex: "DFE2E8"))
+    .frame(width: 80, height: 14)
+    .shimmer()
+
+// SkeletonBlock — convenience shape used in skeleton views
+SkeletonBlock(width: 90, height: 18)       // Default cornerRadius: 6
+SkeletonBlock(width: 20, height: 20, cornerRadius: 10)  // Circle-like
+```
+
+</AccordionItem>
+
+<AccordionItem title="KLScrollIndicator" icon="📜" badge="Scroll">
+
+A custom scroll bar that replaces the default iOS one. It uses `onScrollGeometryChange` (iOS 18+) to track position and hides itself after 1.5 seconds of no scrolling.
+
+<PropsTable>
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `color` | `Color` | `klTextTertiary.opacity(0.8)` | Fill color of the indicator bar |
+| `barWidth` | `CGFloat` | `3` | Width of the scroll bar in points |
+</PropsTable>
+
+<FlowDiagram>
+  <FlowRow>
+    <FlowNode type="view">Hidden</FlowNode>
+    <FlowArrow />
+    <FlowNode type="service">Scroll begins</FlowNode>
+    <FlowArrow />
+    <FlowNode type="vm">Visible (tracks position)</FlowNode>
+    <FlowArrow />
+    <FlowNode type="view">1.5s idle -- fade out (0.4s easeOut)</FlowNode>
+  </FlowRow>
+</FlowDiagram>
+
+```swift filename="KLScrollIndicator.swift"
+// Standard usage — apply to any ScrollView
+ScrollView {
+    // content...
+}
+.klScrollIndicator()
+
+// Custom color and width
+ScrollView {
+    // content...
+}
+.klScrollIndicator(color: .blue, barWidth: 4)
+
+// Internal: minimum bar height is 36pt
+// Bar position tracks via scroll offset / scroll range ratio
+```
+
+</AccordionItem>
+
+<AccordionItem title="KLDetailNavBar" icon="🔙" badge="Navigation">
+
+A navigation bar for detail and modal screens. It has a dismiss button on the left, a centered title, and an optional area on the right for action buttons.
+
+<PropsTable>
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `title` | `String` | Required | Centered title text, uses `.klHeadline` font |
+| `icon` | `String` | `"xmark"` | SF Symbol name for the dismiss button (e.g., `"chevron.left"`) |
+| `onDismiss` | `() -> Void` | Required | Closure called when dismiss button is tapped |
+| `trailing` | `@ViewBuilder` | `EmptyView` | Optional trailing content (e.g., star/home buttons) |
+</PropsTable>
+
+**Variants:**
+
+- **Default (xmark)** -- Used for modal sheets and bottom sheets
+- **Back + Trailing** -- Used for stock detail page with `chevron.left` icon and trailing action buttons
+
+```swift filename="KLDetailNavBar.swift"
+// Simple dismiss bar (no trailing)
+KLDetailNavBar(title: "Filter Settings", onDismiss: { dismiss() })
+
+// With back chevron and trailing actions
+KLDetailNavBar(title: stock.name, icon: "chevron.left", onDismiss: { dismiss() }) {
+    HStack(spacing: 0) {
+        Button { /* navigate home */ } label: {
+            Image(systemName: "house")
+                .frame(width: 44, height: 44)
+        }
+        Button { isFavorite.toggle() } label: {
+            Image(systemName: isFavorite ? "star.fill" : "star")
+                .frame(width: 44, height: 44)
+        }
+    }
+}
+```
+
+</AccordionItem>
+
+<AccordionItem title="KLMoreButton" icon="➕" badge="Action">
+
+A full-width "show more" button placed at the bottom of shortened lists. It has a subtle gray background and uses `.plain` button style to avoid default highlighting.
+
+<PropsTable>
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `action` | `() -> Void` | Required | Closure triggered on tap (typically opens full-screen list) |
+| `label` | `String` | `"더보기"` | Button label text (Korean: "See more") |
+</PropsTable>
+
+```swift filename="KLMoreButton.swift"
+// Standard usage at the bottom of a stock list
+KLMoreButton { showStockDetail = true }
+
+// Custom label
+KLMoreButton(action: { showAllNews = true }, label: "뉴스 더보기")
+```
+
+</AccordionItem>
+
+<AccordionItem title="KLScrollableTabHeader" icon="📑" badge="Navigation">
+
+A horizontally scrollable tab bar with a back button. It uses `matchedGeometryEffect` to create a smooth sliding pill that follows whichever tab you pick. Works with any `Hashable` type.
+
+<PropsTable>
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `selected` | `Binding<T>` | Required | Currently selected tab item (two-way binding) |
+| `items` | `[T]` | Required | Array of tab items (must be `Hashable`) |
+| `label` | `(T) -> String` | Required | Closure that returns display text for each tab |
+| `onDismiss` | `() -> Void` | Required | Back button action (chevron.left circle button) |
+| `onChange` | `((T) -> Void)?` | `nil` | Optional callback when selection changes |
+</PropsTable>
+
+**Animation Details:**
+
+- **Pill transition** -- `.spring(response: 0.35, dampingFraction: 0.75)`
+- **Auto-scroll** -- `scrollTo(newValue, anchor: .center)`
+- **Indicator** -- `matchedGeometryEffect(id: "tabPill")`
+
+```swift filename="KLScrollableTabHeader.swift"
+KLScrollableTabHeader(
+    selected: $selectedFilter,
+    items: StockFilter.allCases,
+    label: { $0.rawValue },
+    onDismiss: { dismiss() },
+    onChange: { newFilter in
+        Task { await viewModel.loadStocks(filter: newFilter) }
+    }
+)
+```
+
+</AccordionItem>
+
+<AccordionItem title="KLSegmentedControl" icon="🔘" badge="Control">
+
+A fixed-width segmented control with a sliding capsule indicator. Same animation system as `KLScrollableTabHeader` but without scrolling or a back button. Used for in-page tab switching.
+
+<PropsTable>
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `selected` | `Binding<T>` | Required | Currently selected segment (two-way binding) |
+| `items` | `[T]` | Required | Array of segment items (must be `Hashable`) |
+| `label` | `(T) -> String` | Required | Closure that returns display text for each segment |
+| `onChange` | `((T) -> Void)?` | `nil` | Optional callback when selection changes |
+</PropsTable>
+
+```swift filename="KLSegmentedControl.swift"
+// Stock detail page — content tabs
+KLSegmentedControl(
+    selected: $selectedContentTab,
+    items: Array(DetailContentTab.allCases),
+    label: { $0.rawValue }
+)
+.padding(.horizontal, KLINESpacing.lg)
+
+// Chart settings sheet — tab bar
+KLSegmentedControl(
+    selected: $selectedTab,
+    items: Array(ChartSettingsTab.allCases),
+    label: { $0.rawValue },
+    onChange: { tab in analyticsTrack("chart_settings_tab", tab) }
+)
+```
+
+</AccordionItem>
+
+<AccordionItem title="LoadingOverlayView" icon="⏳" badge="Loading">
+
+A full-screen loading overlay with a spinner and Korean "Loading..." text. It fades in and out using an opacity transition.
+
+<PropsTable>
+| Property | Value | Description |
+|----------|-------|-------------|
+| Background | `Color.klBackground` | Matches app background, ignores safe area |
+| Spinner | `ProgressView()` | System spinner, `.regular` size, tinted `klTextTertiary` |
+| Label | `"로딩 중..."` | Korean loading text using `.klBody` font |
+| Transition | `.opacity` | Fades in/out when toggled |
+</PropsTable>
+
+```swift filename="LoadingOverlayView.swift"
+ZStack {
+    MainContent()
+
+    if viewModel.isLoading {
+        LoadingOverlayView()
+    }
+}
+.animation(.easeInOut, value: viewModel.isLoading)
+```
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+
+<Tab label="Extensions" icon="🔧">
+
+## Extensions <KoreanLabel>확장</KoreanLabel>
+
+Handy helper functions used throughout the app. Located in `Core/Extensions/`.
+
+<InfoBox type="info" title="What are extensions?">
+Extensions are like add-on powers for existing types. Instead of building a brand new thing, you give an existing type (like Color or Date) a cool new trick it did not have before!
+</InfoBox>
+
+<Accordion>
+<AccordionItem title="Color+Hex" icon="🎨" badge="Color">
+
+Creates a `Color` from a hex string. Supports 6-digit RGB (`"F2F3F5"`) and 8-digit ARGB formats. Automatically strips non-letter characters like `#`.
+
+```swift filename="Color+Hex.swift"
+Color(hex: "F2F3F5")     // 6-digit RGB
+Color(hex: "#E04848")    // With hash prefix (auto-stripped)
+Color(hex: "FF42C4BA")   // 8-digit ARGB with alpha
+```
+
+</AccordionItem>
+
+<AccordionItem title="Date+Korean" icon="📅" badge="Locale">
+
+Formats a `Date` as a Korean date string like `"3월 8일 일요일"` (March 8, Sunday). Uses `Locale(identifier: "ko_KR")` with format `"M월 d일 EEEE"`.
+
+```swift filename="Date+Korean.swift"
+Date().koreanDateString  // "3월 11일 화요일"
+```
+
+</AccordionItem>
+
+<AccordionItem title="Double+Currency" icon="💰" badge="Formatting">
+
+Number formatting helpers for Korean financial data. These turn raw numbers into nicely formatted strings with commas, units, and suffixes.
+
+<PropsTable>
+| Extension | Type | Format | Example |
+|-----------|------|--------|---------|
+| `.formattedWon` | `Double` | No decimals, comma-separated | `188200.0` → `"188,200"` |
+| `.formattedIndex` | `Double` | 2 decimal places | `5584.87` → `"5,584.87"` |
+| `.formattedPercent` | `Double` | 2 decimal places + `%` | `0.02` → `"0.02%"` |
+| `.formattedWon` | `Int` | No decimals, comma-separated | `188200` → `"188,200"` |
+| `.formattedChange` | `Int` | No decimals, unsigned | `-3400` → `"3,400"` |
+| `.formattedPlain` | `Int64` | Comma-separated | `54624256` → `"54,624,256"` |
+| `.formattedVolume` | `Int64` | Commas + `주` suffix | `28540000` → `"28,540,000주"` |
+| `.formattedTradingValue` | `Int64` | Korean units (조/억/원) | `1_000_000_000_000` → `"1.0조"`, `500_000_000_000` → `5,000억` |
+</PropsTable>
+
+```swift filename="Double+Currency.swift"
+stock.price.formattedWon          // "72,400"
+index.value.formattedIndex        // "5,584.87"
+stock.volume.formattedVolume      // "28,540,000주"
+stock.tradingValue.formattedTradingValue  // "5.4조"
+```
+
+</AccordionItem>
+
+<AccordionItem title="Notification+App" icon="🔔" badge="Navigation">
+
+Custom notification for deep navigation reset -- when you want to go all the way back to the home screen from anywhere.
+
+```swift filename="Notification+App.swift"
+// Post: dismiss all detail views and return to home tab
+NotificationCenter.default.post(name: .navigateToHome, object: nil)
+
+// Subscribe: in any fullScreenCover or detail view
+.onReceive(NotificationCenter.default.publisher(for: .navigateToHome)) { _ in
+    dismiss()
+}
+```
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+
+<Tab label="File Structure" icon="📁">
+
+## File Map <KoreanLabel>파일 구조</KoreanLabel>
+
+Here is where every shared component and extension lives in the project.
+
+```
+BARO/Components/
+  ├── CompanyLogoView.swift
+  ├── KLDetailNavBar.swift
+  ├── KLMoreButton.swift
+  ├── KLScrollableTabHeader.swift
+  ├── KLSegmentedControl.swift
+  └── PriceChangeLabel.swift
+
+Core/DesignSystem/
+  ├── KLScrollIndicator.swift
+  ├── ShimmerModifier.swift
+  ├── LoadingOverlayView.swift
+  ├── KLINEColors.swift
+  ├── KLINEFonts.swift
+  └── KLINESpacing.swift
+
+Core/Extensions/
+  ├── Color+Hex.swift
+  ├── Date+Korean.swift
+  ├── Double+Currency.swift
+  └── Notification+App.swift
+```
+
+</Tab>
+</Tabs>

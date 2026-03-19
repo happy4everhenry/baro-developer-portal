@@ -1,0 +1,907 @@
+# REST API Reference
+
+<PageMeta status="live" layer="backend" />
+
+<InfoBox type="info" title="What is a REST API?">
+Think of a REST API like a drive-through window. Your app pulls up and says, "I'd like the stock prices, please!" The server hands back a neatly wrapped package of data (called JSON). Every request uses a URL (like picking a menu item) and gets back data you can read right away.
+</InfoBox>
+
+<InfoBox type="tip" title="Quick setup">
+All endpoints return JSON. Base URL: `http://localhost:8000`. The BARO backend proxies Korea Investment & Securities (KIS) data, so the iOS app never needs API keys.
+</InfoBox>
+
+```bash
+# Development
+BASE_URL=http://localhost:8000
+
+# All responses are JSON with UTF-8 encoding
+Content-Type: application/json; charset=utf-8
+```
+
+---
+
+<Tabs>
+<Tab label="Auth" icon="🔐">
+
+## Authentication Endpoints
+
+These endpoints handle user registration, login, token refresh, and Apple Sign In. All auth endpoints are **live** and backed by a local SQLite database. Prefix: `/api/auth`
+
+<ApiEndpoint method="POST" path="/api/auth/register" description="Create a new account">
+
+Register a new user with email and password. Returns JWT access and refresh tokens.
+
+**Request Body**
+
+```json
+{
+  "email": "user@example.com",
+  "password": "securePass123",
+  "name": "User Name"
+}
+```
+
+**Response -- 201 Created**
+
+```json
+{
+  "access_token": "eyJ...",
+  "refresh_token": "eyJ...",
+  "expires_in": 1800
+}
+```
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/auth/login" description="Sign in with email and password">
+
+Authenticate an existing user. Returns JWT access and refresh tokens.
+
+**Request Body**
+
+```json
+{
+  "email": "user@example.com",
+  "password": "securePass123"
+}
+```
+
+**Response -- 200 OK**
+
+```json
+{
+  "access_token": "eyJ...",
+  "refresh_token": "eyJ...",
+  "expires_in": 1800
+}
+```
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/auth/refresh" description="Refresh an expired access token">
+
+Exchange a valid refresh token for a new access/refresh token pair. The old refresh token is revoked.
+
+**Request Body**
+
+```json
+{
+  "refresh_token": "eyJ..."
+}
+```
+
+**Response -- 200 OK**
+
+```json
+{
+  "access_token": "eyJ...",
+  "refresh_token": "eyJ...",
+  "expires_in": 1800
+}
+```
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/auth/me" description="Get current user profile">
+
+Returns the authenticated user's profile. Requires `Authorization: Bearer {access_token}` header.
+
+**Request**
+
+```bash
+curl -H "Authorization: Bearer eyJ..." http://localhost:8000/api/auth/me
+```
+
+**Response -- 200 OK**
+
+```json
+{
+  "id": "uuid-string",
+  "name": "User Name",
+  "email": "user@example.com",
+  "auth_provider": "email",
+  "created_at": "2026-03-19T00:00:00+00:00"
+}
+```
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/auth/logout" description="Revoke refresh token">
+
+Revokes the provided refresh token. Requires `Authorization: Bearer {access_token}` header.
+
+**Request Body**
+
+```json
+{
+  "refresh_token": "eyJ..."
+}
+```
+
+**Response -- 200 OK**
+
+```json
+{
+  "message": "로그아웃 되었습니다"
+}
+```
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/auth/apple" description="Sign in with Apple">
+
+Authenticate via Apple Sign In. Creates a new account if the Apple user ID is not yet registered.
+
+**Request Body**
+
+```json
+{
+  "identity_token": "apple-jwt-token",
+  "full_name": "Optional Display Name"
+}
+```
+
+**Response -- 200 OK**
+
+```json
+{
+  "access_token": "eyJ...",
+  "refresh_token": "eyJ...",
+  "expires_in": 1800
+}
+```
+
+</ApiEndpoint>
+
+</Tab>
+<Tab label="System" icon="🖥️">
+
+## System Endpoints
+
+These endpoints let you check if the server is awake -- like knocking on a door to see if anyone is home.
+
+<ApiEndpoint method="GET" path="/" description="Application info and status">
+
+Returns basic info about the app. Use this to make sure the server is running and see the current version.
+
+**Request**
+
+```bash
+curl http://localhost:8000/
+```
+
+**Response -- 200 OK**
+
+```json
+{
+  "app": "BARO",
+  "status": "running",
+  "version": "0.1.0"
+}
+```
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/health" description="Health check">
+
+A quick "are you alive?" check. Load balancers and monitoring tools use this to make sure the server is healthy.
+
+**Request**
+
+```bash
+curl http://localhost:8000/health
+```
+
+**Response -- 200 OK**
+
+```json
+{
+  "status": "ok"
+}
+```
+
+</ApiEndpoint>
+
+</Tab>
+<Tab label="Market" icon="📈">
+
+## Market Endpoints
+
+Market data for indices and FX rates, sourced from KIS Open API. Prefix: `/api/market`
+
+<InfoBox type="fun" title="What are indices and FX rates?">
+An **index** (like KOSPI) is a number that tells you how the whole stock market is doing -- like a class average on a test. An **FX rate** tells you how much one country's money is worth in another country's money.
+</InfoBox>
+
+<ApiEndpoint method="GET" path="/api/market/overview" description="Combined market overview for home screen">
+
+Fetches a combined market snapshot: top 3 indices (KOSPI, KOSDAQ, NASDAQ 100) plus top 4 FX rates (USD, EUR, JPY, CNY). Powers the home screen `MarketOverviewRow`.
+
+**Request**
+
+```bash
+curl http://localhost:8000/api/market/overview
+```
+
+**Response -- 200 OK**
+
+```json
+{
+  "indices": [
+    {
+      "id": "kospi",
+      "name": "KOSPI",
+      "flag": "🇰🇷",
+      "value": 2687.45,
+      "change": 12.30,
+      "change_percent": 0.46,
+      "status": "open"
+    },
+    {
+      "id": "kosdaq",
+      "name": "KOSDAQ",
+      "flag": "🇰🇷",
+      "value": 865.22,
+      "change": -3.15,
+      "change_percent": -0.36,
+      "status": "open"
+    }
+  ],
+  "currency_rates": [
+    {
+      "id": "usd",
+      "country": "United States",
+      "code": "USD",
+      "flag": "🇺🇸",
+      "rate": 1342.50,
+      "change": -2.30,
+      "change_percent": -0.17
+    }
+  ]
+}
+```
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/market/indices" description="All market indices with pagination">
+
+Fetch all available market indices with optional filtering and pagination. Returns KOSPI, KOSDAQ, S&P 500, NASDAQ, Dow Jones, and more.
+
+**Parameters**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `ids` | `string` | Optional | Comma-separated index IDs to filter (e.g. `"kospi,nasdaq100"`). Omit for all. |
+| `offset` | `integer` | Optional | Number of items to skip. Default: `0` |
+| `limit` | `integer` | Optional | Max items to return. `0` = no limit. Default: `0` |
+
+**Request**
+
+```bash
+# Fetch all indices
+curl http://localhost:8000/api/market/indices
+
+# Filter specific indices with pagination
+curl "http://localhost:8000/api/market/indices?ids=kospi,kosdaq&offset=0&limit=2"
+```
+
+**Response -- 200 OK**
+
+```json
+{
+  "items": [
+    {
+      "id": "kospi",
+      "name": "KOSPI",
+      "flag": "🇰🇷",
+      "value": 2687.45,
+      "change": 12.30,
+      "change_percent": 0.46,
+      "status": "open"
+    }
+  ],
+  "total": 12,
+  "offset": 0,
+  "limit": 0
+}
+```
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/market/indices/overview" description="Top 3 indices for home screen">
+
+Returns the top 3 market indices for the home screen header: KOSPI, KOSDAQ, and NASDAQ 100. No parameters needed.
+
+**Request**
+
+```bash
+curl http://localhost:8000/api/market/indices/overview
+```
+
+**Response -- 200 OK**
+
+```json
+[
+  {
+    "id": "kospi",
+    "name": "KOSPI",
+    "flag": "🇰🇷",
+    "value": 2687.45,
+    "change": 12.30,
+    "change_percent": 0.46,
+    "status": "open"
+  },
+  {
+    "id": "kosdaq",
+    "name": "KOSDAQ",
+    "flag": "🇰🇷",
+    "value": 865.22,
+    "change": -3.15,
+    "change_percent": -0.36,
+    "status": "open"
+  },
+  {
+    "id": "nasdaq100",
+    "name": "NASDAQ 100",
+    "flag": "🇺🇸",
+    "value": 18234.50,
+    "change": 45.80,
+    "change_percent": 0.25,
+    "status": "closed"
+  }
+]
+```
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/market/currency-rates" description="FX rates against KRW">
+
+Fetch foreign exchange rates against KRW with optional filtering and pagination. Supports USD, EUR, JPY, CNY, GBP, and more.
+
+**Parameters**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `ids` | `string` | Optional | Comma-separated currency IDs (e.g. `"usd,eur"`). Omit for all. |
+| `offset` | `integer` | Optional | Number of items to skip. Default: `0` |
+| `limit` | `integer` | Optional | Max items to return. `0` = no limit. Default: `0` |
+
+**Request**
+
+```bash
+# All currency rates
+curl http://localhost:8000/api/market/currency-rates
+
+# Filter specific currencies
+curl "http://localhost:8000/api/market/currency-rates?ids=usd,eur,jpy&limit=3"
+```
+
+**Response -- 200 OK**
+
+```json
+{
+  "items": [
+    {
+      "id": "usd",
+      "country": "United States",
+      "code": "USD",
+      "flag": "🇺🇸",
+      "rate": 1342.50,
+      "change": -2.30,
+      "change_percent": -0.17
+    },
+    {
+      "id": "eur",
+      "country": "European Union",
+      "code": "EUR",
+      "flag": "🇪🇺",
+      "rate": 1456.80,
+      "change": 1.20,
+      "change_percent": 0.08
+    }
+  ],
+  "total": 8,
+  "offset": 0,
+  "limit": 3
+}
+```
+
+</ApiEndpoint>
+
+</Tab>
+<Tab label="Stocks" icon="💹">
+
+## Stock Endpoints
+
+Stock data for listings, details, charts, and order books. Supports multi-venue routing (KRX, NXT, Combined). Prefix: `/api/stocks`
+
+<InfoBox type="note" title="What are market venues?">
+Think of venues like different stores selling the same toy. KRX is the main store, NXT is a newer store, and "combined" shows you the best price from both.
+</InfoBox>
+
+### Market Venues
+
+| Venue | Code | REST FID_COND_MRKT_DIV_CODE | Description |
+|-------|------|----------------------------|-------------|
+| `combined` | `UN` | `UN` | Unified KRX + NXT (default) |
+| `krx` | `J` | `J` | Korea Exchange only |
+| `nxt` | `NX` | `NX` | NXT (NextRade Korea) ATS only |
+
+<ApiEndpoint method="GET" path="/api/stocks" description="Ranked stock list">
+
+Fetch a ranked list of stocks for the given exchange, filter, and venue. Supports pagination. Used by home screen stock carousels and explore lists.
+
+**Parameters**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `exchange` | `string` | Optional | Exchange identifier. One of: `kospi`, `kosdaq`, `nasdaq`, `nyse`, `amex`. Default: `"kospi"` |
+| `filter` | `string` | Optional | Ranking filter. One of: `marketCap`, `popular`, `volume`, `gainers`, `losers`, `dividend`. Default: `"marketCap"` |
+| `limit` | `integer` | Optional | Max items to return. Range: 1--50. Default: `5` |
+| `offset` | `integer` | Optional | Number of items to skip. Default: `0` |
+| `venue` | `string` | Optional | Market venue: `combined`, `krx`, `nxt`. Default: `"combined"` |
+
+**Request**
+
+```bash
+# Top 5 KOSPI stocks by market cap (default)
+curl http://localhost:8000/api/stocks
+
+# Top 10 gainers on KOSDAQ via NXT
+curl "http://localhost:8000/api/stocks?exchange=kosdaq&filter=gainers&limit=10&venue=nxt"
+
+# US NASDAQ stocks by volume
+curl "http://localhost:8000/api/stocks?exchange=nasdaq&filter=volume&limit=10"
+```
+
+**Response -- 200 OK**
+
+```json
+{
+  "items": [
+    {
+      "id": "005930-combined",
+      "rank": 1,
+      "name": "Samsung Electronics",
+      "code": "005930",
+      "exchange": "kospi",
+      "market_cap": "367조 7,183억",
+      "price": 72300,
+      "change": -200,
+      "change_percent": -0.28,
+      "volume": 12345678,
+      "dividend_yield": 2.15,
+      "venue": "combined",
+      "is_nxt": false,
+      "is_fractional": false
+    }
+  ],
+  "total": 30,
+  "offset": 0,
+  "limit": 5
+}
+```
+
+**Error Responses**
+
+```json
+{
+  "detail": "KIS API error: service temporarily unavailable"
+}
+```
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/stocks/search" description="Search stocks">
+
+Search for stocks by name or code. **Note:** KIS does not provide a search API. This endpoint currently returns **mock/empty data**. The iOS app falls back to local mock data for search results.
+
+**Parameters**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `domestic` | `boolean` | Optional | `true` for Korean stocks, `false` for US stocks. Default: `true` |
+
+**Request**
+
+```bash
+curl "http://localhost:8000/api/stocks/search?domestic=true"
+```
+
+**Response -- 200 OK**
+
+```json
+{
+  "items": [],
+  "message": "Search not available via KIS API"
+}
+```
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/stocks/{code}/detail" description="Full stock detail with chart and orderbook">
+
+Fetch a full stock detail view including real-time quote, historical chart data, order book, investor flow, and fundamentals. Used by the stock detail page.
+
+**Path Parameters**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `code` | `string` | Required | Stock code (e.g. `"005930"` for Samsung Electronics) |
+
+**Query Parameters**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `exchange` | `string` | Optional | Exchange: `kospi`, `kosdaq`, `nasdaq`, `nyse`, `amex`. Default: `"kospi"` |
+| `chart_period` | `string` | Optional | Chart period: `1m`, `3m`, `6m`, `1y`, `3y`, `5y`. Default: `"3m"` |
+| `name` | `string` | Optional | Stock name hint from iOS (KIS quote does not return name in response) |
+| `venue` | `string` | Optional | Market venue: `combined`, `krx`, `nxt`. Default: `"combined"` |
+
+**Request**
+
+```bash
+# Samsung Electronics -- 3 month chart, combined venue
+curl "http://localhost:8000/api/stocks/005930/detail?exchange=kospi&chart_period=3m&name=Samsung%20Electronics"
+
+# SK Hynix -- 1 year chart, KRX only
+curl "http://localhost:8000/api/stocks/000660/detail?exchange=kospi&chart_period=1y&venue=krx"
+```
+
+**Response -- 200 OK**
+
+```json
+{
+  "id": "005930-combined",
+  "stock": {
+    "id": "005930-combined",
+    "rank": 1,
+    "name": "Samsung Electronics",
+    "code": "005930",
+    "exchange": "kospi",
+    "market_cap": "367조 7,183억",
+    "price": 72300,
+    "change": -200,
+    "change_percent": -0.28,
+    "volume": 12345678,
+    "dividend_yield": 2.15,
+    "venue": "combined",
+    "is_nxt": false,
+    "is_fractional": false
+  },
+  "prev_close": 72500,
+  "open": 72400,
+  "high": 73100,
+  "low": 71800,
+  "trading_value_formatted": "5,234억",
+  "market_cap_formatted": "367조 7,183억",
+  "foreign_ownership": 55.23,
+  "week52_high": 78400,
+  "week52_low": 58800,
+  "per": 12.45,
+  "eps": 5810,
+  "pbr": 1.23,
+  "bps": 58790,
+  "dividend_per_share": 1444,
+  "chart_data": [
+    {
+      "date": "2025-01-10T00:00:00",
+      "open": 71500.0,
+      "high": 72800.0,
+      "low": 71200.0,
+      "close": 72300.0,
+      "volume": 15234567
+    }
+  ],
+  "market_status": "open",
+  "nxt_status": "open",
+  "venue": "combined",
+  "investor_flow": {
+    "foreign_net": 12345678,
+    "institution_net": -5678901,
+    "individual_net": -6666777,
+    "foreign_acc5": 45678900,
+    "institution_acc5": -12345678,
+    "individual_acc5": -33333222,
+    "daily_records": []
+  },
+  "order_book": {
+    "asks": [{"id": "a1", "price": 72400, "quantity": 1500}],
+    "bids": [{"id": "b1", "price": 72300, "quantity": 2300}],
+    "current_price": 72300,
+    "total_ask_quantity": 45000,
+    "total_bid_quantity": 52000
+  }
+}
+```
+
+**Error Responses**
+
+```json
+{
+  "detail": "KIS API error: No data found for stock code 999999"
+}
+```
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/stocks/{code}/chart" description="Historical chart data (OHLCV)">
+
+Fetch chart data for a specific stock. Supports intraday minute charts (`1d`) and daily OHLCV for longer periods. Intraday is domestic stocks only; overseas falls back to 1-day daily.
+
+**Path Parameters**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `code` | `string` | Required | Stock code (e.g. `"005930"`) |
+
+**Query Parameters**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `exchange` | `string` | Optional | Exchange identifier. Default: `"kospi"` |
+| `period` | `string` | Optional | Chart period: `1d` (intraday), `1m`, `3m`, `6m`, `1y`, `3y`, `5y`. Default: `"3m"` |
+| `venue` | `string` | Optional | Market venue. Default: `"combined"` |
+
+**Request**
+
+```bash
+# 3-month daily chart for Samsung
+curl "http://localhost:8000/api/stocks/005930/chart?exchange=kospi&period=3m"
+
+# Intraday minute chart (domestic only)
+curl "http://localhost:8000/api/stocks/005930/chart?exchange=kospi&period=1d"
+
+# 1-year chart via NXT venue
+curl "http://localhost:8000/api/stocks/005930/chart?period=1y&venue=nxt"
+```
+
+**Response -- 200 OK**
+
+```json
+{
+  "chart_data": [
+    {
+      "date": "2025-01-10T00:00:00",
+      "open": 71500.0,
+      "high": 72800.0,
+      "low": 71200.0,
+      "close": 72300.0,
+      "volume": 15234567
+    },
+    {
+      "date": "2025-01-11T00:00:00",
+      "open": 72300.0,
+      "high": 73100.0,
+      "low": 72000.0,
+      "close": 72800.0,
+      "volume": 12456789
+    }
+  ]
+}
+```
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/stocks/{code}/orderbook" description="Order book (ask/bid levels)">
+
+Fetch the current order book for a stock. Returns up to 10 levels of ask and bid prices with quantities. Domestic stocks use KIS domestic API; overseas stocks use the separate overseas endpoint.
+
+**Path Parameters**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `code` | `string` | Required | Stock code (e.g. `"005930"`) |
+
+**Query Parameters**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `exchange` | `string` | Optional | Exchange identifier. Default: `"kospi"` |
+| `venue` | `string` | Optional | Market venue. Default: `"combined"` |
+
+**Request**
+
+```bash
+# Samsung order book, combined venue
+curl "http://localhost:8000/api/stocks/005930/orderbook?exchange=kospi"
+
+# KRX-only orderbook
+curl "http://localhost:8000/api/stocks/005930/orderbook?exchange=kospi&venue=krx"
+```
+
+**Response -- 200 OK**
+
+```json
+{
+  "asks": [
+    { "id": "a1", "price": 72400, "quantity": 1500 },
+    { "id": "a2", "price": 72500, "quantity": 2100 },
+    { "id": "a3", "price": 72600, "quantity": 890 },
+    { "id": "a4", "price": 72700, "quantity": 3200 },
+    { "id": "a5", "price": 72800, "quantity": 750 }
+  ],
+  "bids": [
+    { "id": "b1", "price": 72300, "quantity": 2300 },
+    { "id": "b2", "price": 72200, "quantity": 1800 },
+    { "id": "b3", "price": 72100, "quantity": 4500 },
+    { "id": "b4", "price": 72000, "quantity": 1200 },
+    { "id": "b5", "price": 71900, "quantity": 3100 }
+  ],
+  "current_price": 72300,
+  "total_ask_quantity": 45000,
+  "total_bid_quantity": 52000
+}
+```
+
+</ApiEndpoint>
+
+</Tab>
+<Tab label="WebSocket Status" icon="🔌">
+
+## WebSocket Status Endpoint
+
+<InfoBox type="fun" title="What is this for?">
+This endpoint lets you peek behind the curtain and see if the real-time price streaming system is working. It tells you how many people are connected and which stocks are being watched.
+</InfoBox>
+
+<ApiEndpoint method="GET" path="/ws/status" description="WebSocket streaming health check">
+
+Health check for the WebSocket streaming subsystem. Returns the current status of the KIS upstream connection, active subscriptions, and connected iOS clients.
+
+**Request**
+
+```bash
+curl http://localhost:8000/ws/status
+```
+
+**Response -- 200 OK**
+
+```json
+{
+  "kis_connected": true,
+  "active_subscriptions": 3,
+  "connected_clients": 2,
+  "watched_codes": [
+    "005930@combined",
+    "000660@combined",
+    "035420@krx"
+  ]
+}
+```
+
+</ApiEndpoint>
+
+</Tab>
+</Tabs>
+
+---
+
+## Response Data Models
+
+<InfoBox type="note" title="Field naming convention">
+Field names use `snake_case` in JSON responses. The iOS `APIClient` uses `keyDecodingStrategy = .convertFromSnakeCase` for automatic `camelCase` mapping in Swift.
+</InfoBox>
+
+<Accordion>
+<AccordionItem title="MarketIndex" icon="📊" badge="Market Data">
+
+A single market index data point (like KOSPI or NASDAQ).
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `string` | Index identifier (e.g. `"kospi"`, `"nasdaq100"`) |
+| `name` | `string` | Display name |
+| `flag` | `string` | Country flag emoji |
+| `value` | `float` | Current index value |
+| `change` | `float` | Change from previous close |
+| `change_percent` | `float` | Percentage change |
+| `status` | `string` | Market status: `"open"`, `"closed"`, `"pre_market"` |
+
+</AccordionItem>
+<AccordionItem title="CurrencyRate" icon="💱" badge="Market Data">
+
+FX rate against KRW -- how much one unit of foreign money costs in Korean won.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `string` | Currency identifier (e.g. `"usd"`) |
+| `country` | `string` | Country/region name |
+| `code` | `string` | ISO currency code (e.g. `"USD"`) |
+| `flag` | `string` | Country flag emoji |
+| `rate` | `float` | Exchange rate per 1 unit in KRW |
+| `change` | `float` | Change from previous day |
+| `change_percent` | `float` | Percentage change |
+
+</AccordionItem>
+<AccordionItem title="StockResponse" icon="📋" badge="Stock Data">
+
+A single stock item in a list.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `string` | Unique ID: `"{code}-{venue}"` |
+| `rank` | `integer` | Ranking position in the filtered list |
+| `name` | `string` | Stock name |
+| `code` | `string` | Stock code (e.g. `"005930"`) |
+| `exchange` | `string` | Exchange: `kospi`, `kosdaq`, `nasdaq`, `nyse`, `amex` |
+| `market_cap` | `string` | Formatted market cap (e.g. `"367조 7,183억"`) |
+| `price` | `integer` | Current price in local currency units |
+| `change` | `integer` | Price change from previous close |
+| `change_percent` | `float` | Percentage price change |
+| `volume` | `integer` | Trading volume |
+| `dividend_yield` | `float` | Annual dividend yield (%) |
+| `venue` | `string` | Trading venue: `combined`, `krx`, `nxt` |
+| `is_nxt` | `boolean` | Whether this price is from NXT venue |
+| `is_fractional` | `boolean` | Whether fractional shares are supported |
+
+</AccordionItem>
+<AccordionItem title="ChartPointResponse" icon="📉" badge="Chart Data">
+
+A single OHLCV chart data point -- one candle on a candlestick chart.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `date` | `string` | ISO 8601 timestamp (e.g. `"2025-03-10T00:00:00"`) |
+| `open` | `float` | Opening price |
+| `high` | `float` | High price |
+| `low` | `float` | Low price |
+| `close` | `float` | Closing price |
+| `volume` | `integer` | Trading volume |
+
+</AccordionItem>
+<AccordionItem title="OrderBookResponse" icon="📖" badge="Order Book">
+
+The order book shows who wants to buy and sell, and at what prices -- like a scoreboard of offers.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `asks` | `OrderBookEntry[]` | Ask (sell) price levels, ordered lowest to highest |
+| `bids` | `OrderBookEntry[]` | Bid (buy) price levels, ordered highest to lowest |
+| `current_price` | `integer` | Current market price |
+| `total_ask_quantity` | `integer` | Total volume across all ask levels |
+| `total_bid_quantity` | `integer` | Total volume across all bid levels |
+
+Each `OrderBookEntry` has: `id` (string), `price` (integer), `quantity` (integer)
+
+</AccordionItem>
+</Accordion>
+
+---
+
+## Rate Limits & Notes
+
+<InfoBox type="warning" title="Important limits to know">
+The backend rate-limits KIS API calls using an asyncio semaphore (15 concurrent requests). KIS allows approximately 20 requests/second. All KIS API calls have a 15-second timeout.
+</InfoBox>
+
+<StatGrid columns={3}>
+  <StatCard value="15" label="Max concurrent requests" />
+  <StatCard value="~20/s" label="KIS rate limit" />
+  <StatCard value="15s" label="Request timeout" />
+</StatGrid>
+
+- **KIS Upstream Limits:** 15 concurrent requests via asyncio semaphore. KIS allows ~20 req/sec.
+- **Timeout:** 15-second timeout on all KIS calls. If KIS is slow or unreachable, the backend returns `502 Bad Gateway`.
+- **CORS:** All origins allowed during development (`allow_origins=["*"]`). Will be restricted in production.
+- **WebSocket Subscription Limit:** KIS supports ~40 real-time subscriptions per WebSocket session. The `StreamManager` uses reference counting to share subscriptions across multiple iOS clients.

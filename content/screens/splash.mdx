@@ -1,0 +1,33 @@
+# Splash Screen <KoreanLabel>스플래시</KoreanLabel>
+
+<PageMeta status="live" layer="frontend" since="2025" />
+
+<InfoBox type="fun" title="What is a splash screen?">
+A **splash screen** is the very first thing you see when you open the app — like the cover of a book. It shows the BARO logo while the app prepares everything behind the scenes.
+</InfoBox>
+
+## What It Does
+
+The splash screen runs for 2–3 seconds and performs two important tasks:
+
+1. **Shows the brand** — Displays the BARO logo with an animated progress bar
+2. **Checks authentication** — Reads the stored JWT token from Keychain to determine if the user is already logged in
+
+## Where You Go Next
+
+<Diagram title="Splash Routing">
+  <DiagramRow>
+    <DiagramNode type="view" icon="🎬" label="SplashView" sublabel="Check stored token" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="token valid?" />
+  <DiagramRow>
+    <DiagramNode type="view" icon="🔐" label="LoginView" sublabel="No token → sign in" />
+    <DiagramNode type="view" icon="🏠" label="MainTabView" sublabel="Valid token → home" />
+  </DiagramRow>
+</Diagram>
+
+## Source Files
+
+| File | Purpose |
+|------|---------|
+| `Features/Splash/SplashView.swift` | Animated splash screen with progress bar and auth routing |

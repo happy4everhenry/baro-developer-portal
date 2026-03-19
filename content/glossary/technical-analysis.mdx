@@ -1,0 +1,383 @@
+# 기술적 분석 (차트)
+
+<PageMeta status="live" layer="shared" />
+
+**기술적 분석**은 과거 가격과 거래량 데이터를 차트로 분석하여 미래 가격을 예측하려는 방법입니다. 앱의 `StockChartView`와 `SubIndicatorChartView`에서 구현됩니다.
+
+---
+
+## 차트 유형 — 전체 17종
+
+`ChartType` enum에 정의된 차트 유형들입니다. `ChartSettingsSheet`에서 사용자가 선택할 수 있습니다.
+
+### 캔들스틱 차트 (Candlestick)
+
+가장 널리 사용되는 차트입니다. 하나의 **캔들(봉)**이 하나의 기간(1일, 1시간 등)을 나타냅니다.
+
+```
+    ┃ ← 윗꼬리 (High - 고가)
+   ┏┃┓
+   ┃ ┃ ← 몸통 (시가~종가)
+   ┗┃┛
+    ┃ ← 아랫꼬리 (Low - 저가)
+```
+
+| 색상 | 조건 | 의미 |
+|------|------|------|
+| 🔴 빨간 봉 (양봉) | 종가 > 시가 | 가격이 올랐음 |
+| 🔵 파란 봉 (음봉) | 종가 < 시가 | 가격이 내렸음 |
+
+- **몸통이 길다** = 가격 변동이 크다 (강한 방향성)
+- **꼬리가 길다** = 해당 방향으로 갔다가 되돌아왔다 (반전 신호 가능)
+
+### 전체 차트 유형 목록
+
+| # | `ChartType` | 한국어 | 설명 |
+|---|-------------|--------|------|
+| 1 | `.candle` | 캔들 | 시가·고가·저가·종가를 봉 형태로 표시. 가장 기본적인 차트 |
+| 2 | `.bar` | 바 | 캔들과 유사하나 수직 막대 형태 |
+| 3 | `.barOHLC` | 바(시고저종) | OHLC 바 차트. 왼쪽 틱=시가, 오른쪽 틱=종가 |
+| 4 | `.line` | 라인 | 종가만 선으로 연결. 가장 단순한 차트 |
+| 5 | `.flow` | FLOW | 유동적 곡선 차트. 부드러운 추세 확인 |
+| 6 | `.step` | 계단 | 계단 형태 라인. 가격 변동 시점을 명확히 표시 |
+| 7 | `.pnf` | PnF | Point & Figure 차트. 시간 축 없이 가격 변동만 표시. X(상승)와 O(하락) 열로 구성 |
+| 8 | `.threeLineBreak` | 삼선전환도 | 3봉 연속 고/저 돌파 시에만 새 봉 생성. 추세 전환 감지에 유용 |
+| 9 | `.swing` | 스윙 | 의미있는 가격 고점/저점만 연결. 노이즈 제거 |
+| 10 | `.renko` | 렌코 | 일정 가격 변동폭(벽돌 크기)마다 블록 생성. 시간 무관, 순수 가격 움직임만 표시 |
+| 11 | `.kagi` | Kagi | 방향 전환 시에만 선 방향 변경. 두꺼운 선=상승 추세, 얇은 선=하락 추세 |
+| 12 | `.areaLine` | 영역라인 | 라인 아래를 색으로 채움. 추세를 직관적으로 파악 |
+| 13 | `.inverseClock` | 역시계곡선 | 가격(Y축) vs 거래량(X축) 좌표에 시간순으로 점 연결. 반시계 방향 회전=상승 신호 |
+| 14 | `.scatter` | 분산형 | 가격을 점으로 표시. 분포와 패턴 파악 |
+| 15 | `.heikinAshi` | Heikin-Ashi | 평균값으로 계산한 캔들. 일반 캔들보다 노이즈가 적어 추세를 더 명확히 표시 |
+| 16 | `.candleVolume` | 캔들볼륨 | 캔들 너비가 거래량에 비례. 거래량 많은 봉이 더 넓게 표시됨 |
+| 17 | `.equivolume` | 이큐볼륨 | 각 봉의 너비가 거래량, 높이가 가격 범위. 가격과 거래량을 동시에 시각화 |
+
+---
+
+## 차트 기간 (Period)
+
+`ChartPeriod`로 정의됩니다. `StockDetailPeriodTabsView`에서 선택합니다.
+
+| 탭 표시 | 기간 | 데이터 단위 | 용도 |
+|---------|------|-------------|------|
+| 1일 | 당일 | 분봉 | 단기 트레이딩 |
+| 1개월 | 30일 | 일봉 | 단기 추세 |
+| 3개월 | 90일 | 일봉 | 중기 추세 |
+| 1년 | 365일 | 일봉 | 장기 추세 |
+| 3년 | 1,095일 | 주봉 | 장기 투자 판단 |
+
+> **개발자 참고:** LTTB (Largest-Triangle-Three-Buckets) 알고리즘으로 최대 300개 포인트로 다운샘플링합니다. 스크러빙(터치 드래그)할 때는 원본 데이터를 사용합니다.
+
+---
+
+## 오버레이 지표 — 전체 17종
+
+가격 차트 **위에** 겹쳐서 표시되는 지표입니다. `OverlayIndicator` enum으로 정의됩니다.
+
+| # | `OverlayIndicator` | 한국어 | 설명 |
+|---|---------------------|--------|------|
+| 1 | `.priceMA` | 주가이동평균 | 일정 기간의 평균 가격을 선으로 표시. 추세 파악의 가장 기본 도구. 가격이 MA 위=상승, 아래=하락 |
+| 2 | `.priceBox` | 가격 & Box | 가격 범위를 박스로 표시. 지지/저항 구간 시각화 |
+| 3 | `.netChart` | 그물차트 | 여러 기간의 이동평균을 동시에 표시. 그물처럼 겹치면 추세 전환 구간 |
+| 4 | `.volumeProfile` | 매물대 | 가격대별 거래량 분포를 가로 막대로 표시. 거래가 많았던 가격대 = 지지/저항 |
+| 5 | `.ichimoku` | 일목균형표 | 일본 기원 복합 지표. 구름대(색칠 영역)가 핵심. 가격이 구름 위=상승, 안=불확실, 아래=하락. 전환선·기준선·선행스팬A·선행스팬B·후행스팬 5개 요소 |
+| 6 | `.bollingerBand` | Bollinger Band | MA를 중심으로 표준편차 ×2 범위의 상단/하단 밴드. 상단 근처=과매수, 하단 근처=과매도. 밴드 축소=큰 변동 임박 |
+| 7 | `.dema` | DEMA | Double Exponential MA. 일반 MA보다 빠르게 반응. 추세 변화를 빨리 감지 |
+| 8 | `.demark` | Demark | Tom DeMark 지표. 추세 소진 지점(고점/저점) 예측. 카운트 기반 |
+| 9 | `.envelope` | Envelope | MA 위아래로 일정 비율의 밴드. 상단 = MA × (1+N%), 하단 = MA × (1-N%). 볼린저밴드보다 단순 |
+| 10 | `.mac` | MAC | Moving Average Convergence. 두 이동평균의 수렴/발산을 차트 위에 직접 표시 |
+| 11 | `.parabolicSAR` | Parabolic SAR | 가격 위/아래의 점. 아래=상승 추세(보유), 위=하락 추세(매도). 점 위치 전환=추세 전환 신호 |
+| 12 | `.pivot` | Pivot | 전일 고가·저가·종가로 계산한 지지/저항 가격대. 데이 트레이더의 기준점 |
+| 13 | `.pivotPrevBar` | Pivot전봉기준 | 전봉(이전 캔들) 기준 피봇 포인트. 단기 지지/저항 |
+| 14 | `.priceChannel` | Price Channel | N기간 최고가(상단)와 최저가(하단)로 채널 형성. 돌파 시 추세 신호 |
+| 15 | `.starcBands` | Starc Bands | Stoller Average Range Channel. ATR 기반 밴드. 볼린저밴드와 유사하나 ATR 사용 |
+| 16 | `.tema` | TEMA | Triple Exponential MA. DEMA보다 더 빠른 반응. 지연(lag) 최소화 |
+| 17 | `.zigZag` | Zig Zag | 의미있는 가격 변동만 직선으로 연결. 노이즈 제거. 파동 분석에 활용 |
+
+### 주요 오버레이 상세 설명
+
+#### 이동평균 (Moving Average, MA)
+
+**일정 기간 동안의 평균 가격**을 선으로 표시합니다. 가격의 "소음"을 걸러내고 추세를 파악합니다.
+
+```
+MA(20) = 최근 20일간 종가의 평균
+```
+
+| MA 종류 | 약어 | 설명 |
+|---------|------|------|
+| 단순이동평균 | SMA | 단순 산술 평균. 모든 데이터에 동일 가중치 |
+| 지수이동평균 | EMA | 최근 데이터에 더 큰 가중치. SMA보다 빠른 반응 |
+| 이중지수이동평균 | DEMA | EMA의 EMA. 더 빠른 반응 |
+| 삼중지수이동평균 | TEMA | EMA의 EMA의 EMA. 가장 빠른 반응, 지연 최소화 |
+
+**활용:**
+- 가격이 MA 위에 있으면 → 상승 추세
+- 가격이 MA 아래에 있으면 → 하락 추세
+- **골든 크로스:** 단기 MA가 장기 MA를 위로 돌파 → 매수 신호
+- **데드 크로스:** 단기 MA가 장기 MA를 아래로 돌파 → 매도 신호
+
+#### 볼린저 밴드 (Bollinger Bands, BB)
+
+MA를 중심으로 **상단/하단 밴드**를 그려 가격의 변동 범위를 표시합니다.
+
+```
+상단 밴드 = MA(20) + (표준편차 × 2)
+중심선    = MA(20)
+하단 밴드 = MA(20) - (표준편차 × 2)
+```
+
+- 가격이 **상단 밴드 근처** → 과매수 (overbuying), 하락 가능성
+- 가격이 **하단 밴드 근처** → 과매도 (overselling), 반등 가능성
+- **밴드 폭이 좁아지면** → 큰 가격 변동이 임박할 수 있음 ("스퀴즈")
+
+#### 일목균형표 (Ichimoku Cloud)
+
+일본에서 개발된 복합 지표로, **5개의 선**과 **구름대**로 구성됩니다.
+
+| 구성 요소 | 계산 | 역할 |
+|-----------|------|------|
+| 전환선 (Tenkan-sen) | (9일 최고 + 9일 최저) / 2 | 단기 추세 |
+| 기준선 (Kijun-sen) | (26일 최고 + 26일 최저) / 2 | 중기 추세 |
+| 선행스팬 A (Senkou A) | (전환선 + 기준선) / 2, 26일 선행 | 구름대 상단 |
+| 선행스팬 B (Senkou B) | (52일 최고 + 52일 최저) / 2, 26일 선행 | 구름대 하단 |
+| 후행스팬 (Chikou) | 현재 종가를 26일 후행 표시 | 과거 대비 현재 위치 |
+
+---
+
+## 보조 지표 — 전체 155종 (9개 카테고리)
+
+가격 차트 **아래**에 별도 패널로 표시되는 지표입니다. `SubIndicatorChartView`에서 렌더링됩니다.
+
+### 카테고리 1: 관심지표 (9종)
+
+가장 자주 사용하는 핵심 지표 모음입니다.
+
+| # | ID | 한국어 | 설명 |
+|---|-----|--------|------|
+| 1 | `fav_price_ma` | 주가이동평균 | 가격의 평균선. 추세 판단의 기본 도구 |
+| 2 | `fav_ichimoku` | 일목균형표 | 구름대 기반 복합 추세 지표 |
+| 3 | `fav_bollinger` | Bollinger Band | 표준편차 기반 가격 밴드 |
+| 4 | `fav_envelope` | Envelope | MA 기반 고정 비율 밴드 |
+| 5 | `fav_cci` | CCI | Commodity Channel Index. 가격이 평균에서 얼마나 벗어났는지. +100 이상=과매수, -100 이하=과매도 |
+| 6 | `fav_dmi` | DMI | Directional Movement Index. 추세의 방향과 강도 측정. +DI(상승 방향) vs -DI(하락 방향) |
+| 7 | `fav_disparity` | 이격도 | 현재가 ÷ MA × 100. 100 이상이면 MA보다 위(과열), 100 미만이면 MA보다 아래(침체) |
+| 8 | `fav_rsi` | RSI | Relative Strength Index. 0~100 범위. 70 이상=과매수, 30 이하=과매도 |
+| 9 | `fav_stoch_fast` | Stochastic Fast | 현재가가 최근 가격 범위에서 어디인지. 80 이상=과매수, 20 이하=과매도 |
+
+### 카테고리 2: 거래량지표 (17종)
+
+거래량(Volume) 기반 분석 지표입니다. **"가격은 거래량을 따른다"**는 원칙에 기반합니다.
+
+| # | ID | 한국어 | 설명 |
+|---|-----|--------|------|
+| 1 | `vol_volume` | 거래량 | 기본 거래량 막대. 빨강=양봉일, 파랑=음봉일 |
+| 2 | `vol_volume_ma` | 거래량이동평균 | 거래량의 이동평균. 평균 대비 거래량 수준 파악 |
+| 3 | `vol_trading_value` | 거래대금 | 거래량 × 가격 = 실제 거래된 금액 |
+| 4 | `vol_trading_value_ma` | 거래대금이동평균 | 거래대금의 이동평균 |
+| 5 | `vol_bii` | BII | Bullish Indicator Index. 매수 강도 측정 |
+| 6 | `vol_chaikins_osc` | Chaikins OSC | Chaikin Oscillator. AD Line의 MACD. 매수/매도 압력 변화 감지 |
+| 7 | `vol_cmf` | CMF | Chaikin Money Flow. 일정 기간의 자금 유입/유출. 양수=매수 압력, 음수=매도 압력 |
+| 8 | `vol_force_index` | Force Index | 가격 변동 × 거래량. 매수/매도 세력의 힘 측정 |
+| 9 | `vol_eom` | EOM | Ease of Movement. 가격이 얼마나 쉽게 움직이는지. 값이 크면 적은 거래량으로도 가격 변동 |
+| 10 | `vol_mfi` | MFI | Money Flow Index. 거래량 가중 RSI. "돈의 흐름" 파악. 80 이상=과매수, 20 이하=과매도 |
+| 11 | `vol_nvi` | NVI | Negative Volume Index. 거래량 감소일에만 반응. 스마트 머니(기관) 추적 |
+| 12 | `vol_obv` | OBV | On Balance Volume. 거래량 누적 흐름. 가격 상승일 거래량 더하고, 하락일 뺌 |
+| 13 | `vol_pvi` | PVI | Positive Volume Index. 거래량 증가일에만 반응. 군중(개인) 심리 추적 |
+| 14 | `vol_va_osc` | VA Oscillator | Volume Accumulation Oscillator. 거래량 누적의 변화율 |
+| 15 | `vol_vol_osc` | Volume Oscillator | 단기/장기 거래량 MA의 차이. 거래량 추세 |
+| 16 | `vol_vr` | VR | Volume Ratio. 상승일 거래량 ÷ 하락일 거래량. 매수/매도 균형 |
+| 17 | `vol_vroc` | VROC | Volume Rate of Change. 거래량의 변화율(%) |
+
+### 카테고리 3: 추세지표 (23종)
+
+가격의 **추세 방향과 강도**를 측정하는 지표입니다.
+
+| # | ID | 한국어 | 설명 |
+|---|-----|--------|------|
+| 1 | `trd_ad_line` | AD Line | Accumulation/Distribution Line. 거래량 가중 가격 누적. 상승=매수 우세 |
+| 2 | `trd_adx` | ADX | Average Directional Index. 추세의 강도(방향 무관). 25 이상=강한 추세, 20 이하=추세 없음 |
+| 3 | `trd_adxr` | ADXR | ADX의 평균. ADX보다 부드러운 추세 강도 |
+| 4 | `trd_cci` | CCI | Commodity Channel Index. 가격 편차 측정. +100/-100 기준 과매수/과매도 |
+| 5 | `trd_dmi` | DMI | Directional Movement. +DI와 -DI의 교차로 추세 방향 판단 |
+| 6 | `trd_formula` | Formula | 사용자 정의 수식 지표 |
+| 7 | `trd_lrl` | LRL | Linear Regression Line. 가격의 선형 회귀선. 추세의 중심 방향 |
+| 8 | `trd_lrs` | LRS | Linear Regression Slope. 회귀선의 기울기. 양수=상승 추세, 음수=하락 추세 |
+| 9 | `trd_macd` | MACD | EMA(12) - EMA(26). 두 이동평균의 차이로 추세 방향·강도 파악. 시그널(EMA9)과의 교차가 매수/매도 신호 |
+| 10 | `trd_macd_osc` | MACD OSC | MACD - Signal = 히스토그램. 막대가 0 위=상승, 0 아래=하락 모멘텀 |
+| 11 | `trd_macd_plus_osc` | MACD+OSC | MACD 라인 + 시그널 라인 + 히스토그램을 한 패널에 표시 |
+| 12 | `trd_mao` | MAO | Moving Average Oscillator. 단기 MA - 장기 MA. 0선 돌파가 추세 전환 신호 |
+| 13 | `trd_momentum` | Momentum | 현재가 - N일 전 가격. 가격 변화의 속도 측정. 양수=상승세, 음수=하락세 |
+| 14 | `trd_ndi` | NDI | Negative Directional Index. 하락 추세의 강도 |
+| 15 | `trd_price_osc` | Price Oscillator | 단기/장기 MA의 비율 차이(%) |
+| 16 | `trd_price_roc` | Price ROC | 가격 변화율(%). N일 전 대비 현재가의 변화 비율 |
+| 17 | `trd_reverse` | Reverse | 추세 반전 감지 지표 |
+| 18 | `trd_roc` | ROC | Rate of Change. Price ROC와 동일 개념 |
+| 19 | `trd_sonar` | Sonar | 추세 방향 및 모멘텀 복합 지표 |
+| 20 | `trd_sroc` | SROC | Smooth ROC. ROC를 평활화하여 노이즈 제거 |
+| 21 | `trd_trix` | TRIX | Triple EMA의 변화율. 매우 부드러운 추세 지표. 시그널 교차가 매매 신호 |
+| 22 | `trd_tsf` | TSF | Time Series Forecast. 통계적 예측 기반 추세선 |
+| 23 | `trd_vhf` | VHF | Vertical Horizontal Filter. 시장이 추세장인지 횡보장인지 판별 |
+
+### 카테고리 4: 변동성지표 (21종)
+
+가격 **변동의 크기와 범위**를 측정합니다.
+
+| # | ID | 한국어 | 설명 |
+|---|-----|--------|------|
+| 1 | `vlt_disparity` | 이격도 | 현재가 ÷ MA × 100. 100 이상=과열, 100 미만=침체 |
+| 2 | `vlt_disparity_idx` | 이격도[지수] | 지수(코스피 등) 기준 이격도 |
+| 3 | `vlt_ab_ratio` | AB Ratio | A/B비율. 시가 대비 고가·저가의 비율로 매수/매도 세력 비교 |
+| 4 | `vlt_atr` | ATR | Average True Range. 평균 가격 변동폭. 값이 크면 변동성 큼 |
+| 5 | `vlt_band_pctb` | Band %B | 볼린저밴드 내 현재가 위치(%). 1 이상=상단 돌파, 0 이하=하단 돌파 |
+| 6 | `vlt_band_width` | Band Width | 볼린저밴드 폭. 좁으면 변동성 축소(큰 변동 임박), 넓으면 변동성 확대 |
+| 7 | `vlt_bollinger_sub` | Bollinger Band [보조] | 보조 패널에 표시되는 볼린저밴드 |
+| 8 | `vlt_chaikins_vol` | Chaikins Volatility | 고가-저가 범위의 EMA 변화율. 변동성 확대/축소 감지 |
+| 9 | `vlt_dpo` | DPO | Detrended Price Oscillator. 추세를 제거한 가격 오실레이터. 순수 사이클 파악 |
+| 10 | `vlt_drf` | DRF | Detrended Regression Filter. 회귀 제거 필터 |
+| 11 | `vlt_mass_index` | Mass Index | 고가-저가 범위의 팽창/수축 측정. 27 이상 후 하락=추세 반전 신호("리버설 벌지") |
+| 12 | `vlt_nco` | NCO | Normalized Correlation Oscillator. 정규화된 상관관계 오실레이터 |
+| 13 | `vlt_qstic` | Qstic | 가격 변동성의 통계적 측정치 |
+| 14 | `vlt_rmi` | RMI | Relative Momentum Index. RSI 변형. 모멘텀 기반 과매수/과매도 |
+| 15 | `vlt_rsi` | RSI | 0~100. 70 이상=과매수(조정 가능), 30 이하=과매도(반등 가능) |
+| 16 | `vlt_sigma` | Sigma | 가격의 표준편차. 변동성의 통계적 크기 |
+| 17 | `vlt_std_dev` | Standard Deviation | 표준편차. 가격 분산 정도 |
+| 18 | `vlt_stoch_fast` | Stochastic Fast | 빠른 스토캐스틱. 민감하게 반응. 80/20 과매수/과매도 |
+| 19 | `vlt_stoch_slow` | Stochastic Slow | 느린 스토캐스틱. Fast를 평활화. 노이즈 적음 |
+| 20 | `vlt_stoch_osc` | Stochastic Oscillator | 스토캐스틱 오실레이터. %K와 %D의 교차 |
+| 21 | `vlt_williams_r` | Williams R | Williams %R. 스토캐스틱과 유사. -20 이상=과매수, -80 이하=과매도 |
+
+### 카테고리 5: 2차파생지표 (11종)
+
+**두 가지 지표를 조합**한 복합 지표입니다. 단일 지표보다 정확한 신호를 제공합니다.
+
+| # | ID | 한국어 | 설명 |
+|---|-----|--------|------|
+| 1 | `cmb_pctb_stoch` | %B+Stochastic | 볼린저밴드 %B와 스토캐스틱 결합 |
+| 2 | `cmb_lrs_stoch` | LRS+Stochastic | 회귀기울기와 스토캐스틱 결합 |
+| 3 | `cmb_macd_stoch` | MACD+Stochastic | MACD와 스토캐스틱 결합. 추세+과매수/과매도 동시 판단 |
+| 4 | `cmb_mom_stoch` | Momentum+Stochastic | 모멘텀과 스토캐스틱 결합 |
+| 5 | `cmb_obv_mom` | OBV+Momentum | 거래량 흐름과 가격 모멘텀 결합 |
+| 6 | `cmb_obv_stoch` | OBV+Stochastic | 거래량 흐름과 스토캐스틱 결합 |
+| 7 | `cmb_roc_stoch` | ROC+Stochastic | 변화율과 스토캐스틱 결합 |
+| 8 | `cmb_rsi_macd` | RSI+MACD | 과매수/과매도와 추세 방향 동시 판단 |
+| 9 | `cmb_rsi_stoch` | RSI+Stochastic | RSI와 스토캐스틱 결합 |
+| 10 | `cmb_sonar_simri` | Sonar+심리도 | 소나 지표와 시장 심리 결합 |
+| 11 | `cmb_stoch_rsi` | Stochastic+RSI | 스토캐스틱 방식으로 계산한 RSI. 극단값 감지에 유용 |
+
+### 카테고리 6: 시장강도지표 (19종)
+
+시장 전체의 **매수/매도 힘의 균형**을 측정합니다.
+
+| # | ID | 한국어 | 설명 |
+|---|-----|--------|------|
+| 1 | `mst_simrido` | 심리도 | N일 중 상승일 비율(%). 75% 이상=과열(매수 심리 과다), 25% 이하=침체 |
+| 2 | `mst_new_simrido` | 신심리도 | 심리도의 개선 버전. 상승/하락 폭도 반영 |
+| 3 | `mst_bpdl_short` | BPDL Short Trend | 단기 매수/매도 압력 추세 |
+| 4 | `mst_bpdl_stoch` | BPDL Stochastic | 매수/매도 압력의 스토캐스틱 |
+| 5 | `mst_elder_bear` | Elder_Ray Bear Power | 저가 - EMA. 매도(하락) 세력의 강도 측정 |
+| 6 | `mst_elder_bull` | Elder_Ray Bull Power | 고가 - EMA. 매수(상승) 세력의 강도 측정 |
+| 7 | `mst_force_long` | Force Index Long Term | 장기 거래 세력 강도 |
+| 8 | `mst_force_short` | Force Index Short Term | 단기 거래 세력 강도 |
+| 9 | `mst_gm_osc` | GM McClellan Oscillator | 상승종목수-하락종목수의 EMA 차이. 시장 전체 breath 측정 |
+| 10 | `mst_gm_sum` | GM McClellan Summation | McClellan Oscillator의 누적. 장기 시장 추세 |
+| 11 | `mst_lfi` | LFI | Long Force Index. 장기 매수/매도 세력 |
+| 12 | `mst_ma_indicator` | Moving Average Indicator | MA 기반 매수/매도 신호 |
+| 13 | `mst_obv_mid` | OBV[Midpoint] | OBV의 중앙값 기준 표시 |
+| 14 | `mst_obv_osc` | OBV Oscillator | OBV의 단기/장기 MA 차이 |
+| 15 | `mst_obv_vol` | OBV with Volume | OBV와 거래량 동시 표시 |
+| 16 | `mst_pvt` | PVT | Price Volume Trend. 가격 변동률 × 거래량 누적. OBV의 정밀 버전 |
+| 17 | `mst_rci` | RCI | Rank Correlation Index. 가격 순위와 시간 순위의 상관관계. +80 이상=과매수, -80 이하=과매도 |
+| 18 | `mst_trin` | TRIN[Inverted] | Arms Index(반전). 상승/하락 종목수 비율 ÷ 상승/하락 거래량 비율. 1 미만=매수 우세 |
+| 19 | `mst_vol_acc` | Volume Accumulator | 거래량 누적 지표. 자금 유입/유출 추적 |
+
+### 카테고리 7: 시장지표 (15종)
+
+**외국인/기관/개인 수급**과 신용거래 등 시장 구조 데이터입니다.
+
+| # | ID | 한국어 | 설명 |
+|---|-----|--------|------|
+| 1 | `mkt_inst_acc` | 기관순매수누적 | 기관투자자 순매수의 누적 합계 |
+| 2 | `mkt_inst_vol` | 기관순매수량 | 당일 기관 순매수 수량 |
+| 3 | `mkt_market_cap` | 시가총액 | 주가 × 발행주식수의 변화 추이 |
+| 4 | `mkt_foreign_vol` | 외국인 보유량 | 외국인이 보유한 총 주식 수 |
+| 5 | `mkt_foreign_rate` | 외국인 보유율 | 전체 상장 주식 중 외국인 보유 비율(%) |
+| 6 | `mkt_foreign_net` | 외국인 순매수 | 당일 외국인 매수량 - 매도량 |
+| 7 | `mkt_foreign_acc` | 외국인 순매수누적 | 외국인 순매수의 누적 합계 |
+| 8 | `mkt_news_count` | 뉴스건수 | 해당 종목 관련 뉴스 기사 수 |
+| 9 | `mkt_disc_count` | 공시건수 | 해당 종목의 공시 건수 |
+| 10 | `mkt_news_intensity` | 뉴스강도 | 뉴스 빈도 × 관련성 가중치 |
+| 11 | `mkt_indiv_vol` | 개인 순매수량 | 당일 개인 투자자 순매수 수량 |
+| 12 | `mkt_indiv_acc` | 개인 순매수누적 | 개인 순매수의 누적 합계 |
+| 13 | `mkt_credit_shares` | 신용잔고주수 | 빌린 돈으로 산 주식 수. 높으면 반대매매 위험 |
+| 14 | `mkt_credit_rate` | 신용잔고율 | 전체 거래량 대비 신용거래 비율 |
+| 15 | `mkt_credit_prov` | 신용공여율 | 증권사가 빌려준 금액의 비율 |
+
+### 카테고리 8: 신호검색 (20종)
+
+**매수/매도 신호를 자동으로 감지**하여 차트에 화살표 등으로 표시합니다.
+
+| # | ID | 한국어 | 설명 |
+|---|-----|--------|------|
+| 1 | `sig_ma_cross` | 이동평균 크로스 신호 | 단기 MA가 장기 MA를 교차할 때 신호 발생 |
+| 2 | `sig_simple_idx` | 단순지수 크로스 신호 | 지수 이동평균 교차 신호 |
+| 3 | `sig_simple_price` | 단순가격 크로스 신호 | 가격이 MA를 교차할 때 신호 |
+| 4 | `sig_multi_ma` | 멀티 이동평균 크로스 신호 | 여러 기간 MA의 동시 교차 신호 |
+| 5 | `sig_macd_cross` | MACD 크로스 신호 | MACD와 시그널의 교차 |
+| 6 | `sig_mao_cross` | MAO 지표 크로스 신호 | MAO의 0선 돌파 신호 |
+| 7 | `sig_pvi_cross` | PVI 크로스 신호 | PVI의 MA 교차 |
+| 8 | `sig_parabolic` | Parabolic SAR 신호 | SAR 점의 위치 전환 신호 |
+| 9 | `sig_stochastics` | Stochastics 신호 | 스토캐스틱 %K와 %D 교차 |
+| 10 | `sig_adxr_strategy` | ADXRStrategy 신호 | ADXR 기반 추세 강도 전략 신호 |
+| 11 | `sig_cci_baseline` | CCIBaseLine 신호 | CCI의 0선 돌파 신호 |
+| 12 | `sig_cci_overbought` | CCIOverBought 신호 | CCI의 +100/-100 돌파 신호 |
+| 13 | `sig_disparity` | Disparity 신호 | 이격도의 특정 수준 돌파 신호 |
+| 14 | `sig_dmi` | DMI 신호 | +DI와 -DI의 교차 신호 |
+| 15 | `sig_golden_ema` | Golden Cross EMA 신호 | EMA 골든/데드 크로스 신호 |
+| 16 | `sig_macd_baseline` | MACD BaseLine 신호 | MACD의 0선 돌파 |
+| 17 | `sig_sonar_mom` | Sonar Momentum 신호 | 소나 모멘텀 변화 신호 |
+| 18 | `sig_sonar_signal` | Sonar Signal 신호 | 소나 시그널 교차 신호 |
+| 19 | `sig_williams_r` | WilliamsR 신호 | Williams %R의 과매수/과매도 구간 진입/탈출 |
+| 20 | `sig_rsi` | RSI 신호 | RSI의 70/30 수준 돌파 신호 |
+
+### 카테고리 9: 캔들 강세/약세 (20종)
+
+캔들 패턴 기반으로 **강세(상승)·약세(하락) 신호**를 자동 감지합니다.
+
+| # | ID | 한국어 | 설명 |
+|---|-----|--------|------|
+| 1 | `cdl_ma_cross` | 이동평균 크로스 강세약세 | MA 교차 패턴의 강세/약세 판별 |
+| 2 | `cdl_simple_idx` | 단순지수 크로스 강세약세 | 지수 MA 교차의 강세/약세 |
+| 3 | `cdl_simple_price` | 단순가격 크로스 강세약세 | 가격-MA 교차의 강세/약세 |
+| 4 | `cdl_multi_ma` | 멀티 이동평균 크로스 강세약세 | 다중 MA 교차의 강세/약세 |
+| 5 | `cdl_macd` | MACD 강세약세 | MACD 교차의 강세/약세 |
+| 6 | `cdl_mao` | MAO 지표 강세약세 | MAO 교차의 강세/약세 |
+| 7 | `cdl_pvi_cross` | PVI 크로스 강세약세 | PVI 교차의 강세/약세 |
+| 8 | `cdl_parabolic` | Parabolic SAR 강세약세 | SAR 전환의 강세/약세 |
+| 9 | `cdl_stochastics` | Stochastics 강세약세 | 스토캐스틱 교차의 강세/약세 |
+| 10 | `cdl_adxr_strategy` | ADXRStrategy 강세약세 | ADXR의 강세/약세 |
+| 11 | `cdl_cci_baseline` | CCIBaseLine 강세약세 | CCI 0선의 강세/약세 |
+| 12 | `cdl_cci_overbought` | CCIOverBought 강세약세 | CCI 극단값의 강세/약세 |
+| 13 | `cdl_dmi` | DMI 강세약세 | DMI 교차의 강세/약세 |
+| 14 | `cdl_disparity` | Disparity 강세약세 | 이격도의 강세/약세 |
+| 15 | `cdl_golden_ema` | Golden Cross EMA 강세약세 | EMA 크로스의 강세/약세 |
+| 16 | `cdl_macd_baseline` | MACD BaseLine 강세약세 | MACD 0선의 강세/약세 |
+| 17 | `cdl_sonar_mom` | Sonar Momentum 강세약세 | 소나 모멘텀의 강세/약세 |
+| 18 | `cdl_sonar_signal` | Sonar Signal 강세약세 | 소나 시그널의 강세/약세 |
+| 19 | `cdl_williams_r` | WilliamsR 강세약세 | Williams %R의 강세/약세 |
+| 20 | `cdl_rsi` | RSI 강세약세 | RSI의 강세/약세 |
+
+---
+
+## 차트 조작
+
+앱의 `StockChartView`에서 지원하는 터치 제스처:
+
+| 제스처 | 동작 | 구현 위치 |
+|--------|------|-----------|
+| 터치 드래그 | 스크러빙 — 특정 봉의 OHLCV 값 표시 | `DragGesture` (line 180) |
+| 수평 드래그 | 차트 좌우 이동 (패닝) | `DragGesture` (line 180) |
+| 핀치 | 확대/축소 | `MagnifyGesture` (line 165) |
+| 더블탭 | 줌 초기화 | `.onTapGesture(count: 2)` (line 222) |
+
+> **개발자 참고:** 스크러빙 중에는 `StockPriceHeaderView`의 가격 표시가 라이브 가격 대신 스크러빙된 가격으로 전환됩니다 (`isScrubbing` binding).

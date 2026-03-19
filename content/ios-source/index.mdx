@@ -1,0 +1,57 @@
+# iOS Source Code Documentation 소스코드 문서
+
+<PageMeta status="live" layer="frontend" since="2025" />
+
+Comprehensive source code reference for developers maintaining the **BARO iOS** application. This section provides detailed documentation of every source file, architectural decisions, coding patterns, and maintenance procedures.
+
+<StatGrid columns={4}>
+  <StatCard value="124" label="Swift Files" />
+  <StatCard value="19" label="Data Models" />
+  <StatCard value="9" label="Repository Files" />
+  <StatCard value="66" label="Feature Files" />
+</StatGrid>
+
+## Purpose
+
+This documentation is designed for **future maintainers** of the BARO iOS application. It provides:
+
+- **Complete file inventory** — Every Swift source file with its purpose, location, and responsibilities
+- **Architecture deep-dive** — How the MVVM + Repository pattern is implemented in practice
+- **Module breakdowns** — Feature-by-feature documentation of views, view models, and components
+- **Infrastructure reference** — Network layer, WebSocket, design system internals
+- **Coding conventions** — Naming patterns, formatting rules, and idioms used throughout the codebase
+- **Maintenance playbook** — Step-by-step guides for common tasks like adding new screens, models, or API endpoints
+
+## Quick Navigation
+
+| Section | What You'll Find |
+|---------|-----------------|
+| [Project Structure](/ios-source/project-structure) | Directory tree, file organization, naming conventions |
+| [Architecture Guide](/ios-source/architecture) | MVVM pattern, dependency injection, data flow pipelines |
+| [Core Infrastructure](/ios-source/core-infrastructure) | APIClient, WebSocketManager, design system, extensions |
+| [Data Models](/ios-source/data-models) | All 19 model files with field-level documentation |
+| [Feature Modules](/ios-source/feature-modules) | Home, Search, StockDetail, Auth, AI Insights, Events, MyPage — all screens |
+| [Repository Layer](/ios-source/repository-layer) | Protocols, API implementation, mock data system |
+| [Reusable Components](/ios-source/reusable-components) | Shared UI components used across features |
+| [Coding Conventions](/ios-source/coding-conventions) | Swift patterns, naming rules, formatting standards |
+| [Maintenance Guide](/ios-source/maintenance-guide) | How-to guides for extending the application |
+
+## Tech Stack Summary
+
+| Technology | Version | Purpose |
+|-----------|---------|---------|
+| Swift | 5.9+ | Primary language |
+| SwiftUI | iOS 16+ | UI framework |
+| @Observable | Observation framework | State management (replaces ObservableObject) |
+| async/await | Swift Concurrency | Asynchronous operations |
+| AsyncStream | Swift Concurrency | WebSocket event streaming |
+| URLSession | Foundation | HTTP networking |
+| WebSocket | URLSessionWebSocketTask | Real-time price streaming |
+
+## Related Documentation
+
+This section focuses on **source code implementation details**. For higher-level documentation, see:
+
+- [Frontend Overview](/frontend) — Screen definitions, design system, interaction specs
+- [Architecture Overview](/overview/architecture) — System-level architecture diagram
+- [Backend Services](/backend) — Python backend, KIS integration, API reference

@@ -1,0 +1,60 @@
+# Roadmap
+
+<PageMeta status="live" layer="shared" />
+
+Development timeline and planned features for BARO.
+
+## Phase 1 --- Foundation <StatusBadge status="live">COMPLETE</StatusBadge>
+
+Core iOS app: Home dashboard, stock list, market indices, news, search, basic navigation.
+
+**Completed:** Q1–Q2 2025
+
+## Phase 2 --- Stock Analysis <StatusBadge status="live">COMPLETE</StatusBadge>
+
+Stock detail page: interactive chart (23 types, 155+ indicators), order book, daily prices, financials, dividends, analyst opinions, investor flow.
+
+**Completed:** Q3 2025
+
+## Phase 3 --- Market Intelligence <StatusBadge status="live">COMPLETE</StatusBadge>
+
+AI market issues bubble chart, detail sheets (reports, dividends, financials with quarterly/annual toggle).
+
+**Completed:** Q3 2025
+
+## Phase 4 --- Backend Integration <StatusBadge status="live">COMPLETE</StatusBadge>
+
+FastAPI backend with dual data sources (Yahoo Finance + KIS Open API). REST endpoints for stock quotes, charts, orderbooks, rankings. Real-time WebSocket streaming with KIS relay, subscription fan-out, and animated price ticking on iOS.
+
+**Completed:** Q4 2025
+
+## Phase 5 --- Expansion (Login, Events, MyPage, Notifications) <StatusBadge status="live">COMPLETE</StatusBadge>
+
+Login & authentication (100%), Events & calendar (100%), MyPage & settings (100%), Notifications (100%). Intelligence Hub merged into Home screen's AI section. Full backend specification finalized.
+
+**Completed:** Q1 2026
+
+## Phase 6 --- AI Services <StatusBadge status="in-progress">IN PROGRESS</StatusBadge>
+
+12 AI agent roles, RAG pipeline, sentiment engine, signal generator, AI advisor chat. Architecture defined, 12 AI agents fully specified, implementation beginning.
+
+**Progress:** Architecture complete, implementation starting (March 2026)
+
+Key milestones:
+- **AI Platform architecture defined** — 12 agents specified with roles, tools, and workflows (completed March 2026)
+- **AI Stack deployment** — LangGraph orchestration, MCP tool integration, 12 agent workflows ([details](/ai-platform/ai-stack))
+- **Intelligence Layer** — RAG pipeline, embeddings, CAG, QLoRA fine-tuning, and vector search ([details](/ai-platform/intelligence-layer))
+- **AI Security hardening** — Prompt injection defense, data poisoning prevention, canary testing ([details](/ai-platform/ai-security))
+- **Governance & Compliance** — FSC regulatory alignment, HITL approval workflows, ethical AI policies ([details](/ai-platform/ai-governance))
+- **Operations & Audit** — Full audit trail, real-time monitoring, incident response playbooks ([details](/ai-platform/operations-audit))
+
+### 2026 Milestones
+
+- **Q1 2026** — Backend specification complete, AI platform architecture finalized
+- **Q2 2026** — Phase 1 AI agents in development (Risk Guard, Smart Notification, Security Monitor, Control Tower)
+- **Q3 2026** — Phase 2 AI agents development (Market Analyst, Portfolio Advisor, News Analyst, Sentiment Tracker)
+- **Q4 2026** — Phase 3 AI agents development (Trading Strategist, Compliance Auditor, Voice Assistant, Document Analyst)
+
+## Phase 7 --- Social & Compliance <StatusBadge status="planned">PLANNED</StatusBadge>
+
+Copy trading, community feed, FSC regulatory compliance, KYC integration, security gateway.

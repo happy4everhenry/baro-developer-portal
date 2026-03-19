@@ -1,0 +1,122 @@
+# AI Platform
+
+<PageMeta status="in_progress" layer="backend" />
+
+The brain behind BARO — 12 specialized AI agents, a 7-layer technology stack, and a governance framework that keeps everything safe, fair, and auditable. Architecture is complete and fully specified. Phase 1 agents (Risk Guard, Smart Notification, Security Monitor, Control Tower) are now in active development.
+
+<InfoBox type="fun" title="Think of it like a team of robots!">
+  Imagine 12 smart robots, each with one specific job. One watches stock prices, another reads the news, another guards against fraud. They all work together, but a human always makes the final decision on anything involving money.
+</InfoBox>
+
+<StatGrid columns={4}>
+  <StatCard value="7" label="Stack Layers" />
+  <StatCard value="12" label="AI Agents" />
+  <StatCard value="6" label="MCP Servers" />
+  <StatCard value="5" label="Governance Pillars" />
+</StatGrid>
+
+## Explore AI Platform
+
+<QuickNav>
+  <QuickNavCard
+    icon="🏗️"
+    title="AI Stack & Agents"
+    description="The 7-layer architecture and 12 specialized AI agents — from infrastructure to orchestration."
+    href="/ai-platform/ai-stack"
+    badge="Core Architecture"
+  />
+  <QuickNavCard
+    icon="🧠"
+    title="Intelligence Layer"
+    description="RAG pipeline, prompt caching (CAG), local LLM training, and the 3-layer knowledge system."
+    href="/ai-platform/intelligence-layer"
+  />
+  <QuickNavCard
+    icon="📋"
+    title="Operations & Audit"
+    description="7-stage audit trail, safe AI execution rails, One Cockpit monitoring dashboard."
+    href="/ai-platform/operations-audit"
+  />
+  <QuickNavCard
+    icon="🛡️"
+    title="AI Security"
+    description="8 AI threat vectors, 4 firewall layers, and defense strategies for every attack type."
+    href="/ai-platform/ai-security"
+  />
+  <QuickNavCard
+    icon="⚖️"
+    title="AI Governance"
+    description="5 pillars: Alignment, Control, Visibility, Security, and Societal Integration."
+    href="/ai-platform/ai-governance"
+  />
+</QuickNav>
+
+---
+
+## How It All Connects
+
+<Diagram title="AI Platform Architecture" caption="From user request to AI response — every layer plays a role">
+  <DiagramRow>
+    <DiagramNode type="view" icon="👤" label="User" sublabel="Asks a question or triggers action" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="request" />
+  <DiagramRow>
+    <DiagramNode type="default" icon="📱" label="Application Layer" sublabel="Next.js / React Native / iOS" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="routes to agent" />
+  <DiagramRow>
+    <DiagramNode type="vm" icon="🤖" label="AI Agent" sublabel="1 of 12 specialists" />
+    <DiagramNode type="service" icon="🔄" label="LangGraph" sublabel="Orchestration" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="uses tools via" />
+  <DiagramRow>
+    <DiagramNode type="repo" icon="🔌" label="MCP Servers" sublabel="6 tool interfaces" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="fetches knowledge" />
+  <DiagramRow>
+    <DiagramNode type="data" icon="💾" label="CAG Cache" sublabel="Stable knowledge" />
+    <DiagramNode type="model" icon="🔍" label="RAG Pipeline" sublabel="Dynamic knowledge" />
+    <DiagramNode type="service" icon="🧠" label="Local LLM" sublabel="Intrinsic knowledge" />
+  </DiagramRow>
+</Diagram>
+
+---
+
+## The 12 AI Agents at a Glance
+
+<Tabs>
+  <Tab label="Core Agents" icon="⭐">
+
+| # | Agent | Job | Model |
+|---|-------|-----|-------|
+| 1 | **Trade Signal** | Buy/sell/hold signals with confidence scores | XGBoost + Claude |
+| 2 | **AI Advisor Chatbot** | Korean-language financial Q&A | Claude + BGE-M3 |
+| 3 | **Risk Guard** | AML monitoring and fraud detection | Isolation Forest + Claude |
+| 4 | **Market Analysis** | Daily AI market summaries | Claude + TA-Lib |
+| 5 | **Portfolio Optimizer** | Risk-adjusted rebalancing advice | Black-Litterman + Claude |
+| 6 | **Smart Notification** | Relevance-scored alerts in KO/EN/CN | Claude + Collaborative Filter |
+
+</Tab>
+  <Tab label="Specialist Agents" icon="🔬">
+
+| # | Agent | Job | Model |
+|---|-------|-----|-------|
+| 7 | **News Sentiment** | Korean & English news scoring | KoBERT + FinBERT-KO |
+| 8 | **Document Analysis** | Query broker reports & filings | Claude + pgvector |
+| 9 | **CUI Agent** | Voice & text app control | Claude + Local LLM |
+| 10 | **Feature Request** | Auto-generates specs from user requests | Claude |
+| 11 | **Security Monitor** | Threat monitoring & regulatory scanning | Claude + Isolation Forest |
+| 12 | **Control Tower** | Watches all other agents | Claude |
+
+</Tab>
+</Tabs>
+
+---
+
+## Key Safety Principles
+
+<FeatureGrid columns={3}>
+  <FeatureCard icon="🛑" title="HITL on Money" description="A human always confirms before any money moves. No exceptions." color="red" />
+  <FeatureCard icon="📝" title="Full Audit Trail" description="Every action by every agent is recorded and traceable forever." color="blue" />
+  <FeatureCard icon="🔒" title="No God Agents" description="Each agent does one thing well. No single agent has unlimited power." color="purple" />
+</FeatureGrid>

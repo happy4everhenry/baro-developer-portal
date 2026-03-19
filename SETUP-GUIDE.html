@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BARO Developer Portal — Local Setup Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --jade: #22C55E;
+      --jade-dark: #16A34A;
+      --jade-glow: rgba(34, 197, 94, 0.08);
+      --amber: #D4A017;
+      --red: #E04848;
+      --blue: #3478F6;
+      --bg: #FAFBFC;
+      --bg-card: #FFFFFF;
+      --bg-code: #F6F8FA;
+      --text: #1A1A1A;
+      --text-2: #555555;
+      --text-3: #8B8B8B;
+      --border: #E5E7EB;
+      --border-2: #D1D5DB;
+      --radius: 12px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.04);
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ---- HEADER ---- */
+    .hero {
+      background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
+      color: #fff;
+      padding: 60px 0 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -20%;
+      width: 60%;
+      height: 200%;
+      background: radial-gradient(ellipse, rgba(34,197,94,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -50%;
+      right: -20%;
+      width: 50%;
+      height: 200%;
+      background: radial-gradient(ellipse, rgba(52,120,246,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-inner { position: relative; z-index: 1; }
+    .hero-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 14px;
+      background: var(--jade);
+      color: #fff;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+    }
+    .hero h1 {
+      font-size: 40px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+    }
+    .hero h1 span { color: var(--jade); }
+    .hero p {
+      font-size: 16px;
+      color: rgba(255,255,255,0.6);
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    /* ---- LAYOUT ---- */
+    .container {
+      max-width: 840px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ---- TABLE OF CONTENTS ---- */
+    .toc {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      margin: 40px auto;
+      box-shadow: var(--shadow);
+    }
+    .toc h2 {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-3);
+      margin-bottom: 16px;
+    }
+    .toc ol {
+      list-style: none;
+      counter-reset: toc-counter;
+      padding: 0;
+    }
+    .toc li {
+      counter-increment: toc-counter;
+      margin-bottom: 8px;
+    }
+    .toc li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 500;
+      padding: 6px 8px;
+      border-radius: 8px;
+      transition: background 0.15s;
+    }
+    .toc li a:hover { background: var(--jade-glow); color: var(--jade-dark); }
+    .toc li a::before {
+      content: counter(toc-counter);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--jade-glow);
+      color: var(--jade-dark);
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    /* ---- SECTIONS ---- */
+    section {
+      margin: 48px 0;
+    }
+    section h2 {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--border);
+    }
+    section h2 .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      font-size: 14px;
+      font-weight: 700;
+      background: var(--jade);
+      color: #fff;
+      border-radius: 8px;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+    section h3 {
+      font-size: 17px;
+      font-weight: 700;
+      margin: 28px 0 10px;
+      color: var(--text);
+    }
+    section p, section li {
+      font-size: 15px;
+      color: var(--text-2);
+    }
+    section ul, section ol {
+      padding-left: 24px;
+      margin: 12px 0;
+    }
+    section li { margin-bottom: 6px; }
+
+    /* ---- CODE BLOCKS ---- */
+    .code-block {
+      background: #1E293B;
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin: 16px 0;
+      box-shadow: var(--shadow-md);
+    }
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: rgba(0,0,0,0.2);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .code-header .label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.5);
+    }
+    .code-header .dots {
+      display: flex;
+      gap: 6px;
+    }
+    .code-header .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .code-header .dot.r { background: #FF5F57; }
+    .code-header .dot.y { background: #FEBC2E; }
+    .code-header .dot.g { background: #28C840; }
+    .code-block pre {
+      padding: 20px;
+      overflow-x: auto;
+      margin: 0;
+    }
+    .code-block code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      color: #E2E8F0;
+    }
+    .code-block code .comment { color: #64748B; }
+    .code-block code .cmd { color: #22C55E; }
+    .code-block code .flag { color: #38BDF8; }
+    .code-block code .url { color: #FBBF24; }
+    .code-block code .output { color: #94A3B8; }
+
+    /* ---- INLINE CODE ---- */
+    code.inline {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 6px;
+      color: var(--text);
+    }
+
+    /* ---- CARDS ---- */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin: 16px 0;
+      box-shadow: var(--shadow);
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-3);
+      margin-bottom: 12px;
+    }
+
+    /* ---- INFO / WARNING / TIP BOXES ---- */
+    .callout {
+      display: flex;
+      gap: 14px;
+      padding: 16px 20px;
+      border-radius: var(--radius);
+      margin: 16px 0;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .callout .icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+    .callout p { margin: 0; color: inherit; }
+    .callout strong { font-weight: 700; }
+    .callout.info {
+      background: rgba(52, 120, 246, 0.06);
+      border: 1px solid rgba(52, 120, 246, 0.15);
+      color: #1E40AF;
+    }
+    .callout.warning {
+      background: rgba(245, 158, 11, 0.06);
+      border: 1px solid rgba(245, 158, 11, 0.15);
+      color: #92400E;
+    }
+    .callout.success {
+      background: rgba(34, 197, 94, 0.06);
+      border: 1px solid rgba(34, 197, 94, 0.15);
+      color: #166534;
+    }
+    .callout.danger {
+      background: rgba(224, 72, 72, 0.06);
+      border: 1px solid rgba(224, 72, 72, 0.15);
+      color: #991B1B;
+    }
+
+    /* ---- TABLES ---- */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin: 12px 0;
+    }
+    thead th {
+      text-align: left;
+      padding: 10px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-3);
+      border-bottom: 2px solid var(--border);
+    }
+    tbody td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-2);
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody td code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    /* ---- BADGE ---- */
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 10px;
+      border-radius: 20px;
+    }
+    .badge.jade { background: rgba(34,197,94,0.1); color: var(--jade-dark); }
+    .badge.blue { background: rgba(52,120,246,0.1); color: var(--blue); }
+    .badge.amber { background: rgba(212,160,23,0.1); color: var(--amber); }
+    .badge.gray { background: rgba(107,114,128,0.1); color: #6B7280; }
+
+    /* ---- TREE ---- */
+    .tree {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      color: var(--text-2);
+    }
+    .tree .dir { color: var(--blue); font-weight: 600; }
+    .tree .file { color: var(--text); }
+    .tree .desc { color: var(--text-3); font-style: italic; }
+
+    /* ---- FOOTER ---- */
+    .guide-footer {
+      text-align: center;
+      padding: 48px 0;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .guide-footer p { font-size: 13px; color: var(--text-3); }
+
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 28px; }
+      .container { padding: 0 16px; }
+      .toc { padding: 20px; }
+      .code-block pre { padding: 14px; }
+      .code-block code { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================ -->
+  <!-- HERO HEADER                                                   -->
+  <!-- ============================================================ -->
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-badge">SETUP GUIDE</div>
+      <h1>BARO <span>Developer Portal</span></h1>
+      <p>Complete step-by-step guide to run the documentation site locally on macOS</p>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- ============================================================ -->
+    <!-- TABLE OF CONTENTS                                            -->
+    <!-- ============================================================ -->
+    <nav class="toc">
+      <h2>Table of Contents</h2>
+      <ol>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#clone">Get the Project Files</a></li>
+        <li><a href="#install">Install Dependencies</a></li>
+        <li><a href="#dev-server">Start the Development Server</a></li>
+        <li><a href="#prod-build">Production Build &amp; Preview</a></li>
+        <li><a href="#project-structure">Project Structure Explained</a></li>
+        <li><a href="#custom-components">Custom MDX Components</a></li>
+        <li><a href="#adding-content">Adding or Editing Content</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+        <li><a href="#tech-stack">Tech Stack Reference</a></li>
+      </ol>
+    </nav>
+
+
+    <!-- ============================================================ -->
+    <!-- 1. PREREQUISITES                                             -->
+    <!-- ============================================================ -->
+    <section id="prerequisites">
+      <h2><span class="step-num">1</span> Prerequisites</h2>
+      <p>Before you begin, make sure you have the following installed on your Mac.</p>
+
+      <h3>Node.js (v18 or later)</h3>
+      <p>This project uses <strong>Next.js 16</strong> which requires <strong>Node.js 18+</strong>. We recommend Node 20 LTS or later.</p>
+
+      <p>Check if Node is installed:</p>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <div class="label">Terminal</div>
+        </div>
+        <pre><code><span class="cmd">node</span> <span class="flag">--version</span>
+<span class="comment"># Expected: v18.x.x or higher (v20+ recommended)</span>
+
+<span class="cmd">npm</span> <span class="flag">--version</span>
+<span class="comment"># Expected: 9.x.x or higher</span></code></pre>
+      </div>
+
+      <h3>Install Node.js if not present</h3>
+      <p>Choose one of these methods:</p>
+
+      <p><strong>Option A &mdash; Homebrew (recommended)</strong></p>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <div class="label">Terminal</div>
+        </div>
+        <pre><code><span class="comment"># Install Homebrew if you don't have it</span>
+<span class="cmd">/bin/bash</span> -c "$(curl -fsSL <span class="url">https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh</span>)"
+
+<span class="comment"># Install Node.js LTS</span>
+<span class="cmd">brew</span> install node@20</code></pre>
+      </div>
+
+      <p><strong>Option B &mdash; Official installer</strong></p>
+      <p>Download the macOS <code class="inline">.pkg</code> installer from <a href="https://nodejs.org" target="_blank" style="color: var(--jade-dark); font-weight: 600;">nodejs.org</a> &mdash; choose the LTS version.</p>
+
+      <p><strong>Option C &mdash; nvm (Node Version Manager)</strong></p>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <div class="label">Terminal</div>
+        </div>
+        <pre><code><span class="comment"># Install nvm</span>
+<span class="cmd">curl</span> -o- <span class="url">https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh</span> | bash
+
+<span class="comment"># Restart your terminal, then:</span>
+<span class="cmd">nvm</span> install 20
+<span class="cmd">nvm</span> use 20</code></pre>
+      </div>
+
+      <div class="callout info">
+        <span class="icon">&#x2139;&#xFE0F;</span>
+        <div>
+          <p><strong>Apple Silicon Macs (M1/M2/M3/M4):</strong> Node.js works natively on ARM. No Rosetta needed. Homebrew installs to <code class="inline">/opt/homebrew/</code> on Apple Silicon.</p>
+        </div>
+      </div>
+
+      <h3>Git (optional but recommended)</h3>
+      <p>macOS ships with Git via Xcode Command Line Tools. Verify:</p>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <div class="label">Terminal</div>
+        </div>
+        <pre><code><span class="cmd">git</span> <span class="flag">--version</span>
+<span class="comment"># If not installed, macOS will prompt you to install Xcode CLI Tools</span></code></pre>
+      </div>
+
+      <h3>Text Editor</h3>
+      <p>Any editor works. We recommend <a href="https://code.visualstudio.com" target="_blank" style="color: var(--jade-dark); font-weight: 600;">VS Code</a> with the MDX extension for syntax highlighting of <code class="inline">.mdx</code> files.</p>
+    </section>
+
+
+    <!-- ============================================================ -->
+    <!-- 2. GET THE PROJECT FILES                                      -->
+    <!-- ============================================================ -->
+    <section id="clone">
+      <h2><span class="step-num">2</span> Get the Project Files</h2>
+      <p>The developer portal lives inside the BARO monorepo at <code class="inline">developer-portal/</code>.</p>
+
+      <h3>If you have the project folder already</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <div class="label">Terminal</div>
+        </div>
+        <pre><code><span class="comment"># Navigate to the developer portal directory</span>
+<span class="cmd">cd</span> /path/to/BARO/developer-portal</code></pre>
+      </div>
+
+      <h3>If cloning from a Git repository</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <div class="label">Terminal</div>
+        </div>
+        <pre><code><span class="comment"># Clone the repo (replace URL with your actual repo URL)</span>
+<span class="cmd">git</span> clone https://github.com/your-org/baro.git
+<span class="cmd">cd</span> baro/developer-portal</code></pre>
+      </div>
+
+      <h3>Verify the directory structure</h3>
+      <p>You should see these files and folders:</p>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <div class="label">Terminal</div>
+        </div>
+        <pre><code><span class="cmd">ls</span> -la
+
+<span class="output">app/
+components/
+content/
+styles/
+public/
+mdx-components.jsx
+next.config.mjs
+package.json
+package-lock.json
+.gitignore</span></code></pre>
+      </div>
+
+      <div class="callout warning">
+        <span class="icon">&#x26A0;&#xFE0F;</span>
+        <div>
+          <p><strong>Important:</strong> Make sure you are inside the <code class="inline">developer-portal/</code> directory, not the root <code class="inline">BARO/</code> directory. All commands below should be run from within <code class="inline">developer-portal/</code>.</p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ============================================================ -->
+    <!-- 3. INSTALL DEPENDENCIES                                       -->
+    <!-- ============================================================ -->
+    <section id="install">
+      <h2><span class="step-num">3</span> Install Dependencies</h2>
+      <p>Install all required npm packages. This project has 5 dependencies:</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <div class="label">Terminal &mdash; inside developer-portal/</div>
+        </div>
+        <pre><code><span class="cmd">npm</span> install
+
+<span class="comment"># This will install:</span>
+<span class="comment">#   next@16.x        — React framework with App Router</span>
+<span class="comment">#   nextra@4.x       — Docs engine (MDX content layer)</span>
+<span class="comment">#   nextra-theme-docs — Sidebar, TOC, search, dark mode</span>
+<span class="comment">#   react@19.x       — React library</span>
+<span class="comment">#   react-dom@19.x   — React DOM renderer</span></code></pre>
+      </div>
+
+      <p>This typically takes <strong>30&ndash;90 seconds</strong> depending on your network speed. The <code class="inline">node_modules/</code> folder will be created with approximately 200&ndash;300 MB of packages.</p>
+
+      <div class="callout success">
+        <span class="icon">&#x2705;</span>
+        <div>
+          <p><strong>Success indicator:</strong> You should see output ending with <code class="inline">added XXX packages</code> and no <code class="inline">ERR!</code> messages. Peer dependency warnings are normal and can be safely ignored.</p>
+        </div>
+      </div>
+
+      <h3>If you encounter permission errors</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <div class="label">Terminal</div>
+        </div>
+        <pre><code><span class="comment"># Fix npm permissions (avoid using sudo with npm)</span>
+<span class="cmd">mkdir</span> ~/.npm-global
+<span class="cmd">npm</span> config set prefix '~/.npm-global'
+
+<span class="comment"># Add to your shell profile (~/.zshrc for Zsh, the default on macOS):</span>
+<span class="cmd">echo</span> 'export PATH=~/.npm-global/bin:$PATH' >> ~/.zshrc
+<span class="cmd">source</span> ~/.zshrc
+
+<span class="comment"># Then retry</span>
+<span class="cmd">npm</span> install</code></pre>
+      </div>
+    </section>
+
+
+    <!-- ============================================================ -->
+    <!-- 4. START THE DEV SERVER                                       -->
+    <!-- ============================================================ -->
+    <section id="dev-server">
+      <h2><span class="step-num">4</span> Start the Development Server</h2>
+      <p>Launch the local development server with hot-reload:</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <div class="label">Terminal &mdash; inside developer-portal/</div>
+        </div>
+        <pre><code><span class="cmd">npm</span> run dev
+
+<span class="comment"># This runs: next dev --turbopack</span>
+<span class="comment"># Turbopack is Next.js's Rust-based bundler for fast compilation</span></code></pre>
+      </div>
+
+      <p>You should see output like:</p>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <div class="label">Expected Output</div>
+        </div>
+        <pre><code><span class="output">  ▲ Next.js 16.1.6 (Turbopack)
+  - Local:   http://localhost:3000
+  - Network: http://192.168.x.x:3000
+
+  ✓ Starting...
+  ✓ Ready in 2.5s</span></code></pre>
+      </div>
+
+      <h3>Open in your browser</h3>
+      <p>Navigate to:</p>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <div class="label">Browser</div>
+        </div>
+        <pre><code><span class="url">http://localhost:3000</span></code></pre>
+      </div>
+
+      <p>You should see the BARO Developer Docs landing page with the jade green theme, sidebar navigation, and the BARO logo.</p>
+
+      <div class="callout info">
+        <span class="icon">&#x1F504;</span>
+        <div>
+          <p><strong>Hot Reload:</strong> Any changes you make to <code class="inline">.mdx</code> files, components, or CSS will automatically refresh in the browser. No need to restart the server.</p>
+        </div>
+      </div>
+
+      <h3>Stop the server</h3>
+      <p>Press <code class="inline">Ctrl + C</code> in the terminal to stop the development server.</p>
+
+      <h3>Port already in use?</h3>
+      <p>If port 3000 is busy, Next.js will automatically try 3001, 3002, etc. Or specify a port manually:</p>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <div class="label">Terminal</div>
+        </div>
+        <pre><code><span class="comment"># Run on a custom port</span>
+<span class="cmd">npx</span> next dev <span class="flag">--turbopack</span> <span class="flag">-p</span> 4000
+
+<span class="comment"># Or kill whatever is using port 3000</span>
+<span class="cmd">lsof</span> <span class="flag">-ti</span> :3000 | <span class="cmd">xargs</span> kill <span class="flag">-9</span></code></pre>
+      </div>
+    </section>
+
+
+    <!-- ============================================================ -->
+    <!-- 5. PRODUCTION BUILD                                           -->
+    <!-- ============================================================ -->
+    <section id="prod-build">
+      <h2><span class="step-num">5</span> Production Build &amp; Preview</h2>
+      <p>To create an optimized production build (useful for verifying everything compiles, or before deployment):</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <div class="label">Terminal &mdash; inside developer-portal/</div>
+        </div>
+        <pre><code><span class="comment"># Step 1: Build the production bundle</span>
+<span class="cmd">npm</span> run build
+
+<span class="comment"># Step 2: Serve the production build locally</span>
+<span class="cmd">npm</span> run start</code></pre>
+      </div>
+
+      <p>Expected build output:</p>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <div class="label">Expected Build Output</div>
+        </div>
+        <pre><code><span class="output">  ▲ Next.js 16.1.6 (Turbopack)
+
+  Creating an optimized production build ...
+  ✓ Compiled successfully in ~10s
+  ✓ Collecting page data using 9 workers ...
+  ✓ Generating static pages (39/39) in ~1s
+
+  Route (app)
+  ┌ ○ /_not-found
+  └ ● /[[...mdxPath]]
+    ├ /api/authentication
+    ├ /api/errors
+    ├ /api/rest-endpoints
+    └ [+34 more paths]</span></code></pre>
+      </div>
+
+      <div class="callout success">
+        <span class="icon">&#x2705;</span>
+        <div>
+          <p><strong>39/39 routes:</strong> 37 content pages + root index + 404 page. All pages are statically generated (SSG) for optimal performance.</p>
+        </div>
+      </div>
+
+      <div class="callout warning">
+        <span class="icon">&#x26A0;&#xFE0F;</span>
+        <div>
+          <p><strong>Harmless warning:</strong> You may see <code class="inline">[nextra] Init git repository failed</code>. This is expected if you haven't initialized a Git repo in the developer-portal directory yet. It does not affect functionality.</p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ============================================================ -->
+    <!-- 6. PROJECT STRUCTURE                                          -->
+    <!-- ============================================================ -->
+    <section id="project-structure">
+      <h2><span class="step-num">6</span> Project Structure Explained</h2>
+      <p>Here's a complete map of the project directory:</p>
+
+      <div class="tree">
+<span class="dir">developer-portal/</span>
+├── <span class="dir">app/</span>                           <span class="desc">Next.js App Router</span>
+│   ├── layout.jsx                    <span class="desc">Root layout: navbar, sidebar, footer, fonts</span>
+│   └── <span class="dir">[[...mdxPath]]/</span>
+│       └── page.jsx                  <span class="desc">Catch-all route that renders MDX content</span>
+│
+├── <span class="dir">components/</span>                    <span class="desc">7 custom React components for MDX</span>
+│   ├── <span class="file">ApiEndpoint.jsx</span>              <span class="desc">Collapsible API endpoint cards</span>
+│   ├── <span class="file">ColorSwatch.jsx</span>              <span class="desc">Click-to-copy color swatch grid</span>
+│   ├── <span class="file">FlowDiagram.jsx</span>              <span class="desc">Architecture flow diagrams</span>
+│   ├── <span class="file">KoreanLabel.jsx</span>              <span class="desc">Inline Korean translation labels</span>
+│   ├── <span class="file">PropsTable.jsx</span>               <span class="desc">Scrollable props/data tables</span>
+│   ├── <span class="file">StatCard.jsx</span>                 <span class="desc">Metric stat cards in a grid</span>
+│   └── <span class="file">StatusBadge.jsx</span>              <span class="desc">Color-coded status pill badges</span>
+│
+├── <span class="dir">content/</span>                       <span class="desc">All documentation pages (MDX format)</span>
+│   ├── _meta.js                      <span class="desc">Root sidebar ordering</span>
+│   ├── index.mdx                     <span class="desc">Landing page</span>
+│   ├── <span class="dir">getting-started/</span>             <span class="desc">Architecture, Quick Start</span>
+│   ├── <span class="dir">screens/</span>                     <span class="desc">8 screen definitions (Home, Stock Detail, ...)</span>
+│   ├── <span class="dir">design-system/</span>               <span class="desc">Colors, Typography, Spacing, Themes, ...</span>
+│   ├── <span class="dir">components/</span>                  <span class="desc">Navigation, Charts, Data Display, ...</span>
+│   ├── <span class="dir">api/</span>                         <span class="desc">REST Endpoints, WebSocket, Auth, Errors</span>
+│   ├── <span class="dir">data-layer/</span>                  <span class="desc">Models, Data Flow, Repositories</span>
+│   ├── <span class="dir">backend/</span>                     <span class="desc">Python Backend, KIS Integration, Market</span>
+│   ├── <span class="dir">interactions/</span>                <span class="desc">Motion, Transitions, Micro-interactions</span>
+│   └── <span class="dir">future/</span>                      <span class="desc">AI Services, Roadmap</span>
+│
+├── <span class="dir">styles/</span>
+│   └── <span class="file">globals.css</span>                  <span class="desc">BARO design tokens &amp; Nextra overrides</span>
+│
+├── <span class="dir">public/</span>                        <span class="desc">Static assets (images, favicons)</span>
+├── <span class="file">mdx-components.jsx</span>             <span class="desc">Global MDX component registry</span>
+├── <span class="file">next.config.mjs</span>                <span class="desc">Next.js + Nextra configuration</span>
+├── <span class="file">package.json</span>                   <span class="desc">Project metadata &amp; scripts</span>
+└── <span class="file">.gitignore</span>                     <span class="desc">Git ignore rules</span>
+      </div>
+
+      <h3>Content Directory Convention</h3>
+      <p>Every subfolder in <code class="inline">content/</code> has a <code class="inline">_meta.js</code> file that controls sidebar ordering and labels:</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <div class="label">content/screens/_meta.js (example)</div>
+        </div>
+        <pre><code><span class="comment">// Sidebar order and labels for Screen Definitions</span>
+export default {
+  'home':             'Home',
+  'stock-detail':     'Stock Detail',
+  'market-overview':  'Market Overview',
+  'search':           'Search',
+  'intelligence-hub': 'Intelligence Hub',
+  'trading-floor':    'Trading Floor',
+  'settings':         'Settings',
+  'login':            'Login',
+}</code></pre>
+      </div>
+
+      <p>The key (e.g., <code class="inline">'home'</code>) must match the MDX filename (<code class="inline">home.mdx</code>). The value is the display label shown in the sidebar.</p>
+    </section>
+
+
+    <!-- ============================================================ -->
+    <!-- 7. CUSTOM MDX COMPONENTS                                      -->
+    <!-- ============================================================ -->
+    <section id="custom-components">
+      <h2><span class="step-num">7</span> Custom MDX Components</h2>
+      <p>These React components are available in any <code class="inline">.mdx</code> file without importing &mdash; they are globally registered in <code class="inline">mdx-components.jsx</code>.</p>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>Usage</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>StatusBadge</code></td>
+              <td><code>&lt;StatusBadge status="live"&gt;TEXT&lt;/StatusBadge&gt;</code></td>
+              <td>Color-coded pill badge. Statuses: <code>live</code> (green), <code>warning</code> (amber), <code>info</code> (blue), <code>planned</code> (gray)</td>
+            </tr>
+            <tr>
+              <td><code>KoreanLabel</code></td>
+              <td><code>&lt;KoreanLabel&gt;&#xD55C;&#xAD6D;&#xC5B4;&lt;/KoreanLabel&gt;</code></td>
+              <td>Inline gray Korean translation text</td>
+            </tr>
+            <tr>
+              <td><code>StatGrid</code> / <code>StatCard</code></td>
+              <td><code>&lt;StatGrid cols={4}&gt;&lt;StatCard value="37" label="Pages" /&gt;&lt;/StatGrid&gt;</code></td>
+              <td>Grid of metric cards with large values</td>
+            </tr>
+            <tr>
+              <td><code>FlowDiagram</code></td>
+              <td><code>&lt;FlowDiagram&gt;&lt;FlowRow&gt;&lt;FlowNode type="view"&gt;...&lt;/FlowNode&gt;&lt;/FlowRow&gt;&lt;/FlowDiagram&gt;</code></td>
+              <td>Architecture flow diagrams with color-coded nodes (view, vm, repo, model, service)</td>
+            </tr>
+            <tr>
+              <td><code>ApiEndpoint</code></td>
+              <td><code>&lt;ApiEndpoint method="GET" path="/api/stocks" description="..."&gt;...&lt;/ApiEndpoint&gt;</code></td>
+              <td>Collapsible API endpoint card with method badge</td>
+            </tr>
+            <tr>
+              <td><code>ColorSwatch</code> / <code>SwatchGrid</code></td>
+              <td><code>&lt;SwatchGrid&gt;&lt;ColorSwatch color="#22C55E" name="Jade" /&gt;&lt;/SwatchGrid&gt;</code></td>
+              <td>Click-to-copy color swatch with hex value display</td>
+            </tr>
+            <tr>
+              <td><code>PropsTable</code></td>
+              <td><code>&lt;PropsTable&gt;| Prop | Type | ...&lt;/PropsTable&gt;</code></td>
+              <td>Scrollable wrapper for property/data tables</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+
+    <!-- ============================================================ -->
+    <!-- 8. ADDING OR EDITING CONTENT                                  -->
+    <!-- ============================================================ -->
+    <section id="adding-content">
+      <h2><span class="step-num">8</span> Adding or Editing Content</h2>
+
+      <h3>Edit an existing page</h3>
+      <p>Simply open any <code class="inline">.mdx</code> file in <code class="inline">content/</code>, make changes, and save. The browser will hot-reload automatically.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <div class="label">content/getting-started/quick-start.mdx</div>
+        </div>
+        <pre><code># Quick Start
+
+This is a standard MDX file. You can use **Markdown** syntax
+plus any custom component:
+
+&lt;StatusBadge status="live"&gt;PRODUCTION&lt;/StatusBadge&gt;
+
+```swift filename="Example.swift"
+let app = BaroApp()
+```</code></pre>
+      </div>
+
+      <h3>Add a new page</h3>
+      <ol>
+        <li>Create a new <code class="inline">.mdx</code> file in the appropriate <code class="inline">content/</code> subdirectory:
+          <div class="code-block">
+            <div class="code-header">
+              <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+              <div class="label">Terminal</div>
+            </div>
+            <pre><code><span class="cmd">touch</span> content/getting-started/deployment.mdx</code></pre>
+          </div>
+        </li>
+        <li>Add content to the file with a heading:
+          <div class="code-block">
+            <div class="code-header">
+              <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+              <div class="label">content/getting-started/deployment.mdx</div>
+            </div>
+            <pre><code># Deployment Guide
+
+Instructions for deploying to Vercel...</code></pre>
+          </div>
+        </li>
+        <li>Register the page in the section's <code class="inline">_meta.js</code>:
+          <div class="code-block">
+            <div class="code-header">
+              <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+              <div class="label">content/getting-started/_meta.js</div>
+            </div>
+            <pre><code>export default {
+  'architecture': 'Architecture',
+  'quick-start':  'Quick Start',
+  'deployment':   'Deployment',   <span class="comment">// ← new entry</span>
+}</code></pre>
+          </div>
+        </li>
+      </ol>
+      <p>The page will immediately appear in the sidebar navigation.</p>
+
+      <h3>Add a new section (category)</h3>
+      <ol>
+        <li>Create a new folder in <code class="inline">content/</code></li>
+        <li>Add a <code class="inline">_meta.js</code> file inside it</li>
+        <li>Register the folder in the root <code class="inline">content/_meta.js</code></li>
+        <li>Add <code class="inline">.mdx</code> files for each page</li>
+      </ol>
+    </section>
+
+
+    <!-- ============================================================ -->
+    <!-- 9. TROUBLESHOOTING                                            -->
+    <!-- ============================================================ -->
+    <section id="troubleshooting">
+      <h2><span class="step-num">9</span> Troubleshooting</h2>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 35%;">Problem</th>
+              <th>Solution</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong><code class="inline">npm install</code> fails</strong></td>
+              <td>Delete <code>node_modules/</code> and <code>package-lock.json</code>, then retry: <code>rm -rf node_modules package-lock.json && npm install</code></td>
+            </tr>
+            <tr>
+              <td><strong>Port 3000 in use</strong></td>
+              <td>Kill the process: <code>lsof -ti :3000 | xargs kill -9</code> or use a different port: <code>npx next dev --turbopack -p 4000</code></td>
+            </tr>
+            <tr>
+              <td><strong>"Module not found" error</strong></td>
+              <td>Run <code>npm install</code> again. If the error references a content file, verify the filename matches the key in <code>_meta.js</code></td>
+            </tr>
+            <tr>
+              <td><strong>"Element type is invalid: expected a string but got: undefined"</strong></td>
+              <td>This means a component is undefined. Check that <code>mdx-components.jsx</code> imports from <code>nextra-theme-docs</code> (NOT <code>nextra/mdx-components</code>)</td>
+            </tr>
+            <tr>
+              <td><strong>"_meta.js refers to a page that cannot be found"</strong></td>
+              <td>Every key in <code>_meta.js</code> must have a matching <code>.mdx</code> file. Create the missing file or remove the key</td>
+            </tr>
+            <tr>
+              <td><strong>Styles look wrong / no jade green</strong></td>
+              <td>Make sure <code>styles/globals.css</code> is imported in <code>app/layout.jsx</code> after the Nextra theme CSS import</td>
+            </tr>
+            <tr>
+              <td><strong>"Init git repository failed" warning</strong></td>
+              <td>Harmless. Run <code>git init</code> inside <code>developer-portal/</code> if you want to eliminate it. Does not affect functionality</td>
+            </tr>
+            <tr>
+              <td><strong>Node version too old</strong></td>
+              <td>Next.js 16 requires Node 18+. Upgrade via <code>brew upgrade node</code> or <code>nvm install 20</code></td>
+            </tr>
+            <tr>
+              <td><strong>Slow first page load</strong></td>
+              <td>Normal on dev server &mdash; Turbopack compiles pages on-demand. Subsequent loads are instant. Production build (<code>npm run build</code>) pre-renders everything</td>
+            </tr>
+            <tr>
+              <td><strong>Search not working</strong></td>
+              <td>Nextra's search requires a production build for full indexing. In dev mode, basic search is available via the search bar (top right or <code>Cmd+K</code>)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Nuclear reset</h3>
+      <p>If everything is broken, start fresh:</p>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <div class="label">Terminal &mdash; inside developer-portal/</div>
+        </div>
+        <pre><code><span class="comment"># Remove all generated files and dependencies</span>
+<span class="cmd">rm</span> <span class="flag">-rf</span> node_modules .next package-lock.json
+
+<span class="comment"># Reinstall everything</span>
+<span class="cmd">npm</span> install
+
+<span class="comment"># Restart the dev server</span>
+<span class="cmd">npm</span> run dev</code></pre>
+      </div>
+    </section>
+
+
+    <!-- ============================================================ -->
+    <!-- 10. TECH STACK REFERENCE                                      -->
+    <!-- ============================================================ -->
+    <section id="tech-stack">
+      <h2><span class="step-num">10</span> Tech Stack Reference</h2>
+
+      <div class="card">
+        <div class="card-title">Dependencies</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Package</th>
+              <th>Version</th>
+              <th>Role</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>next</code></td>
+              <td><span class="badge blue">^16.1.6</span></td>
+              <td>React framework with App Router, Turbopack, SSG</td>
+            </tr>
+            <tr>
+              <td><code>nextra</code></td>
+              <td><span class="badge jade">^4.6.1</span></td>
+              <td>Docs engine: MDX processing, content directory, page maps</td>
+            </tr>
+            <tr>
+              <td><code>nextra-theme-docs</code></td>
+              <td><span class="badge jade">^4.6.1</span></td>
+              <td>UI theme: sidebar, TOC, search, dark/light mode, wrapper</td>
+            </tr>
+            <tr>
+              <td><code>react</code></td>
+              <td><span class="badge gray">^19.2.4</span></td>
+              <td>UI library for component rendering</td>
+            </tr>
+            <tr>
+              <td><code>react-dom</code></td>
+              <td><span class="badge gray">^19.2.4</span></td>
+              <td>React DOM renderer</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title">npm Scripts</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>npm run dev</code></td>
+              <td>Start development server with Turbopack on <code>localhost:3000</code> (hot-reload enabled)</td>
+            </tr>
+            <tr>
+              <td><code>npm run build</code></td>
+              <td>Create optimized production build with static page generation (SSG)</td>
+            </tr>
+            <tr>
+              <td><code>npm run start</code></td>
+              <td>Serve the production build locally (run <code>build</code> first)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Design Tokens</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Token</th>
+              <th>Value</th>
+              <th>Usage</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Jade (Primary)</td>
+              <td><span style="display:inline-block;width:14px;height:14px;background:#22C55E;border-radius:4px;vertical-align:middle;margin-right:6px;"></span> <code>#22C55E</code></td>
+              <td>Primary accent, links, active states</td>
+            </tr>
+            <tr>
+              <td>Amber</td>
+              <td><span style="display:inline-block;width:14px;height:14px;background:#D4A017;border-radius:4px;vertical-align:middle;margin-right:6px;"></span> <code>#D4A017</code></td>
+              <td>Warnings, gains (Korean market convention)</td>
+            </tr>
+            <tr>
+              <td>Red</td>
+              <td><span style="display:inline-block;width:14px;height:14px;background:#E04848;border-radius:4px;vertical-align:middle;margin-right:6px;"></span> <code>#E04848</code></td>
+              <td>Errors, losses</td>
+            </tr>
+            <tr>
+              <td>Blue</td>
+              <td><span style="display:inline-block;width:14px;height:14px;background:#3478F6;border-radius:4px;vertical-align:middle;margin-right:6px;"></span> <code>#3478F6</code></td>
+              <td>Info badges, links</td>
+            </tr>
+            <tr>
+              <td>Body Font</td>
+              <td><code>Inter</code></td>
+              <td>All UI text (loaded via Google Fonts)</td>
+            </tr>
+            <tr>
+              <td>Code Font</td>
+              <td><code>JetBrains Mono</code></td>
+              <td>Code blocks, inline code</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Content Statistics</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Total MDX pages</td><td><strong>37</strong></td></tr>
+            <tr><td>Content sections</td><td><strong>9</strong></td></tr>
+            <tr><td>Custom components</td><td><strong>7 files / 11 exports</strong></td></tr>
+            <tr><td>Sidebar configs</td><td><strong>10 _meta.js files</strong></td></tr>
+            <tr><td>Total content lines</td><td><strong>~23,000 lines</strong></td></tr>
+            <tr><td>Build routes</td><td><strong>39 (37 + root + 404)</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+
+    <!-- ============================================================ -->
+    <!-- QUICK START CHEAT SHEET                                       -->
+    <!-- ============================================================ -->
+    <section>
+      <h2 style="border: none; padding: 0; margin-bottom: 16px;">Quick Start Cheat Sheet</h2>
+      <p>Copy-paste these 4 commands to go from zero to running:</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <div class="label">Terminal &mdash; the 4 commands you need</div>
+        </div>
+        <pre><code><span class="comment"># 1. Navigate to the project</span>
+<span class="cmd">cd</span> /path/to/BARO/developer-portal
+
+<span class="comment"># 2. Install dependencies (only needed once)</span>
+<span class="cmd">npm</span> install
+
+<span class="comment"># 3. Start the dev server</span>
+<span class="cmd">npm</span> run dev
+
+<span class="comment"># 4. Open in browser</span>
+<span class="cmd">open</span> <span class="url">http://localhost:3000</span></code></pre>
+      </div>
+    </section>
+
+
+    <!-- ============================================================ -->
+    <!-- FOOTER                                                        -->
+    <!-- ============================================================ -->
+    <div class="guide-footer">
+      <p>BARO Developer Portal &mdash; Setup Guide</p>
+      <p style="margin-top: 4px;">Built with Next.js 16 + Nextra 4 + React 19</p>
+    </div>
+
+  </div>
+
+</body>
+</html>

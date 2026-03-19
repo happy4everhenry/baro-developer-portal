@@ -1,0 +1,293 @@
+# Quick Start <KoreanLabel>빠른 시작</KoreanLabel>
+
+<PageMeta status="live" layer="shared" />
+
+Get BARO up and running on your Mac in under 5 minutes! This guide walks you through every step — from installing tools to seeing live stock data on your screen.
+
+---
+
+## What You'll Need
+
+<InfoBox type="warning" title="Before You Begin">
+Make sure you have these tools installed on your Mac. If something is missing, don't worry — we'll tell you how to get it!
+</InfoBox>
+
+<StatGrid columns={4}>
+  <StatCard value="Xcode 16+" label="Builds the iOS app" />
+  <StatCard value="Python 3.11+" label="Runs the backend server" />
+  <StatCard value="pip / venv" label="Manages Python packages" />
+  <StatCard value="KIS API Key" label="Connects to Korean stock data" />
+</StatGrid>
+
+<InfoBox type="tip" title="Where do I get a KIS API Key?">
+KIS stands for **Korea Investment & Securities** (한국투자증권). You'll need an `APP_KEY`, `APP_SECRET`, and `ACCOUNT_NO` from their developer portal. Ask your team lead if you don't have these yet.
+</InfoBox>
+
+---
+
+## How Everything Connects
+
+<Diagram title="What gets installed where">
+  <DiagramRow>
+    <DiagramNode type="view" icon="📱" label="iOS App" sublabel="SwiftUI in Xcode Simulator" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="talks to" />
+  <DiagramRow>
+    <DiagramNode type="service" icon="🐍" label="Python Backend" sublabel="FastAPI on localhost:8000" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="fetches from" />
+  <DiagramRow>
+    <DiagramNode type="data" icon="📊" label="KIS API" sublabel="Live Korean stock market data" />
+  </DiagramRow>
+</Diagram>
+
+---
+
+## Setup Steps
+
+<Tabs>
+  <Tab label="Backend Setup" icon="🐍">
+
+<StepGuide>
+  <Step number={1} title="Go to the project folder" icon="📂">
+
+Open your terminal and navigate to the backend folder:
+
+```bash
+cd ~/Desktop/BARO/backend
+```
+
+  </Step>
+
+  <Step number={2} title="Create a virtual environment" icon="📦">
+
+A virtual environment keeps BARO's Python packages separate from everything else on your Mac. Think of it like a clean room just for this project.
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+<InfoBox type="info" title="How do I know it worked?">
+You should see `(venv)` at the beginning of your terminal prompt. That means you're inside the virtual environment!
+</InfoBox>
+
+  </Step>
+
+  <Step number={3} title="Install dependencies" icon="⬇️">
+
+This downloads all the Python libraries BARO needs (FastAPI, WebSocket tools, the KIS API client, and more):
+
+```bash
+pip install -r requirements.txt
+```
+
+  </Step>
+
+  <Step number={4} title="Set up your API keys" icon="🔑">
+
+Copy the example environment file and fill in your real credentials:
+
+```bash
+cp .env.example .env
+```
+
+Then open `.env` in any editor and fill in these three values:
+
+```bash
+KIS_APP_KEY=your_app_key
+KIS_APP_SECRET=your_app_secret
+KIS_ACCOUNT_NO=your_account_number
+```
+
+<InfoBox type="danger" title="Keep your keys secret!">
+Never commit your `.env` file to git. It contains private API credentials.
+</InfoBox>
+
+  </Step>
+
+  <Step number={5} title="Start the server" icon="🚀">
+
+This launches the backend! The `--reload` flag means it restarts automatically when you change code.
+
+```bash
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+<InfoBox type="tip" title="Is it running?">
+Open your browser and go to `http://localhost:8000/health`. You should see `{"status": "ok"}`.
+</InfoBox>
+
+  </Step>
+</StepGuide>
+
+  </Tab>
+
+  <Tab label="iOS Setup" icon="📱">
+
+<StepGuide>
+  <Step number={1} title="Open the Xcode project" icon="💻">
+
+Navigate to the iOS folder and open the project in Xcode:
+
+```bash
+cd ~/Desktop/BARO/ios/BARO
+open BARO.xcodeproj
+```
+
+Or, if you prefer building from the command line:
+
+```bash
+xcodebuild -project BARO.xcodeproj \
+  -scheme BARO \
+  -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+  build
+```
+
+  </Step>
+
+  <Step number={2} title="Run in the Simulator" icon="▶️">
+
+Press **Cmd + R** in Xcode (or click the Play button). The app will build and launch in the iPhone Simulator.
+
+<InfoBox type="warning" title="Simulator vs. Physical Device">
+The app connects to different addresses depending on where it runs:
+
+- **Simulator:** `127.0.0.1:8000` (your Mac's localhost)
+- **Physical device:** Your Mac's local Wi-Fi IP on port `8000`
+
+Replace `192.168.68.57` with your machine's local IP address (find via `ifconfig` on macOS or `ipconfig getifaddr en0`). You can change this in `WebSocketManager.swift`.
+</InfoBox>
+
+  </Step>
+
+  <Step number={3} title="Make sure the backend is running!" icon="🔗">
+
+The iOS app needs the Python backend to show real data. If you haven't started it yet, switch to the **Backend Setup** tab and follow those steps first.
+
+  </Step>
+</StepGuide>
+
+  </Tab>
+</Tabs>
+
+---
+
+## Documentation Portals
+
+<FeatureGrid columns={2}>
+  <FeatureCard icon="⚡" title="Swagger API Docs" description="Auto-generated by FastAPI. Test endpoints live in your browser. Requires the backend server running." href="http://localhost:8000/docs" />
+  <FeatureCard icon="📖" title="Developer Portal" description="Full project docs — design system, screens, components, architecture, and backend reference. You're reading it right now!" href="/" />
+</FeatureGrid>
+
+<InfoBox type="info" title="Alternative API Docs">
+FastAPI also generates a ReDoc UI at `http://localhost:8000/redoc` — same info, different layout.
+</InfoBox>
+
+---
+
+## Verify Everything Works
+
+<InfoBox type="fun" title="Checklist time!">
+Run these commands in your terminal to make sure each part of BARO is healthy.
+</InfoBox>
+
+| Check | Command | What You Should See |
+|-------|---------|---------------------|
+| Backend Health | `curl http://localhost:8000/health` | `{"status": "ok"}` |
+| Market Data | `curl http://localhost:8000/api/market/overview` | JSON with indices + FX rates |
+| Stock List | `curl http://localhost:8000/api/stocks?limit=5` | Array of 5 stock objects |
+| WebSocket | `curl http://localhost:8000/ws/status` | WebSocket connection status |
+| iOS App | Run in Simulator | Home screen with live stock data |
+
+---
+
+## Project Structure
+
+<Accordion>
+  <AccordionItem title="iOS App — SwiftUI" icon="📱" badge="Swift 6">
+
+```bash
+ios/BARO/BARO/
+├── App/                  # DependencyContainer (DI setup)
+├── Core/
+│   ├── Auth/             # AuthManager, KeychainHelper
+│   ├── DesignSystem/     # Colors, Fonts, Spacing tokens
+│   ├── Extensions/       # Color+Hex, Double+Currency, Date+Korean
+│   ├── FavoritesManager  # Shared favorites state
+│   ├── Network/          # APIClient — talks to the backend
+│   ├── Utilities/        # KeyboardPrewarmer
+│   └── WebSocket/        # WebSocketManager (live price updates)
+├── Models/               # 19 data models (Stock, User, AuthModels, etc.)
+├── Repositories/         # 4 protocols + API/Mock implementations
+├── Components/           # 10 shared UI components
+└── Features/
+    ├── Splash/           # Launch screen with auth check
+    ├── Auth/             # Login + Register screens
+    ├── Home/             # Home screen + 18 components
+    ├── StockDetailPage/  # Stock detail (primary)
+    ├── Search/           # Stock/ETF/theme search
+    ├── MarketOverview/   # Indices & FX rates
+    ├── NewsDetail/       # News article detail
+    ├── ThemeDetail/      # Market theme detail
+    ├── AIInsights/       # AI-powered insights hub
+    ├── MyPage/           # Profile, settings, services
+    ├── Events/           # Promotions & competitions
+    └── Notifications/    # Alerts & preferences
+```
+
+  </AccordionItem>
+
+  <AccordionItem title="Python Backend — FastAPI" icon="🐍" badge="Python 3.11+">
+
+```bash
+backend/app/
+├── main.py              # FastAPI app entry point
+├── database.py          # SQLite init + connection helper
+├── routers/
+│   ├── auth.py          # /api/auth/* endpoints (register, login, refresh, etc.)
+│   ├── market.py        # /api/market/* endpoints
+│   ├── stock.py         # /api/stocks/* endpoints
+│   └── websocket.py     # WebSocket streaming
+├── services/
+│   ├── auth_service.py  # JWT tokens, password hashing, Apple ID verification
+│   ├── kis_auth.py      # KIS OAuth token + WS approval key
+│   ├── kis_market_service.py # Market indices & FX data
+│   ├── kis_stock_service.py  # KIS REST API (quote, chart, rankings)
+│   ├── kis_websocket.py # KIS WebSocket client
+│   └── stream_manager.py # WebSocket stream manager
+└── models/
+    ├── auth.py          # Auth request/response schemas
+    ├── market.py        # Market data schemas
+    ├── stock.py         # Stock schemas
+    └── venue.py         # KRX/NXT/Combined venue mapping
+```
+
+  </AccordionItem>
+
+  <AccordionItem title="Other Folders" icon="📁">
+
+```bash
+BARO/
+├── developer-portal/    # This documentation site (Nextra)
+└── documents/           # Specification documents
+    ├── Korea_Trading_SuperApp_Full_UI_Spec.docx
+    ├── Kline_Brand_CI_Guidelines.docx
+    └── SDD_Korea_Trading_SuperApp.docx
+```
+
+  </AccordionItem>
+</Accordion>
+
+---
+
+## Key Architecture Decisions
+
+| Decision | Choice | Why? |
+|----------|--------|------|
+| UI Framework | SwiftUI + @Observable | Modern reactive UI with minimal boilerplate |
+| Real-time Data | Native WebSocket | Low latency, venue-aware subscriptions |
+| Backend | FastAPI (Python) | Async WebSocket support, rapid prototyping |
+| Data Source | KIS (한국투자증권) API | Official Korean market data with KRX + NXT venues |
+| Charts | WKWebView + Lightweight Charts | TradingView-quality charts via web bridge |
+| Multi-venue | KRX / NXT / Combined | Support for both traditional KRX and new NXT exchange |

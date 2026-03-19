@@ -1,0 +1,238 @@
+# Repository Layer 저장소 계층
+
+<PageMeta status="live" layer="frontend" />
+
+The data access layer uses protocol-based abstraction to decouple ViewModels from data sources. This enables seamless switching between mock data (for development) and live API data (for production).
+
+> **See also:** [Repository Layer (Frontend)](/frontend/data-layer/repositories) for protocol signatures and mock data coverage tables.
+
+<StatGrid columns={4}>
+  <StatCard value="4" label="Protocols" />
+  <StatCard value="5" label="Implementations" />
+  <StatCard value="11" label="API Methods" />
+  <StatCard value="1" label="DI Container" />
+</StatGrid>
+
+---
+
+## Protocol Definitions
+
+### MarketRepositoryProtocol.swift
+
+**Location:** `Repositories/Protocols/MarketRepositoryProtocol.swift`
+
+The primary data access protocol — all 9 methods are `async throws`:
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `fetchIndices()` | `[MarketIndex]` | Top market indices (KOSPI, KOSDAQ, etc.) |
+| `fetchAllIndices()` | `[MarketIndex]` | All available market indices |
+| `fetchStocks(filter:exchange:)` | `[Stock]` | Filtered stock list (top 5) |
+| `fetchDetailStocks(filter:exchange:)` | `[Stock]` | Filtered stock list (extended) |
+| `fetchCurrencyRates()` | `[CurrencyRate]` | Foreign exchange rates |
+| `fetchSearchStocks(domestic:)` | `[Stock]` | All stocks for search pool |
+| `fetchStockDetail(id:exchange:name:venue:)` | `StockDetailInfo` | Full stock detail with all sections |
+| `fetchChartData(code:exchange:period:venue:)` | `[ChartPoint]` | Historical chart data |
+| `fetchMarketThemes()` | `[MarketTheme]` | Market sector themes |
+
+**Default Parameter Extension:**
+
+```swift
+extension MarketRepositoryProtocol {
+    func fetchStockDetail(id: String, exchange: StockExchange,
+                          name: String) async throws -> StockDetailInfo {
+        try await fetchStockDetail(id: id, exchange: exchange,
+                                   name: name, venue: .combined)
+    }
+}
+```
+
+### BannerRepositoryProtocol.swift
+
+**Location:** `Repositories/Protocols/BannerRepositoryProtocol.swift`
+
+Single method: `fetchBanners() async throws -> [BannerItem]`
+
+### NewsRepositoryProtocol.swift
+
+**Location:** `Repositories/Protocols/NewsRepositoryProtocol.swift`
+
+| Method | Returns |
+|--------|---------|
+| `fetchLatestNews()` | `[NewsArticle]` |
+| `fetchNewsForStock(stockCode:)` | `[NewsArticle]` |
+
+### EventRepositoryProtocol.swift
+
+**Location:** `Repositories/Protocols/EventRepositoryProtocol.swift`
+
+| Method | Returns |
+|--------|---------|
+| `fetchEvents()` | `[EventItem]` |
+| `fetchEventDetail(id:)` | `EventItem` |
+
+---
+
+## API Implementation
+
+### APIMarketRepository.swift
+
+**Location:** `Repositories/API/APIMarketRepository.swift` (~360 lines)
+
+Live API implementation that calls the FastAPI backend via `APIClient`.
+
+**REST Endpoints Used:**
+
+| Method | Endpoint | Source |
+|--------|----------|--------|
+| `fetchIndices()` | `GET /api/market/indices/overview` | Yahoo Finance via backend |
+| `fetchAllIndices()` | `GET /api/market/indices` | Yahoo Finance via backend |
+| `fetchCurrencyRates()` | `GET /api/market/currency-rates` | Yahoo Finance via backend |
+| `fetchStocks()` | `GET /api/stocks?exchange=&filter=&limit=5` | KIS Open API |
+| `fetchDetailStocks()` | `GET /api/stocks?exchange=&filter=&detail=true` | KIS Open API |
+| `fetchStockDetail()` | `GET /api/stocks/{id}/detail?exchange=&name=&venue=` | KIS Open API |
+| `fetchChartData()` | `GET /api/stocks/{code}/chart?exchange=&period=&venue=` | KIS Open API |
+| `fetchSearchStocks()` | Falls back to mock | No search API available |
+| `fetchMarketThemes()` | Falls back to mock | No themes API available |
+
+**Fallback Strategy:**
+
+Every method wraps the network call in `do/catch` with automatic fallback to `MockMarketRepository`:
+
+```swift
+func fetchIndices() async throws -> [MarketIndex] {
+    do {
+        return try await apiClient.get("/api/market/indices/overview")
+    } catch {
+        print("[API] Indices failed, using mock: \(error)")
+        return try await MockMarketRepository().fetchIndices()
+    }
+}
+```
+
+> **Note for maintainers:** This fallback pattern means the app never crashes due to API failures — it gracefully degrades to mock data. However, this can mask API issues during development. Check console logs for `[API] ... failed, using mock:` messages.
+
+**MockDataFiller (nested struct):**
+
+For `fetchStockDetail()`, the KIS API only provides price and chart data. Extended sections are filled with deterministic mock data:
+
+| Section | Data Source |
+|---------|------------|
+| Price, Chart, Order Book | KIS Open API (real data) |
+| Analyst Opinions | MockDataFiller (15 opinions) |
+| Research Reports | MockDataFiller (12 reports) |
+| Dividends | MockDataFiller (4 years quarterly) |
+| Financials | MockDataFiller (15 metrics) |
+| Investor Flow | MockDataFiller (15 days) |
+
+---
+
+## Mock Implementations
+
+### MockMarketRepository.swift
+
+**Location:** `Repositories/Mock/MockMarketRepository.swift` (~1,070 lines)
+
+The largest file in the project — generates comprehensive, deterministic mock data for all 9 protocol methods.
+
+**Mock Data Coverage:**
+
+| Data Type | Count | Generation Method |
+|-----------|-------|-------------------|
+| Market indices | 10 | Static (KOSPI, KOSDAQ, NASDAQ, Dow, S&P 500, Nikkei, Hang Seng, Shanghai, FTSE, DAX) |
+| Currency rates | 5 | Static (USD, HKD, CNY, JPY, EUR) |
+| Base stocks | 50 | Static (10 per exchange with full detail) |
+| Generated stocks | 700 | `generateStocks()` with seeded pseudo-random |
+| Market themes | 28 | Static across 5 categories |
+| Chart data | 1,095 days | Multi-phase trend generation |
+| Intraday data | 120 points | For 1D period charts |
+| Order book | 20 levels | 10 ask + 10 bid |
+| Analyst opinions | 15+ | From 18 Korean brokerages |
+| Financial records | 8+ quarters | Quarterly + annual detail |
+| Dividend records | 4+ years | Quarterly groups |
+
+**Deterministic Randomization:**
+
+Mock data uses seeded random number generation based on stock codes, ensuring consistent data across app launches:
+
+```swift
+func generateStocks(exchange: StockExchange, count: Int) -> [Stock] {
+    var rng = SeededRandomNumberGenerator(seed: exchange.rawValue.hashValue)
+    // Generates consistent stocks for each exchange
+}
+```
+
+**Simulated Delays:**
+
+All mock methods include artificial delays (200–400ms) to simulate network latency and test loading states.
+
+### MockBannerRepository.swift
+
+**Location:** `Repositories/Mock/MockBannerRepository.swift` (~30 lines)
+
+Returns 5 static `BannerItem` instances with Korean titles, icons, and gradient colors.
+
+### MockNewsRepository.swift
+
+**Location:** `Repositories/Mock/MockNewsRepository.swift` (~80 lines)
+
+Returns 10+ static `NewsArticle` instances across multiple categories (economy, tech, real estate, politics) with Korean content.
+
+### MockEventRepository.swift
+
+**Location:** `Repositories/Mock/MockEventRepository.swift` (~50 lines)
+
+Returns static `EventItem` instances across 5 categories (trading, reward, education, competition, announcement) with varying statuses (upcoming, active, ended).
+
+---
+
+## Dependency Injection Container
+
+### DependencyContainer.swift
+
+**Location:** `App/DependencyContainer.swift`
+
+```swift
+@Observable
+final class DependencyContainer {
+    let marketRepository: any MarketRepositoryProtocol
+    let bannerRepository: any BannerRepositoryProtocol
+    let newsRepository: any NewsRepositoryProtocol
+    let eventRepository: any EventRepositoryProtocol
+    let authManager: AuthManager
+
+    init(useMocks: Bool = false) {
+        authManager = AuthManager(tokenProvider: { KeychainHelper.read(key: "com.baro.accessToken") })
+        if useMocks {
+            marketRepository = MockMarketRepository()
+            bannerRepository = MockBannerRepository()
+            newsRepository = MockNewsRepository()
+            eventRepository = MockEventRepository()
+        } else {
+            marketRepository = APIMarketRepository()
+            bannerRepository = MockBannerRepository()   // Still mock (no API yet)
+            newsRepository = MockNewsRepository()        // Still mock (no API yet)
+            eventRepository = MockEventRepository()      // Still mock (no API yet)
+        }
+    }
+}
+```
+
+**Current State:**
+- `useMocks: true` in `BAROApp.swift` — all data from mocks
+- `useMocks: false` — market data from API, banners/news still from mocks (no API endpoints exist yet)
+
+**How to switch to live API:**
+
+1. Open `BAROApp.swift`
+2. Change `DependencyContainer(useMocks: true)` → `DependencyContainer(useMocks: false)`
+3. Ensure the FastAPI backend is running at the correct IP address
+4. Update `APIClient.swift` device IP if on physical device
+
+**Adding a new repository:**
+
+1. Create protocol in `Repositories/Protocols/`
+2. Create mock implementation in `Repositories/Mock/`
+3. Create API implementation in `Repositories/API/`
+4. Add property to `DependencyContainer`
+5. Initialize in both `if useMocks` branches

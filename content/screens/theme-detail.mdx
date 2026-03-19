@@ -1,0 +1,34 @@
+# Theme Detail <KoreanLabel>테마 상세</KoreanLabel>
+
+<PageMeta status="live" layer="frontend" since="2025" />
+
+<InfoBox type="fun" title="What is a market theme?">
+A **market theme** groups companies that share a common story — like "HBM" (high-bandwidth memory) or "반도체" (semiconductors). When a theme is hot, all the stocks in it tend to move together!
+</InfoBox>
+
+## What You See
+
+```
+┌─────────────────────────────┐
+│  KLDetailNavBar             │  ← Back button + theme name
+│  Theme Header               │  ← Name, change %, sentiment badge
+│  Description                │  ← What this theme is about
+│  Related Stocks List        │  ← All stocks in this theme
+│  Performance Chart          │  ← Theme performance over time
+└─────────────────────────────┘
+```
+
+## Features
+
+- **Sentiment coloring** — Blue (positive), Red (negative), Gray (neutral)
+- **Change percentage** — Overall theme performance
+- **Related stocks** — Full list of companies in the theme, tappable to stock detail
+- **Category filtering** — Tech, energy, industry, bio, finance
+
+## Source Files
+
+| File | Purpose |
+|------|---------|
+| `Features/ThemeDetail/ThemeDetailView.swift` | Theme detail with related stocks |
+| `Features/ThemeDetail/ThemeDetailPageView.swift` | Extended theme detail page view |
+| `Features/ThemeDetail/ThemeDetailViewModel.swift` | Theme data loading and stock list |

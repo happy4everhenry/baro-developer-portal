@@ -1,0 +1,274 @@
+# Coding Conventions 코딩 규칙
+
+<PageMeta status="live" layer="frontend" />
+
+Patterns, naming rules, and formatting standards used throughout the BARO iOS codebase. Follow these conventions when adding new code to maintain consistency.
+
+---
+
+## File Organization
+
+### Directory Structure Convention
+
+```
+Features/
+  ├── FeatureName/
+  │   ├── FeatureNameView.swift           # Main view
+  │   ├── FeatureNameViewModel.swift      # ViewModel
+  │   └── Components/                     # Feature-specific components
+  │       ├── SubComponentA.swift
+  │       └── SubComponentB.swift
+```
+
+Every feature module follows the same structure: a main `View`, a `ViewModel`, and a `Components/` subdirectory for sub-views.
+
+### File Header Convention
+
+Every Swift file includes a standard header:
+
+```swift
+//
+//  FileName.swift
+//  BARO
+//
+//  Created for BARO iOS Application
+//
+```
+
+### MARK Comments
+
+Use `// MARK: -` to organize code within files:
+
+```swift
+// MARK: - Properties
+// MARK: - Initialization
+// MARK: - Data Loading
+// MARK: - WebSocket
+// MARK: - Computed Properties
+// MARK: - Helper Methods
+// MARK: - Body
+// MARK: - Subviews
+```
+
+---
+
+## Naming Conventions
+
+### Files
+
+| Type | Pattern | Examples |
+|------|---------|----------|
+| Views | `XyzView.swift` | `HomeView.swift`, `SearchView.swift` |
+| ViewModels | `XyzViewModel.swift` | `HomeViewModel.swift` |
+| Components | Descriptive name ending in `View` | `StockRowView.swift`, `BannerCarouselView.swift` |
+| Sheets/Modals | `XyzSheet.swift` | `StockFilterSheet.swift`, `ChartSettingsSheet.swift` |
+| Design System | `BARO` or `KL` prefix | `BAROColors.swift`, `KLSegmentedControl.swift` |
+| Extensions | `Type+Feature.swift` | `Color+Hex.swift`, `Double+Currency.swift` |
+| Protocols | `XyzProtocol.swift` | `MarketRepositoryProtocol.swift` |
+| Mock implementations | `MockXyz.swift` | `MockMarketRepository.swift` |
+| API implementations | `APIXyz.swift` | `APIMarketRepository.swift` |
+
+### Types
+
+| Type | Convention | Example |
+|------|-----------|---------|
+| Structs (Views) | PascalCase, suffix `View` | `StockRowView` |
+| Classes (ViewModels) | PascalCase, suffix `ViewModel` | `HomeViewModel` |
+| Enums | PascalCase | `StockExchange`, `StockFilter` |
+| Enum cases | camelCase | `.marketCap`, `.kospi` |
+| Protocols | PascalCase, suffix `Protocol` | `MarketRepositoryProtocol` |
+
+### Properties
+
+| Context | Convention | Example |
+|---------|-----------|---------|
+| State properties | camelCase | `isLoadingStocks`, `selectedFilter` |
+| Boolean properties | `is`/`has`/`should` prefix | `isPositive`, `isConnected` |
+| Collections | Plural nouns | `stocks`, `indices`, `latestPrices` |
+| Closures | `on` prefix for callbacks | `onBack`, `onSelect`, `onDismiss` |
+| Constants | `static let` in enum | `BAROSpacing.md`, `BAROColors.klText` |
+
+---
+
+## SwiftUI Patterns
+
+### View-ViewModel Binding
+
+```swift
+struct FeatureView: View {
+    @State private var viewModel: FeatureViewModel
+
+    init(container: DependencyContainer) {
+        _viewModel = State(initialValue: FeatureViewModel(
+            repository: container.marketRepository
+        ))
+    }
+
+    var body: some View {
+        ContentView(data: viewModel.data)
+            .task { await viewModel.loadData() }
+    }
+}
+```
+
+### Component Props Pattern
+
+Components receive data via initializer parameters (not environment):
+
+```swift
+struct StockRowView: View {
+    let stock: Stock
+    let latestPrice: PriceUpdate?
+
+    var body: some View { /* ... */ }
+}
+```
+
+### Loading State Pattern
+
+Each data section has its own loading boolean:
+
+```swift
+@Observable
+class HomeViewModel {
+    var isLoadingStocks = true
+    var isLoadingBanners = true
+    var isLoadingNews = true
+
+    func loadStocks() async {
+        isLoadingStocks = true
+        defer { isLoadingStocks = false }
+        stocks = try? await repo.fetchStocks(filter: selectedFilter, exchange: selectedExchange)
+    }
+}
+```
+
+In views, skeleton loaders are shown per-section:
+
+```swift
+if viewModel.isLoadingStocks {
+    StockListSkeletonView()
+} else {
+    StockListView(stocks: viewModel.stocks)
+}
+```
+
+### Navigation Pattern
+
+```swift
+NavigationLink(value: stock) {
+    StockRowView(stock: stock)
+}
+.navigationDestination(for: Stock.self) { stock in
+    StockDetailPageView(stock: stock, container: container)
+}
+```
+
+---
+
+## Async/Concurrency Patterns
+
+### Parallel Data Loading
+
+```swift
+func loadAllData() async {
+    async let a = loadIndices()
+    async let b = loadStocks()
+    async let c = loadBanners()
+    _ = await (a, b, c)
+}
+```
+
+### WebSocket Subscription
+
+```swift
+func startLiveUpdates() async {
+    let stream = WebSocketManager.shared.subscribe(code: stock.code)
+    for await update in stream {
+        latestPrices[update.code] = update
+    }
+}
+```
+
+### Error Handling
+
+Repository calls use try/catch with console logging and graceful degradation:
+
+```swift
+do {
+    stocks = try await repo.fetchStocks(filter: filter, exchange: exchange)
+} catch {
+    print("[HomeViewModel] Failed to load stocks: \(error)")
+    // UI shows empty state, not a crash
+}
+```
+
+---
+
+## Number Formatting Conventions
+
+| Format | Extension | Example Output |
+|--------|-----------|---------------|
+| Korean won | `.formattedWon` | `"188,200"` |
+| Index value | `.formattedIndex` | `"5,584.87"` |
+| Percentage | `.formattedPercent` | `"0.02%"` |
+| Volume | `.formattedVolume` | `"28,540,000주"` |
+| Trading value | `.formattedTradingValue` | `"5.4조"` or `"1,234억"` |
+
+> **Important:** `formattedTradingValue` auto-selects 조 (trillion, ≥1조) or 억 (hundred million) units.
+
+---
+
+## Color Conventions
+
+### Korean Market Colors
+
+```swift
+// RED = Price Up (opposite of US convention)
+Color.klPriceUp    // #E04848 (red)
+Color.klPriceDown  // #3478F6 (blue)
+```
+
+> **Critical:** This is the Korean market convention. Do NOT change this to match US conventions (green up / red down).
+
+### Semantic Color Usage
+
+| Token | When to Use |
+|-------|-------------|
+| `.klText` | Primary text |
+| `.klTextSecondary` | Secondary/supporting text |
+| `.klTextTertiary` | Tertiary/hint text |
+| `.klBackground` | Page background |
+| `.klSurface` | Card/container background |
+| `.klBorder` | Borders |
+| `.klDivider` | Section separators |
+
+---
+
+## Documentation Comment Style
+
+The codebase uses Swift's standard documentation markup:
+
+```swift
+/// A view that displays a single stock row with price information.
+///
+/// Shows the company logo, name, current price, change amount,
+/// and trading volume. Tapping navigates to the stock detail page.
+///
+/// - Parameters:
+///   - stock: The stock data to display.
+///   - latestPrice: Optional real-time price update overlay.
+///
+/// - Note: Uses Korean color convention (red = up, blue = down).
+/// - SeeAlso: ``StockListView``, ``StockDetailPageView``
+struct StockRowView: View { ... }
+```
+
+### When to Use Each Comment Style
+
+| Style | When |
+|-------|------|
+| `///` | Single-line doc on types, properties, simple methods |
+| `/** ... */` | Multi-line documentation with parameters, notes |
+| `// MARK: -` | Section dividers within a file |
+| `//` | Inline comments for complex logic |

@@ -1,0 +1,1154 @@
+# AI Stack & Agent Architecture
+
+<PageMeta status="in_progress" layer="backend" />
+
+The complete 7-layer technology stack and 12 specialized AI agents that power BARO — from bare-metal infrastructure all the way up to intelligent orchestration. Architecture is fully specified. Phase 1 foundation agents are in active development.
+
+<InfoBox type="fun" title="Think of it like a 7-layer cake!">
+  Imagine building a skyscraper for robots. The bottom floor is the power and plumbing (infrastructure), the middle floors are the brains and memory (models & data), and the top floors are where the robots actually do their work (agents & apps). Each floor depends on the one below it — you can't have smart robots without electricity!
+</InfoBox>
+
+<StatGrid columns={4}>
+  <StatCard value="7" label="Stack Layers" />
+  <StatCard value="12" label="AI Agents" />
+  <StatCard value="6" label="MCP Servers" />
+  <StatCard value="3" label="Hard Rules" />
+</StatGrid>
+
+---
+
+## The 7-Layer Stack at a Glance
+
+<Diagram title="7-Layer AI Stack" caption="Bottom-up: each layer builds on the one below it">
+  <DiagramRow>
+    <DiagramNode type="default" icon="🧩" label="Layer 7: LangGraph" sublabel="Typed state graphs, checkpointing" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="orchestrates via" />
+  <DiagramRow>
+    <DiagramNode type="service" icon="🔌" label="Layer 6: MCP" sublabel="6 MCP servers (tool interfaces)" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="exposes tools to" />
+  <DiagramRow>
+    <DiagramNode type="view" icon="📱" label="Layer 5: Application" sublabel="Next.js 14, React Native, TradingView" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="triggers" />
+  <DiagramRow>
+    <DiagramNode type="vm" icon="🔄" label="Layer 4: Orchestration" sublabel="LangGraph, BullMQ, Redis Pub/Sub" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="queries" />
+  <DiagramRow>
+    <DiagramNode type="data" icon="💾" label="Layer 3: Data" sublabel="KIS API, TimescaleDB, pgvector, Redis" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="feeds" />
+  <DiagramRow>
+    <DiagramNode type="model" icon="🧠" label="Layer 2: Model" sublabel="Claude, XGBoost, KoBERT, BGE-M3" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="runs on" />
+  <DiagramRow>
+    <DiagramNode type="repo" icon="🏗️" label="Layer 1: Infrastructure" sublabel="Vercel, Railway, Supabase, Upstash, Cloudflare" />
+  </DiagramRow>
+</Diagram>
+
+---
+
+<Tabs>
+  <Tab label="The 7 Layers" icon="🏗️">
+
+<InfoBox type="info" title="Reading the layers">
+  Each layer is numbered from the bottom up — Layer 1 (Infrastructure) is the foundation, and Layer 7 (LangGraph) is the highest-level orchestration logic. Click each accordion to see all the technologies and details inside.
+</InfoBox>
+
+<Accordion>
+  <AccordionItem title="Layer 1 — Infrastructure" icon="🏗️" badge="Foundation" defaultOpen={true}>
+
+**What it does:** Provides compute, storage, networking, and defines latency tiers for the entire platform.
+
+**Key Technologies:**
+- **Vercel** — Frontend hosting & edge functions
+- **Railway Seoul** — Backend containers (Korea region)
+- **Supabase** — Managed PostgreSQL + Auth
+- **Upstash Redis** — Serverless Redis for caching & pub/sub
+- **Cloudflare** — CDN, DDoS protection, edge workers
+
+**3 Latency Tiers:**
+
+| Tier | Target | Example Use Cases |
+|------|--------|-------------------|
+| **Critical** | under 100ms | Auth checks, cache reads, order validation |
+| **Interactive** | 100ms – 1s | Chat responses, search, chart rendering |
+| **Background** | 1s – 60s | Report generation, model training, batch jobs |
+
+<InfoBox type="tip" title="Kid-friendly analogy">
+  Think of latency tiers like traffic lanes on a highway. The fast lane (Critical) is for ambulances — things that absolutely cannot wait. The middle lane (Interactive) is for regular cars — fast but not urgent. The slow lane (Background) is for big trucks carrying heavy loads — they take longer but carry more stuff.
+</InfoBox>
+
+</AccordionItem>
+
+  <AccordionItem title="Layer 2 — Model" icon="🧠" badge="AI Brains">
+
+**What it does:** Houses all LLMs, ML classifiers, and embedding models used by the agents.
+
+**3 Model Categories:**
+
+| Category | Purpose | Models |
+|----------|---------|--------|
+| **A: Cloud LLM** | Complex reasoning, natural language | Claude API (Anthropic) |
+| **B: Local ML** | Classification, anomaly detection, NLP | XGBoost, Isolation Forest, LSTM, KoBERT, FinBERT-KO |
+| **C: Embeddings** | Vector search, semantic similarity | BGE-M3 (primary), text-embedding-3-small (fallback) |
+
+**Additional models:**
+- **EXAONE 3.5** — Korean-optimized LLM for local inference
+
+<InfoBox type="note" title="Why three categories?">
+  Category A (Claude) is like asking a brilliant professor a question — powerful but costs money per question. Category B is like having a fast calculator on your desk — it runs locally and is free per query. Category C turns words into numbers so we can find similar things quickly.
+</InfoBox>
+
+</AccordionItem>
+
+  <AccordionItem title="Layer 3 — Data" icon="💾" badge="Knowledge">
+
+**What it does:** Ingests, stores, and serves all market data, user data, and vector embeddings.
+
+**Data Sources:**
+
+| Source | Data Type |
+|--------|-----------|
+| **KIS Open API** | Korean stock market (실시간 시세) |
+| **Upbit + Binance** | Cryptocurrency prices |
+| **OANDA** | Forex rates |
+| **Naver Finance + RSS** | Korean financial news |
+| **User Events** | Clicks, trades, preferences |
+| **PostgreSQL** | Relational application data |
+| **오픈뱅킹 API** | Open banking integration |
+
+**Storage & Processing:**
+- **TimescaleDB** — Time-series market data
+- **pgvector** — Vector store for RAG/embeddings
+- **Redis** — Real-time cache & pub/sub
+- **TA-Lib** — Technical analysis calculations (SMA, RSI, MACD, etc.)
+
+</AccordionItem>
+
+  <AccordionItem title="Layer 4 — Orchestration" icon="🔄" badge="Traffic Control">
+
+**What it does:** Manages agent workflows, human-in-the-loop (HITL) approvals, and agent-to-agent (A2A) events.
+
+**Key Technologies:**
+- **LangGraph** — Typed state graphs with conditional edges
+- **BullMQ** — Persistent job queues for background tasks
+- **Redis Pub/Sub** — Real-time event broadcasting between agents
+
+<InfoBox type="fun" title="Like an air traffic controller">
+  The orchestration layer is like an air traffic controller at a busy airport. It decides which agent (airplane) goes next, makes sure they don't crash into each other, and always asks a human for permission before anything risky happens (like landing on a new runway).
+</InfoBox>
+
+</AccordionItem>
+
+  <AccordionItem title="Layer 5 — Application" icon="📱" badge="User-Facing">
+
+**What it does:** Delivers the UI to users, streams AI responses in real time, and renders charts.
+
+**Key Technologies:**
+- **Next.js 14** — Web app with App Router & Server Components
+- **React Native** — Mobile app (iOS & Android)
+- **TradingView Charts** — Interactive financial charting library
+
+</AccordionItem>
+
+  <AccordionItem title="Layer 6 — MCP" icon="🔌" badge="Tool Interface">
+
+**What it does:** Provides 6 Model Context Protocol servers that give AI agents structured access to external tools and data.
+
+MCP (Model Context Protocol) is an open standard by Anthropic that lets AI models call tools in a safe, structured way — like giving each robot a specific toolbox.
+
+<InfoBox type="info" title="What is MCP?">
+  Imagine each AI agent has a walkie-talkie. MCP is the radio frequency they all share — it lets them call specific tools (like "fetch stock price" or "search news") in a way that's safe and standardized. Details on each of the 6 MCP servers live in a separate document.
+</InfoBox>
+
+</AccordionItem>
+
+  <AccordionItem title="Layer 7 — LangGraph" icon="🧩" badge="State Machine">
+
+**What it does:** Defines typed state graphs with conditional edges, enabling complex multi-step agent workflows with full checkpointing.
+
+**Key Capabilities:**
+- **Typed State Graphs** — Each agent's workflow is a graph with strongly-typed state at every node
+- **Conditional Edges** — "If the risk score is above 0.8, route to human review; otherwise, proceed"
+- **Checkpointing** — Full agent state persisted to Redis at every node transition
+
+**Checkpoint & Recovery:**
+- Every node transition saves the full state to Redis
+- HITL pause states are checkpointed
+- If the server restarts, the agent resumes **exactly** where it paused — no lost progress
+
+<InfoBox type="tip" title="Like a video game save point">
+  LangGraph checkpointing works just like save points in a video game. Every time an agent finishes a step, it saves its progress. If the game (server) crashes, you don't start over from the beginning — you reload your last save and keep going.
+</InfoBox>
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+
+  <Tab label="The 12 Agents" icon="🤖">
+
+<InfoBox type="fun" title="One robot, one job!">
+  Each agent is like a specialist on a sports team. The goalkeeper only blocks shots, the striker only scores goals. No agent tries to do everything — that's how we keep things safe and reliable.
+</InfoBox>
+
+### Agent Overview
+
+| # | Agent | Job | Models | Phase |
+|---|-------|-----|--------|-------|
+| 1 | **Trade Signal** | Buy/sell/hold signals | XGBoost + Claude | <StatusBadge status="designed">Phase 2 — Architecture Complete</StatusBadge> |
+| 2 | **AI Advisor Chatbot** | Korean financial Q&A with RAG | Claude + BGE-M3 | <StatusBadge status="designed">Phase 2 — Architecture Complete</StatusBadge> |
+| 3 | **Risk Guard** | AML monitoring & fraud detection | Isolation Forest + Claude | <StatusBadge status="wip">Phase 1 — In Development</StatusBadge> |
+| 4 | **Market Analysis** | Daily AI market summaries | Claude + TA-Lib | <StatusBadge status="designed">Phase 2 — Architecture Complete</StatusBadge> |
+| 5 | **Portfolio Optimizer** | Black-Litterman rebalancing | Black-Litterman + Claude | <StatusBadge status="planned">Phase 3 — Specified</StatusBadge> |
+| 6 | **Smart Notification** | Relevance-scored alerts | Claude + Collaborative Filter | <StatusBadge status="wip">Phase 1 — In Development</StatusBadge> |
+| 7 | **News Sentiment** | Korean/English news scoring | KoBERT + FinBERT-KO + Claude | <StatusBadge status="designed">Phase 2 — Architecture Complete</StatusBadge> |
+| 8 | **Document Analysis** | Query broker reports & filings | Claude + pgvector + BGE-M3 | <StatusBadge status="designed">Phase 2 — Architecture Complete</StatusBadge> |
+| 9 | **CUI Agent** | Voice & text commands | Claude + Local LLM | <StatusBadge status="designed">Phase 2 — Architecture Complete</StatusBadge> |
+| 10 | **Feature Request** | Auto-generate specs from feedback | Claude | <StatusBadge status="designed">Phase 2 — Architecture Complete</StatusBadge> |
+| 11 | **Security Monitor** | Threat monitoring & regulatory scan | Claude + Isolation Forest | <StatusBadge status="wip">Phase 1 — In Development</StatusBadge> |
+| 12 | **Control Tower** | Watches all other agents | Claude | <StatusBadge status="wip">Phase 1 — In Development</StatusBadge> |
+
+### Agent Summaries
+
+<Accordion>
+  <AccordionItem title="1. Trade Signal Agent" icon="📈" badge="Phase 2">
+
+**Job:** Generate buy/sell/hold signals with confidence scores for Korean equities.
+
+**Models:** XGBoost (signal classification) + Claude (reasoning & explanation)
+
+**How it works:** XGBoost crunches technical indicators (from TA-Lib) and outputs a signal. Claude then explains *why* in plain Korean — e.g., "삼성전자 매수 신호: RSI 과매도 구간 진입 + 거래량 급증."
+
+</AccordionItem>
+
+  <AccordionItem title="2. AI Advisor Chatbot" icon="💬" badge="Phase 2">
+
+**Job:** Answer Korean-language financial questions using RAG (Retrieval-Augmented Generation).
+
+**Models:** Claude (generation) + BGE-M3 (embedding & retrieval)
+
+**How it works:** User asks a question → BGE-M3 finds the most relevant documents in pgvector → Claude reads them and writes a helpful, sourced answer.
+
+</AccordionItem>
+
+  <AccordionItem title="3. Risk Guard Agent" icon="🛡️" badge="Phase 1">
+
+**Job:** Monitor transactions for AML (Anti-Money Laundering) violations and suspicious patterns.
+
+**Models:** Isolation Forest (anomaly detection) + Claude (explanation & case summary)
+
+**How it works:** Isolation Forest flags unusual transaction patterns. Claude reviews the flagged cases and generates a human-readable risk report for compliance review.
+
+</AccordionItem>
+
+  <AccordionItem title="4. Market Analysis Agent" icon="📊" badge="Phase 2">
+
+**Job:** Produce daily AI-generated market summaries for Korean and global markets.
+
+**Models:** Claude (summarization) + TA-Lib (technical indicators)
+
+**How it works:** Pulls market close data, computes technical indicators, and Claude writes a morning brief covering key movements, sector rotations, and notable signals.
+
+</AccordionItem>
+
+  <AccordionItem title="5. Portfolio Optimizer" icon="⚖️" badge="Phase 3">
+
+**Job:** Suggest risk-adjusted portfolio rebalancing using the Black-Litterman model.
+
+**Models:** Black-Litterman (optimization math) + Claude (explanation & "what if" scenarios)
+
+**How it works:** Takes current portfolio + market views → Black-Litterman computes optimal weights → Claude explains the recommendation in everyday language.
+
+</AccordionItem>
+
+  <AccordionItem title="6. Smart Notification Agent" icon="🔔" badge="Phase 1">
+
+**Job:** Send relevance-scored alerts so users only see what matters to them.
+
+**Models:** Claude (content generation) + Collaborative Filtering (relevance scoring)
+
+**How it works:** Scores each potential notification by how relevant it is to the user's portfolio, watchlist, and past behavior. Only high-relevance alerts get through.
+
+</AccordionItem>
+
+  <AccordionItem title="7. News Sentiment Agent" icon="📰" badge="Phase 2">
+
+**Job:** Score Korean and English financial news articles for sentiment (bullish/bearish/neutral).
+
+**Models:** KoBERT (Korean NLP) + FinBERT-KO (Korean financial sentiment) + Claude (summarization)
+
+**How it works:** KoBERT + FinBERT-KO score each article. Claude summarizes the top movers and explains sentiment shifts.
+
+</AccordionItem>
+
+  <AccordionItem title="8. Document Analysis Agent" icon="📄" badge="Phase 2">
+
+**Job:** Let users query broker reports, SEC filings, and research PDFs with natural language.
+
+**Models:** Claude (Q&A) + pgvector (vector search) + BGE-M3 (embeddings)
+
+**How it works:** Documents are chunked and embedded into pgvector using BGE-M3. User asks a question → retrieval finds relevant chunks → Claude answers with citations.
+
+</AccordionItem>
+
+  <AccordionItem title="9. CUI Agent" icon="🎙️" badge="Phase 2">
+
+**Job:** Handle voice and text commands for hands-free app control.
+
+**Models:** Claude (intent parsing) + Local LLM (fast on-device fallback)
+
+**How it works:** "지난주 삼성전자 차트 보여줘" → parses intent → routes to the correct screen or data fetch.
+
+</AccordionItem>
+
+  <AccordionItem title="10. Feature Request Agent" icon="💡" badge="Phase 2">
+
+**Job:** Automatically generate feature specs from user feedback and requests.
+
+**Models:** Claude (spec generation)
+
+**How it works:** Collects user feedback → Claude drafts a structured feature spec with user stories, acceptance criteria, and priority suggestion.
+
+</AccordionItem>
+
+  <AccordionItem title="11. Security Monitor" icon="🔒" badge="Phase 1">
+
+**Job:** Monitor for security threats and regulatory changes.
+
+**Models:** Claude (analysis) + Isolation Forest (anomaly detection)
+
+**How it works:** Continuously scans for unusual access patterns, API abuse, and regulatory updates. Flags issues for the security team.
+
+</AccordionItem>
+
+  <AccordionItem title="12. Control Tower" icon="🗼" badge="Always On">
+
+**Job:** Watch all other 11 agents — the agent that monitors agents.
+
+**Models:** Claude (meta-analysis)
+
+**How it works:** Tracks agent health, response times, error rates, and drift. If any agent behaves abnormally, Control Tower alerts the engineering team and can pause the rogue agent.
+
+<InfoBox type="warning" title="The boss robot">
+  Control Tower is the only agent that watches other agents. But even it follows the rules — it can pause agents, but it cannot make financial decisions on its own.
+</InfoBox>
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+
+  <Tab label="MCP & LangGraph" icon="🔌">
+
+### Model Context Protocol (MCP)
+
+<InfoBox type="info" title="What is MCP?">
+  MCP is an open standard created by Anthropic. It gives AI agents a **standardized way to use tools** — like a universal remote control that works with any TV. Instead of each agent having custom code to call APIs, they all go through MCP servers.
+</InfoBox>
+
+<StatGrid columns={2}>
+  <StatCard value="6" label="MCP Servers" />
+  <StatCard value="1" label="Open Standard (Anthropic)" />
+</StatGrid>
+
+The 6 MCP servers provide structured tool access for all agents. Each server exposes a set of tools that agents can call in a safe, auditable way. Full details on each MCP server are documented separately.
+
+---
+
+### LangGraph Orchestration
+
+LangGraph powers the brain of every agent workflow — defining exactly what steps to take, when to ask a human, and how to recover from failures.
+
+<FeatureGrid columns={2}>
+  <FeatureCard icon="📐" title="Typed State Graphs" description="Every agent workflow is a graph with strongly-typed state at each node. No guessing what data is where." color="blue" />
+  <FeatureCard icon="🔀" title="Conditional Edges" description="Smart routing: 'If risk above 0.8, ask a human. Otherwise, proceed.' Branching logic built into the graph." color="purple" />
+  <FeatureCard icon="💾" title="Redis Checkpointing" description="Full state saved to Redis at every node transition. Server crash? Resume exactly where you left off." color="jade" />
+  <FeatureCard icon="✋" title="HITL Pause & Resume" description="Human-in-the-loop pauses are checkpointed too. The agent waits patiently until a human approves." color="amber" />
+</FeatureGrid>
+
+<InfoBox type="tip" title="Checkpoint = Video game save">
+  Every time an agent finishes a step, LangGraph saves a snapshot to Redis. If the server restarts, the agent reloads its last save and continues — no lost work, no repeated steps, no confusion.
+</InfoBox>
+
+</Tab>
+</Tabs>
+
+---
+
+## Full Agent Workflows
+
+<InfoBox type="info" title="What is in each workflow?">
+  Every agent has two things: a **state** (the data it carries around, like a clipboard) and a **workflow** (the step-by-step recipe it follows). Below you will find both for all 12 agents. Think of the state like a robot's memory, and the workflow like its instruction manual.
+</InfoBox>
+
+<InfoBox type="warning" title="FSC Hard Rule: Human-in-the-Loop">
+  Nodes marked **HITL** require a human to approve before the workflow can continue. This is a Korean Financial Services Commission (FSC) requirement — no exceptions, even in "Auto Mode." If the timeout expires without a decision, the workflow either cancels or escalates.
+</InfoBox>
+
+<Accordion>
+  <AccordionItem title="Agent 1 — Trade Signal: Full Workflow" icon="📈" badge="HITL">
+
+**State (the robot's clipboard):**
+
+| Field | Description |
+|-------|-------------|
+| `asset_symbol` | The stock or asset ticker (e.g., 005930.KS for Samsung) |
+| `market` | Which market: KR, US, crypto, forex |
+| `ohlcv_data` | Open/High/Low/Close/Volume price data |
+| `indicators` | Calculated technical indicators (RSI, MACD, etc.) |
+| `market_regime` | Current market condition (bull, bear, sideways) |
+| `signal_direction` | BUY, SELL, or HOLD |
+| `confidence_pct` | How confident the model is (0-100%) |
+| `price_target` | Predicted target price |
+| `stop_loss` | Recommended stop-loss level |
+| `compliance_result` | PASS or FAIL from compliance check |
+| `order_id` | Staged order identifier |
+| `user_decision` | What the human decided (approve/reject/modify) |
+| `retry_count` | Number of retries attempted |
+
+**Workflow (step-by-step):**
+
+| Step | Node | What Happens |
+|------|------|-------------|
+| 1 | `fetch_market_data` | Pulls OHLCV data via kis-trading MCP |
+| 2 | `calculate_indicators` | Runs TA-Lib: RSI, MACD, Bollinger, ATR, VWAP, Ichimoku |
+| 3 | `evaluate_regime` | Determines if market is bullish, bearish, or sideways |
+| 4 | `score_signal` | XGBoost scores the signal; Claude explains reasoning |
+| 5 | `compliance_check` | Validates against FSC rules via compliance-check MCP |
+| 6 | `notify` | If compliance PASS, sends signal to user |
+| 7 | **`await_user_decision`** | **HITL node** — waits for human approval (30-minute timeout). If timeout expires, the order is cancelled. |
+| 8 | `stage_order` | If approved, stages the order via kis-trading MCP |
+| 9 | `log_outcome` | Writes immutable audit record |
+
+<InfoBox type="warning" title="Non-negotiable HITL">
+  The await_user_decision node is non-negotiable. Even if the user enables "Auto Mode" in settings, this step still requires explicit human confirmation for every trade. This is an FSC regulatory requirement.
+</InfoBox>
+
+</AccordionItem>
+
+  <AccordionItem title="Agent 2 — AI Advisor Chatbot: Full Workflow" icon="💬" badge="Streaming">
+
+**State (the robot's clipboard):**
+
+| Field | Description |
+|-------|-------------|
+| `user_id` | Who is asking the question |
+| `question_text` | The raw question from the user |
+| `question_type` | Classified type (market, portfolio, general, etc.) |
+| `retrieval_plan` | Which sources to query for context |
+| `market_context` | Data from market-context MCP |
+| `portfolio_context` | Data from portfolio-intelligence MCP |
+| `news_context` | Data from pgvector news embeddings |
+| `response_text` | The generated answer |
+| `review_passed` | Whether self-review passed (true/false) |
+| `review_failures` | List of what failed in self-review |
+| `citations` | Source references for the answer |
+| `retry_count` | Number of retries attempted |
+
+**Workflow (step-by-step):**
+
+| Step | Node | What Happens |
+|------|------|-------------|
+| 1 | `classify_question` | Determines what kind of question the user asked |
+| 2 | `plan_retrieval` | Decides which data sources to query |
+| 3 | `fetch_context` | **PARALLEL** fetch: market-context MCP + portfolio-intelligence MCP + pgvector news search |
+| 4 | `load_cached_context` | Loads stable knowledge from CAG (Context-Augmented Generation) — pre-loaded facts that never need retrieval |
+| 5 | `generate_response` | Claude generates a streaming answer using all gathered context |
+| 6 | `self_review` | FSC compliance self-check: Does the response include a disclaimer? Are citations present? Does it avoid making guarantees? |
+| 7 | `stream_to_user` | Sends the response to the user in real time |
+| 8 | `append_citations` | Attaches source references at the end |
+| 9 | `log_interaction` | Writes immutable audit record |
+
+<InfoBox type="tip" title="What is CAG?">
+  CAG (Context-Augmented Generation) is like giving the robot a cheat sheet stapled to its desk. Instead of searching the library every time someone asks "What is KOSPI?", the answer is already loaded in memory. This saves time and money. See the Intelligence Layer page for full CAG details.
+</InfoBox>
+
+</AccordionItem>
+
+  <AccordionItem title="Agent 3 — Risk Guard: Full Workflow" icon="🛡️" badge="HITL + AML">
+
+**State (the robot's clipboard):**
+
+| Field | Description |
+|-------|-------------|
+| `transaction_id` | The transaction being evaluated |
+| `user_id` | The user who initiated the transaction |
+| `amount` | Transaction amount |
+| `risk_score` | Anomaly score from Isolation Forest (0.0 to 1.0) |
+| `aml_flags` | Anti-money laundering flags triggered |
+| `sanctions_hit` | Whether the user matches a sanctions list |
+| `account_status` | Current account state (active, frozen, etc.) |
+| `str_draft_text` | Suspicious Transaction Report draft text |
+| `officer_decision` | Compliance officer's decision |
+| `resolution_timestamp` | When the case was resolved |
+
+**Workflow (step-by-step):**
+
+| Step | Node | What Happens |
+|------|------|-------------|
+| 1 | `score_anomaly` | Isolation Forest scores the transaction 0.0 (normal) to 1.0 (suspicious) |
+| 2 | `aml_check` | Checks KoFIU thresholds: transactions at or above KRW 10M flagged; sanctions list cross-check |
+| 3a | `approve` | If score is below 0.3 and no AML flags: transaction approved automatically |
+| 3b | `enhanced_monitoring` | If score is 0.3 to 0.7: transaction proceeds but is flagged for enhanced monitoring |
+| 3c | `freeze_and_alert` | If score is above 0.7 OR any AML flag: account frozen, compliance team alerted |
+| 4 | `generate_str_draft` | Claude drafts a Suspicious Transaction Report (STR) with all evidence summarized |
+| 5 | **`await_compliance_review`** | **HITL node** — compliance officer reviews the case (72-hour timeout; if no response, auto-escalates to senior compliance) |
+| 6 | `execute_decision` | Carries out the officer's decision (unfreeze, file STR, escalate) |
+| 7 | `log_outcome` | Writes immutable audit record |
+
+<InfoBox type="note" title="Three risk lanes">
+  Think of it like a security checkpoint at an airport. Green lane (below 0.3) — walk right through. Yellow lane (0.3 to 0.7) — extra screening but you can still proceed. Red lane (above 0.7 or AML flag) — you're stopped until a security officer clears you.
+</InfoBox>
+
+</AccordionItem>
+
+  <AccordionItem title="Agent 4 — Market Analysis: Full Workflow" icon="📊" badge="Multi-market">
+
+**State (the robot's clipboard):**
+
+| Field | Description |
+|-------|-------------|
+| `assets_data` | Raw market data across all tracked markets |
+| `indicators_map` | Technical indicators computed per asset |
+| `news_context` | Relevant news articles retrieved via RAG |
+| `analysis_text` | The generated market analysis |
+| `quality_passed` | Whether quality check passed |
+| `quality_failures` | List of quality issues found |
+| `retry_count` | Number of retries attempted |
+| `published_at` | Timestamp of publication |
+| `notification_triggers` | Events that trigger user notifications |
+
+**Workflow (step-by-step):**
+
+| Step | Node | What Happens |
+|------|------|-------------|
+| 1 | `fetch_all_market_data` | **PARALLEL** fetch across 8 markets: KR, US, JP, CN, HK, VN, crypto, forex |
+| 2 | `run_indicators` | TA-Lib computes RSI, MACD, Bollinger Bands, ATR, VWAP, and Ichimoku Cloud for each asset |
+| 3 | `fetch_relevant_news` | pgvector RAG retrieves news articles relevant to current market conditions |
+| 4 | `generate_analysis` | Claude writes the analysis in 3 languages: Korean (KO), English (EN), and Chinese (CN) |
+| 5 | `quality_check` | Validates completeness, accuracy of cited data, and disclaimer presence |
+| 6 | `cache_and_publish` | Stores the analysis in Redis with a 15-minute TTL, then publishes |
+| 7 | `trigger_notifications` | Sends alerts to users whose watchlists match significant movements |
+
+<InfoBox type="fun" title="Morning newspaper for robots">
+  This agent is like a financial journalist who wakes up every morning, reads 8 different newspapers from around the world, does the math, and writes a summary. Except this journalist writes in 3 languages simultaneously and never sleeps.
+</InfoBox>
+
+</AccordionItem>
+
+  <AccordionItem title="Agent 5 — Portfolio Optimizer: Full Workflow" icon="⚖️" badge="HITL + Loop">
+
+**State (the robot's clipboard):**
+
+| Field | Description |
+|-------|-------------|
+| `user_id` | The portfolio owner |
+| `holdings` | Current list of assets held |
+| `current_weights` | Percentage allocation per asset |
+| `risk_tolerance` | User's risk preference level |
+| `optimization_result` | Raw output from Black-Litterman model |
+| `target_weights` | Recommended new allocation percentages |
+| `suitability_passed` | Whether recommendation fits user's risk profile |
+| `iteration_count` | Number of optimization loops completed |
+| `recommendation_text` | Human-readable explanation |
+| `user_decision` | What the human decided (approve/reject/modify) |
+| `staged_order_ids` | List of staged rebalancing orders |
+
+**Workflow (step-by-step):**
+
+| Step | Node | What Happens |
+|------|------|-------------|
+| 1 | `snapshot_portfolio` | Captures current holdings and weights via portfolio-intelligence MCP |
+| 2 | `fetch_risk_profile` | Retrieves the user's risk tolerance and investment goals |
+| 3 | `run_optimization` | Black-Litterman model computes optimal target weights |
+| 4 | `check_suitability` | Validates that recommended weights match user's risk profile |
+| 4a | `tighten_constraints` | If suitability FAIL: tightens optimization constraints and re-runs (max 3 iterations) |
+| 5 | `explain_recommendation` | Claude writes a plain-language explanation in KO/EN/CN |
+| 6 | **`await_decision`** | **HITL node** — user reviews recommendation (7-day timeout; if no response, recommendation archived) |
+| 7 | `stage_rebalancing_orders` | If approved, stages all necessary buy/sell orders via kis-trading MCP |
+
+<InfoBox type="tip" title="Retry loop with guardrails">
+  If the first optimization result is too risky for the user's profile, the agent tightens its constraints and tries again — like a chef tasting the soup and adding a little less salt each time. But it only gets 3 tries, to prevent infinite loops.
+</InfoBox>
+
+</AccordionItem>
+
+  <AccordionItem title="Agent 6 — Smart Notification: Full Workflow" icon="🔔" badge="Multi-channel">
+
+**State (the robot's clipboard):**
+
+| Field | Description |
+|-------|-------------|
+| `event_type` | What kind of event occurred (price alert, news, etc.) |
+| `event_data` | Raw event payload |
+| `user_id` | Who should potentially be notified |
+| `relevance_score` | How relevant this event is to the user (0.0 to 1.0) |
+| `quiet_hours_active` | Whether the user has "Do Not Disturb" on |
+| `message_text` | The generated notification message |
+| `selected_channel` | Which channel to use (push, Kakao, SMS, in-app) |
+| `dispatch_status` | Delivery status |
+| `open_status` | Whether the user opened the notification |
+| `action_taken` | What the user did after opening |
+
+**Workflow (step-by-step):**
+
+| Step | Node | What Happens |
+|------|------|-------------|
+| 1 | `receive_event` | Listens on Redis Pub/Sub for events from other agents |
+| 2 | `score_relevance` | ML model scores how important this event is to the specific user |
+| 3 | `check_quiet_hours` | Respects the user's quiet hours / DND settings |
+| 4 | `generate_message` | Claude writes the notification text in the user's preferred language |
+| 5 | `select_channel` | Picks the best delivery channel: push notification, Kakao AlimTalk, SMS, or in-app |
+| 6 | `dispatch` | Sends the notification via notification-dispatch MCP |
+| 7 | `track_outcome` | Records whether the user opened it and what action they took |
+
+<InfoBox type="fun" title="A polite robot butler">
+  This agent is like a butler who knows when to tap you on the shoulder and when to leave a note on the table. It checks whether you are busy (quiet hours), decides if the news is actually important to you (relevance scoring), and picks the best way to tell you (channel selection).
+</InfoBox>
+
+</AccordionItem>
+
+  <AccordionItem title="Agent 7 — News Sentiment: Full Workflow" icon="📰" badge="Dual-language">
+
+**State (the robot's clipboard):**
+
+| Field | Description |
+|-------|-------------|
+| `raw_articles` | Freshly fetched news articles |
+| `deduplicated_articles` | Articles after removing duplicates |
+| `ko_articles` | Korean-language articles |
+| `en_articles` | English-language articles |
+| `sentiment_scores` | Sentiment score per article (-1.0 to +1.0) |
+| `low_confidence_articles` | Articles where the model was not confident |
+| `embeddings` | Vector embeddings for storage |
+| `aggregated_scores` | Per-asset, per-hour aggregated sentiment |
+| `extreme_assets` | Assets with extreme sentiment (at or above 0.7 or at or below -0.7) |
+
+**Workflow (step-by-step):**
+
+| Step | Node | What Happens |
+|------|------|-------------|
+| 1 | `fetch_articles` | Pulls articles from RSS feeds + Naver Finance API |
+| 2 | `deduplicate` | Content hashing removes duplicate articles |
+| 3a | `score_sentiment_ko` | **PARALLEL** — KoBERT scores Korean articles (-1.0 to +1.0) |
+| 3b | `score_sentiment_en` | **PARALLEL** — FinBERT-KO scores English articles (-1.0 to +1.0) |
+| 4 | `complex_article_review` | If model confidence is below 0.6, Claude reviews the article for nuanced sentiment |
+| 5 | `embed_and_store` | BGE-M3 generates embeddings; stores in pgvector for future RAG retrieval |
+| 6 | `aggregate_sentiment` | Aggregates scores per asset per hour and writes to TimescaleDB |
+| 7 | `publish_extremes` | If any asset has aggregated sentiment at or above +0.7 or at or below -0.7, publishes an alert event |
+
+<InfoBox type="note" title="Why two models?">
+  Korean news and English news have different writing styles, idioms, and financial jargon. KoBERT was trained on Korean text, while FinBERT-KO was fine-tuned on financial English with Korean context. Using the right model for each language means more accurate sentiment scores.
+</InfoBox>
+
+</AccordionItem>
+
+  <AccordionItem title="Agent 8 — Document Analysis: Full Workflow" icon="📄" badge="RAG + Access Control">
+
+**State (the robot's clipboard):**
+
+| Field | Description |
+|-------|-------------|
+| `user_id` | Who is querying |
+| `query_text` | The natural language question |
+| `query_type` | One of 5 types: factual, comparison, summarization, structured extraction, or red flag detection |
+| `filters` | Search filters (date range, document type, etc.) |
+| `raw_chunks` | Initial retrieved document chunks |
+| `permitted_chunks` | Chunks the user has permission to access |
+| `reranked_chunks` | Top-ranked chunks after reranking |
+| `assembled_context` | Final context window assembled for Claude |
+| `analysis_text` | The generated analysis |
+| `citations` | Source references |
+| `access_denied` | Flag if user lacks permission for requested documents |
+
+**Workflow (step-by-step):**
+
+| Step | Node | What Happens |
+|------|------|-------------|
+| 1 | `receive_query` | Accepts the user's natural language question |
+| 2 | `classify_query_type` | Determines one of 5 query types: factual, comparison, summarization, structured extraction, or red flag detection |
+| 3 | `retrieve_chunks` | Hybrid search: pgvector (semantic) + BM25 (keyword) for maximum recall |
+| 4 | `filter_by_permissions` | **Hard access control gate** — removes any chunks the user is not authorized to see |
+| 5 | `rerank_results` | Cohere reranker narrows from top-20 candidates to top-5 most relevant |
+| 6 | `assemble_context` | Builds the final context window from the top-5 chunks |
+| 7 | `generate_analysis` | Claude reads the context and generates a detailed analysis |
+| 8 | `append_citations` | Attaches exact source references (document name, page, paragraph) |
+| 9 | `stream_to_user` | Streams the answer to the user in real time |
+
+<InfoBox type="warning" title="Access control is non-negotiable">
+  The filter_by_permissions step is a hard gate — not a suggestion. If a user does not have permission to see a document, the chunks from that document are removed before Claude ever sees them. The AI cannot leak data the user is not authorized to access.
+</InfoBox>
+
+</AccordionItem>
+
+  <AccordionItem title="Agent 9 — CUI (Conversational UI) Agent: Full Workflow" icon="🎙️" badge="HITL + Voice">
+
+**State (the robot's clipboard):**
+
+| Field | Description |
+|-------|-------------|
+| `user_input` | Raw text or audio input |
+| `input_modality` | Text or voice |
+| `current_screen` | What screen the user is currently on |
+| `current_asset` | What asset the user is currently viewing |
+| `intent_class` | Classified user intent |
+| `resolved_entities` | Resolved entity references (e.g., "Samsung" becomes 005930.KS) |
+| `service_status` | Current status of required backend services |
+| `action_sequence` | Planned sequence of app actions |
+| `narration_text` | Spoken or displayed response text |
+| `confirmation_required` | Whether the action needs user confirmation |
+| `user_confirmed` | Whether the user confirmed the action |
+| `feature_request_payload` | If the request is for a new feature, the payload sent to Agent 10 |
+| `actions_executed` | List of completed actions |
+
+**Workflow (step-by-step):**
+
+| Step | Node | What Happens |
+|------|------|-------------|
+| 1 | `receive_input` | Accepts text or voice input (voice transcribed via Whisper or Naver Clova STT) |
+| 2 | `classify_intent` | Local LLM handles fast/clear intents; Claude handles ambiguous ones |
+| 3 | `resolve_entities` | Maps natural language to system identifiers (e.g., "Samsung" to 005930.KS) |
+| 4 | `check_service_registry` | Verifies that required backend services are available |
+| 5 | `plan_action_sequence` | Determines the sequence of app actions to execute |
+| 6 | **`await_confirmation`** | **HITL node** for financial actions only (5-minute timeout; non-financial actions skip this step) |
+| 7 | `execute_actions` | Carries out the planned actions via the App Action API |
+| 8 | `generate_narration` | Claude generates a spoken/displayed confirmation in the user's language |
+
+**App Action API (what the CUI can do in the app):**
+
+| Action | Description |
+|--------|-------------|
+| `navigate_to` | Go to a specific screen |
+| `open_asset_detail` | Open the detail page for a stock or asset |
+| `open_order_form` | Open the buy/sell order form |
+| `set_price_alert` | Create a price alert for an asset |
+| `open_chart` | Open the charting view |
+| `highlight_portfolio_position` | Highlight a specific holding in the portfolio |
+| `apply_chart_indicator` | Add a technical indicator to the current chart |
+
+<InfoBox type="fun" title="A voice-controlled remote for your investments">
+  Imagine telling your TV remote "Show me last week's Samsung chart with Bollinger Bands." The CUI Agent is exactly that — a voice-controlled remote for the entire BARO app. It hears you, figures out what you want, and does it.
+</InfoBox>
+
+</AccordionItem>
+
+  <AccordionItem title="Agent 10 — Feature Request: Full Workflow" icon="💡" badge="Self-evolving">
+
+**Scoring System:**
+
+| Score Range | Action Taken |
+|-------------|-------------|
+| 7.0 and above | Full feature specification generated automatically |
+| 5.0 to 6.9 | Summary logged for product team review |
+| Below 5.0 | Archived — low feasibility or demand |
+
+**4 Scoring Dimensions:**
+
+| Dimension | What It Measures |
+|-----------|-----------------|
+| **Product Fit** | How well does this feature align with BARO's mission? |
+| **Technical Feasibility** | How hard is it to build with our current stack? |
+| **Demand Signal** | How many users have requested something similar? |
+| **Regulatory Risk** | Could this feature create compliance issues? |
+
+**Workflow (step-by-step):**
+
+| Step | Node | What Happens |
+|------|------|-------------|
+| 1 | `normalize_request` | Claude rewrites the raw user feedback into a structured format |
+| 2 | `deduplicate_and_cluster` | pgvector finds similar past requests and clusters them together |
+| 3 | `score_feasibility` | Scores across 4 dimensions: Product Fit, Technical Feasibility, Demand Signal, Regulatory Risk |
+| 4 | `generate_spec_document` | If score is 7.0+, Claude writes a full feature spec with user stories and acceptance criteria |
+| 5 | `generate_implementation_guide` | Claude drafts a technical implementation guide for the engineering team |
+
+<InfoBox type="tip" title="A self-evolving product pipeline">
+  This agent turns user complaints into engineering tickets automatically. A user says "I wish I could compare two stocks side by side," and the agent normalizes the request, checks if others have asked for the same thing, scores feasibility, and — if the score is high enough — writes a full feature spec. The product team wakes up to a ready-made ticket.
+</InfoBox>
+
+</AccordionItem>
+
+  <AccordionItem title="Agent 11 — Security Monitor: Full Workflow" icon="🔒" badge="Scheduled">
+
+**Scan Schedules:**
+
+| Frequency | What Gets Scanned |
+|-----------|--------------------|
+| **Hourly** | MITRE ATLAS threat database + KISA (Korea Internet Security Agency) advisories + FSC regulatory updates |
+| **Daily** | AI-SPM (AI Security Posture Management) full scan + canary test suite (200+ tests) |
+| **Weekly** | Threat intelligence aggregation + shadow AI audit (detect unauthorized AI usage) |
+| **Monthly** | Full regulatory compliance review + bias audit across all models |
+| **Event-triggered** | Automatic scan on every new deployment (code, model, or config change) |
+
+<InfoBox type="note" title="What is a canary test?">
+  A canary test is like a fire drill for the AI. We send 200+ tricky inputs (prompt injections, edge cases, adversarial examples) and check that every agent responds safely. If even one canary fails, the security team is alerted immediately.
+</InfoBox>
+
+<InfoBox type="fun" title="The night watchman">
+  Security Monitor is like a night watchman who patrols the building at different intervals. Every hour, they check the front door (threat databases). Every day, they test every lock (canary tests). Every week, they review the security cameras (threat intel). Every month, they do a full building inspection (regulatory review). And whenever someone installs a new door (deployment), they test it immediately.
+</InfoBox>
+
+</AccordionItem>
+
+  <AccordionItem title="Agent 12 — Control Tower: Full Workflow" icon="🗼" badge="Always On">
+
+**Monitored Signals & Thresholds:**
+
+| Signal | Threshold | Action When Triggered |
+|--------|-----------|----------------------|
+| **Prompt injection rate** | Spike above 50 per hour | Alert security team, increase monitoring |
+| **HITL bypass** | Any single instance | Immediate shutdown of affected agent + incident report |
+| **Output quality score** | Drops below 0.70 | Flag for quality review, pause agent if persistent |
+| **Cross-agent anomaly** | 3 or more agents behaving abnormally simultaneously | System-wide alert, escalate to engineering lead |
+| **Compliance presence** | Drops below 0.95 (disclaimers/citations) | Pause affected agent, trigger compliance review |
+| **Token consumption** | Exceeds 3x baseline | Cost alert, investigate for prompt injection or infinite loops |
+
+<InfoBox type="warning" title="Zero tolerance for HITL bypass">
+  If any agent — even for a millisecond — bypasses a human-in-the-loop step, Control Tower triggers an immediate shutdown. A HITL bypass is the most serious possible violation in BARO's architecture. It generates an automatic incident report and requires manual restart by an engineer.
+</InfoBox>
+
+<InfoBox type="fun" title="Mission control for robots">
+  Control Tower is like NASA's Mission Control. It has a big screen showing the vital signs of every robot in the building. If any robot's heart rate (error rate) spikes, or if a robot tries to sneak past a security checkpoint (HITL bypass), Mission Control hits the big red button.
+</InfoBox>
+
+</AccordionItem>
+</Accordion>
+
+---
+
+## MCP Server Reference
+
+<InfoBox type="info" title="What are MCP servers?">
+  Think of each MCP server as a specialized toolbox. A plumber has a plumbing toolbox, an electrician has an electrical toolbox. AI agents cannot use tools directly — they go through these MCP servers, which make sure every tool call is safe, structured, and auditable. There are 6 toolboxes in total.
+</InfoBox>
+
+<StatGrid columns={3}>
+  <StatCard value="6" label="MCP Servers" />
+  <StatCard value="38" label="Total Tools" />
+  <StatCard value="100%" label="Audit Coverage" />
+</StatGrid>
+
+<Accordion>
+  <AccordionItem title="1. kis-trading — Stock Trading Tools" icon="📈" badge="6 tools">
+
+**Purpose:** Direct interface to the Korea Investment & Securities (KIS) Open API for market data and order management.
+
+| Tool | Description |
+|------|-------------|
+| `get_quote` | Get the current price quote for a stock |
+| `get_ohlcv` | Get Open/High/Low/Close/Volume historical data |
+| `get_orderbook` | Get the current order book (bid/ask depth) |
+| `get_account_balance` | Get the user's account balance and buying power |
+| `stage_order` | Stage a buy or sell order (does NOT execute — requires HITL approval) |
+| `cancel_order` | Cancel a previously staged or pending order |
+
+<InfoBox type="tip" title="Stage, not execute">
+  Notice the tool is called stage_order, not execute_order. Orders are always staged first and wait for human approval. The MCP server physically cannot execute a trade without HITL confirmation.
+</InfoBox>
+
+</AccordionItem>
+
+  <AccordionItem title="2. portfolio-intelligence — Portfolio Data Tools" icon="💼" badge="6 tools">
+
+**Purpose:** Provides read access to portfolio holdings, performance, and risk metrics.
+
+| Tool | Description |
+|------|-------------|
+| `get_holdings` | List all assets the user currently holds |
+| `get_pnl` | Get profit and loss (realized and unrealized) |
+| `get_risk_metrics` | Get portfolio-level risk metrics (beta, Sharpe ratio, max drawdown, etc.) |
+| `get_risk_profile` | Get the user's declared risk tolerance and investment goals |
+| `get_correlation_matrix` | Get the correlation matrix between held assets |
+| `update_risk_signal` | Update a risk signal when new data changes the risk profile |
+
+</AccordionItem>
+
+  <AccordionItem title="3. market-context — Market Intelligence Tools" icon="🌍" badge="5 tools">
+
+**Purpose:** Aggregates market data, technical indicators, and news sentiment into a single context bundle for agents.
+
+| Tool | Description |
+|------|-------------|
+| `get_asset_context` | Get a comprehensive context bundle for a specific asset (price, indicators, news, sentiment) |
+| `get_technical_indicators` | Get calculated technical indicators for an asset (RSI, MACD, Bollinger, etc.) |
+| `get_news_sentiment` | Get the latest aggregated sentiment score for an asset |
+| `search_news` | Search for news articles by keyword, asset, or topic |
+| `get_sector_momentum` | Get momentum scores for market sectors |
+
+</AccordionItem>
+
+  <AccordionItem title="4. compliance-check — Regulatory Compliance Tools" icon="🏛️" badge="5 tools">
+
+**Purpose:** Validates actions against FSC regulations, AML rules, and KYC requirements.
+
+| Tool | Description |
+|------|-------------|
+| `check_order_compliance` | Validate a staged order against FSC trading rules |
+| `check_aml_flag` | Check if a transaction triggers AML thresholds |
+| `get_user_kyc_status` | Get the user's KYC (Know Your Customer) verification status |
+| `log_compliance_event` | Write an immutable compliance audit record |
+| `generate_str_draft` | Generate a Suspicious Transaction Report draft for compliance review |
+
+</AccordionItem>
+
+  <AccordionItem title="5. notification-dispatch — Notification Delivery Tools" icon="🔔" badge="5 tools">
+
+**Purpose:** Sends notifications across multiple channels and retrieves user notification preferences.
+
+| Tool | Description |
+|------|-------------|
+| `send_push` | Send a mobile push notification |
+| `send_kakao_alimtalk` | Send a Kakao AlimTalk message (Korea's dominant messaging platform) |
+| `send_sms` | Send an SMS text message |
+| `send_email` | Send an email notification |
+| `get_notification_preferences` | Get the user's preferred notification channels and quiet hours |
+
+</AccordionItem>
+
+  <AccordionItem title="6. document-retrieval — Document Search & Analysis Tools" icon="📄" badge="8 tools">
+
+**Purpose:** Full-text and semantic search over broker reports, SEC filings, research PDFs, and other financial documents.
+
+| Tool | Description |
+|------|-------------|
+| `search_documents` | Hybrid search: pgvector semantic + BM25 keyword |
+| `get_document_metadata` | Get metadata for a specific document (title, date, author, type) |
+| `get_document_chunks` | Get specific chunks from a document by ID |
+| `rerank_chunks` | Rerank retrieved chunks using Cohere for relevance |
+| `extract_structured_data` | Extract structured data (tables, financials) from a document |
+| `compare_documents` | Compare two documents and highlight differences |
+| `check_access_permissions` | Verify a user has permission to access a specific document |
+| `ingest_document` | Add a new document to the vector store (chunk, embed, index) |
+
+<InfoBox type="note" title="The biggest toolbox">
+  document-retrieval has the most tools (8) because document analysis involves many steps: finding, verifying permissions, retrieving, reranking, extracting, comparing, and ingesting. Each step is its own tool so agents can combine them in different ways.
+</InfoBox>
+
+</AccordionItem>
+</Accordion>
+
+---
+
+## LangGraph Capabilities
+
+<InfoBox type="info" title="The operating system for agents">
+  If agents are the robots, LangGraph is their operating system. It defines how each robot follows its instruction manual (workflow), when it needs to ask a human (HITL), and how it remembers where it left off if the power goes out (checkpointing).
+</InfoBox>
+
+### Core Capabilities
+
+| Capability | Description | Why It Matters |
+|------------|-------------|----------------|
+| **Typed Shared State** | Every agent has a strongly-typed state object (like a clipboard) that is passed between nodes | Prevents bugs caused by missing or wrong data types — if a field is supposed to be a number, it cannot accidentally be text |
+| **HITL Nodes** | Special pause points where the workflow stops and waits for a human | Required by FSC regulations for all financial actions; prevents autonomous money movement |
+| **Conditional Edges** | Branching logic: "if risk score above 0.7, go to freeze; otherwise, go to approve" | Enables smart routing without hardcoding every possible path |
+| **Parallel Execution** | Multiple nodes can run at the same time (e.g., fetching data from 3 sources simultaneously) | Dramatically reduces latency for multi-source data gathering |
+| **Checkpointer Persistence** | Full agent state saved to Redis at every node transition | If the server crashes mid-workflow, the agent resumes exactly where it stopped — no lost progress, no repeated work |
+| **Streaming Output** | Agents can stream partial results to users in real time (e.g., chatbot typing effect) | Users see responses as they are generated, not after a long wait |
+
+### HITL Timeout Summary
+
+Every HITL node has a timeout — if the human does not respond in time, the system takes a safe default action.
+
+| Agent | HITL Node | Timeout | Default Action on Timeout |
+|-------|-----------|---------|--------------------------|
+| **Trade Signal** | `await_user_decision` | 30 minutes | Order cancelled |
+| **Risk Guard** | `await_compliance_review` | 72 hours | Auto-escalate to senior compliance |
+| **Portfolio Optimizer** | `await_decision` | 7 days | Recommendation archived |
+| **CUI Agent** | `await_confirmation` | 5 minutes | Action cancelled |
+
+<InfoBox type="tip" title="Safe defaults protect everyone">
+  Every timeout results in a safe action — cancel, escalate, or archive. No timeout ever results in "do it anyway." This is a core safety principle: when in doubt, do nothing and tell a human.
+</InfoBox>
+
+---
+
+## Prompt & Context Engineering
+
+<InfoBox type="fun" title="Teaching robots to read and talk">
+  Prompt engineering is like writing really good instructions for a new employee. Context engineering is like making sure the employee has the right documents on their desk before they start working. Together, they determine how well our AI agents understand questions and give useful answers.
+</InfoBox>
+
+### Prompt Engineering Techniques
+
+<InfoBox type="info" title="6 techniques for crafting AI instructions">
+  These are the core strategies we use to write prompts (instructions) for Claude and other LLMs. Each technique makes the AI's output more reliable, more compliant, and more useful.
+</InfoBox>
+
+<Accordion>
+  <AccordionItem title="1. Role-Based System Prompts" icon="🎭" badge="Foundation">
+
+Every agent receives a system prompt that defines its identity, scope, and constraints. This is the first thing the AI reads, and it shapes everything that follows.
+
+**Example pattern:**
+- "You are the Risk Guard agent for BARO. Your only job is to evaluate transactions for AML compliance. You MUST include a disclaimer in every output. You CANNOT approve transactions — you can only recommend actions to a human compliance officer."
+
+<InfoBox type="tip" title="Why this works">
+  Giving the AI a clear role is like giving a new employee a job description on day one. Without it, the AI might try to be helpful in ways that are actually dangerous — like approving a transaction it should only be flagging.
+</InfoBox>
+
+</AccordionItem>
+
+  <AccordionItem title="2. Structured Output Formatting" icon="📋" badge="Reliability">
+
+Prompts specify the exact output format expected — JSON schemas, required fields, and validation rules. This ensures downstream systems can parse AI outputs reliably.
+
+**Example pattern:**
+- "Respond with a JSON object containing: signal_direction (BUY/SELL/HOLD), confidence_pct (0-100), reasoning (string, max 500 characters), and disclaimer (string, must include FSC required text)."
+
+</AccordionItem>
+
+  <AccordionItem title="3. Chain-of-Thought Prompting" icon="🔗" badge="Reasoning">
+
+For complex decisions, prompts ask the AI to show its work step by step before giving a final answer. This makes reasoning transparent and auditable.
+
+**Example pattern:**
+- "Before providing your risk assessment, walk through these steps: (1) List all anomaly indicators present, (2) Compare against KoFIU thresholds, (3) Check sanctions list results, (4) State your conclusion with a risk score and justification."
+
+</AccordionItem>
+
+  <AccordionItem title="4. Few-Shot Examples" icon="📝" badge="Accuracy">
+
+Prompts include 2-5 example inputs and expected outputs so the AI understands the exact format and quality level expected.
+
+**Example pattern:**
+- "Here are 3 examples of correctly formatted market analysis summaries: [Example 1: KR market bullish...] [Example 2: US market mixed...] [Example 3: Crypto bearish...] Now write a summary for today's data following the same format."
+
+</AccordionItem>
+
+  <AccordionItem title="5. Guardrail Prompting" icon="🚧" badge="Safety">
+
+Explicit instructions about what the AI must NOT do. These negative constraints are as important as positive instructions.
+
+**Example pattern:**
+- "NEVER provide specific buy/sell recommendations without the compliance disclaimer. NEVER claim to guarantee returns. NEVER reference data you were not given in the context window. If you are unsure, say so explicitly."
+
+</AccordionItem>
+
+  <AccordionItem title="6. Multi-Language Templating" icon="🌐" badge="Localization">
+
+Prompts include language-specific templates for Korean, English, and Chinese output. Financial terminology has precise translations that must be consistent.
+
+**Example pattern:**
+- "Generate the analysis in Korean. Use the following financial terms consistently: 매수 (buy), 매도 (sell), 보유 (hold), 손절 (stop-loss), 목표가 (target price)."
+
+</AccordionItem>
+</Accordion>
+
+### Context Engineering Techniques
+
+<InfoBox type="info" title="8 techniques for giving AI the right information">
+  Context engineering is about what information the AI has access to when it generates a response. Even the smartest AI gives bad answers if it is working from bad or missing information. These 8 techniques ensure every agent has exactly the right context — no more, no less.
+</InfoBox>
+
+<Accordion>
+  <AccordionItem title="1. RAG (Retrieval-Augmented Generation)" icon="🔍" badge="Dynamic">
+
+The workhorse of context engineering. When an agent needs information, it searches the vector database (pgvector) using BGE-M3 embeddings and retrieves the most relevant chunks.
+
+**How it works:** User question → embed with BGE-M3 → search pgvector → retrieve top-K chunks → feed to Claude as context → generate answer.
+
+**Used by:** AI Advisor, Document Analysis, Market Analysis, News Sentiment
+
+</AccordionItem>
+
+  <AccordionItem title="2. CAG (Context-Augmented Generation)" icon="📖" badge="Cached">
+
+Stable, rarely-changing knowledge is pre-loaded into the context window at startup instead of being retrieved every time. This is faster and cheaper than RAG for information that does not change often.
+
+**Examples of CAG content:**
+- FSC regulatory requirements and disclaimer text
+- Korean financial terminology glossary
+- Company ticker-to-name mappings
+- Standard technical indicator definitions
+
+**How it differs from RAG:** RAG goes to the library every time. CAG is like a cheat sheet stapled to the desk — always there, no lookup needed.
+
+**Used by:** AI Advisor, Trade Signal, Risk Guard, Market Analysis
+
+See the [Intelligence Layer](/ai-platform/intelligence-layer) page for the full CAG specification.
+
+</AccordionItem>
+
+  <AccordionItem title="3. Hybrid Search (Semantic + Keyword)" icon="🔀" badge="Precision">
+
+Combines pgvector semantic search with BM25 keyword search. Semantic search understands meaning ("stock going up" matches "bullish equity trend"). Keyword search catches exact terms that semantic search might miss ("005930.KS").
+
+**Used by:** Document Analysis, News Sentiment
+
+</AccordionItem>
+
+  <AccordionItem title="4. Reranking" icon="🏆" badge="Quality">
+
+After initial retrieval returns 20 candidates, a Cohere reranker scores them by relevance and keeps only the top 5. This dramatically improves the quality of context fed to Claude.
+
+**Used by:** Document Analysis
+
+</AccordionItem>
+
+  <AccordionItem title="5. Parallel Context Fetching" icon="⚡" badge="Speed">
+
+When an agent needs data from multiple sources, it fetches them all simultaneously instead of one at a time. For example, the AI Advisor fetches market data, portfolio data, and news context in parallel.
+
+**Used by:** AI Advisor, Market Analysis, News Sentiment
+
+</AccordionItem>
+
+  <AccordionItem title="6. Permission-Filtered Context" icon="🔒" badge="Security">
+
+Before any retrieved context is shown to Claude, it passes through an access control filter. Chunks from documents the user is not authorized to see are removed. Claude never sees unauthorized data.
+
+**Used by:** Document Analysis
+
+</AccordionItem>
+
+  <AccordionItem title="7. Time-Windowed Context" icon="⏰" badge="Freshness">
+
+Market data and news context is time-windowed to ensure the AI only works with recent, relevant information. Old data is filtered out based on configurable TTLs (e.g., market analysis uses the last 15 minutes of cached data).
+
+**Used by:** Market Analysis, Trade Signal, News Sentiment
+
+</AccordionItem>
+
+  <AccordionItem title="8. Entity Resolution" icon="🏷️" badge="Accuracy">
+
+Natural language references are resolved to canonical system identifiers before any context lookup. "Samsung" becomes "005930.KS", "Apple" becomes "AAPL", "Tesla" becomes "TSLA". This ensures the right data is fetched every time.
+
+**Used by:** CUI Agent, AI Advisor, Trade Signal
+
+</AccordionItem>
+</Accordion>
+
+---
+
+## The 3 Hard Rules
+
+<InfoBox type="warning" title="These rules can never be broken">
+  No matter how smart the AI gets, these three rules are hardcoded into every agent, every workflow, and every deployment. They are not suggestions — they are laws.
+</InfoBox>
+
+<FeatureGrid columns={3}>
+  <FeatureCard icon="☝️" title="One Agent = One Job" description="Every agent has exactly one responsibility. No 'god agents' that try to do everything. This keeps behavior predictable and auditable." color="blue" />
+  <FeatureCard icon="✋" title="HITL on Every Money Action" description="A human must approve before any financial transaction executes. No agent can move money autonomously — ever." color="red" />
+  <FeatureCard icon="📝" title="Immutable Audit at Every Terminal Node" description="Every time an agent completes a workflow, an immutable audit record is written. These records can never be edited or deleted." color="purple" />
+</FeatureGrid>
+
+---
+
+## Rollout Timeline
+
+<Timeline>
+  <TimelineItem date="Phase 1" title="Foundation Agents — In Development" status="wip" icon="🏗️">
+    Risk Guard, Smart Notification, Security Monitor, and Control Tower — the safety-first agents that must be rock solid before anything else launches. Architecture is complete; implementation is actively underway.
+</TimelineItem>
+  <TimelineItem date="Phase 2" title="Intelligence Agents — Architecture Complete" status="designed" icon="🧠">
+    Trade Signal, AI Advisor, Market Analysis, News Sentiment, Document Analysis, CUI Agent, and Feature Request — the agents that make BARO smart. All agent architectures, workflows, and state schemas are fully specified.
+</TimelineItem>
+  <TimelineItem date="Phase 3" title="Advanced Optimization — Specified" status="planned" icon="🚀">
+    Portfolio Optimizer — the most complex agent, requiring mature data pipelines and proven risk controls from Phase 1 & 2. Architecture is specified; implementation begins after Phase 2 maturity.
+</TimelineItem>
+</Timeline>

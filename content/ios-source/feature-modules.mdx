@@ -1,0 +1,490 @@
+# Feature Modules 기능 모듈
+
+<PageMeta status="live" layer="frontend" />
+
+Detailed documentation of every feature module — the screens, views, view models, and components that make up the BARO iOS application.
+
+<StatGrid columns={4}>
+  <StatCard value="15" label="Feature Modules" />
+  <StatCard value="66" label="Swift Files" />
+  <StatCard value="8" label="ViewModels" />
+  <StatCard value="48" label="Component Views" />
+</StatGrid>
+
+---
+
+## MainTabView.swift — Root Navigation
+
+**Location:** `Features/MainTabView.swift`
+
+The root view of the application, implementing a custom floating tab bar with 5 tabs:
+
+| Tab Index | Label | View | Status |
+|-----------|-------|------|--------|
+| 0 | Home 홈 | `HomeView` | <StatusBadge status="live">Live</StatusBadge> |
+| 1 | Products 상품 | `ProductsPlaceholderView` | <StatusBadge status="planned">Placeholder</StatusBadge> |
+| 2 | Assets 자산 | `AssetsPlaceholderView` | <StatusBadge status="planned">Placeholder</StatusBadge> |
+| 3 | Events 이벤트 | `EventsView` | <StatusBadge status="live">Live</StatusBadge> |
+| 4 | Menu 메뉴 | `MyPageView` | <StatusBadge status="live">Live</StatusBadge> |
+
+**Key Behaviors:**
+- **Floating tab bar** — custom overlay at bottom, not native `TabView`
+- **Collapsible** — tab bar collapses when user scrolls down, expands on scroll up
+- **Search modal** — full-screen `SearchView` presented as a sheet
+- **Deep navigation** — listens for `Notification.Name.navigateToHome` to reset navigation stack
+
+**Dependencies injected:** `DependencyContainer` from SwiftUI environment.
+
+---
+
+## Home Module
+
+### HomeView.swift
+
+**Location:** `Features/Home/HomeView.swift`
+
+The main landing screen with vertically scrollable content sections:
+
+```
+┌─────────────────────────────┐
+│  HomeHeaderView             │  ← User greeting
+│  BannerCarouselView         │  ← Promotional banners
+│  DateDisplayView            │  ← Current date + market status
+│  MarketOverviewRowView      │  ← Market indices
+│  CurrencyRatesRowView       │  ← FX rates
+│  StockListView              │  ← Filtered stock list
+│  AIMarketIssuesView         │  ← Market themes bubble chart
+│  NewsSectionView            │  ← News/reports/disclosures
+└─────────────────────────────┘
+```
+
+**Loading Pattern:** Each section has its own skeleton loader that shows while data loads. Sections load independently via parallel async calls.
+
+**Scroll Tracking:** Monitors scroll offset to collapse/expand the header and notify `MainTabView` to collapse the floating tab bar.
+
+### HomeViewModel.swift
+
+**Location:** `Features/Home/HomeViewModel.swift`
+
+`@Observable` ViewModel managing all home screen state and data fetching.
+
+**State Properties:**
+
+| Property | Type | Purpose |
+|----------|------|---------|
+| `stocks` | `[Stock]` | Filtered stock list |
+| `indices` | `[MarketIndex]` | Market index data |
+| `currencyRates` | `[CurrencyRate]` | FX rates |
+| `banners` | `[BannerItem]` | Promotional banners |
+| `latestNews` | `[NewsArticle]` | News feed |
+| `themes` | `[MarketTheme]` | Market themes |
+| `latestPrices` | `[String: PriceUpdate]` | Live price overlay dict |
+| `selectedFilter` | `StockFilter` | Current stock filter |
+| `selectedExchange` | `StockExchange` | Current exchange filter |
+| `isLoadingStocks` | `Bool` | Per-section loading state |
+
+**Data Loading Flow:**
+
+```swift
+func loadAllData() async {
+    async let indices = loadIndices()
+    async let stocks = loadStocks()
+    async let banners = loadBanners()
+    async let news = loadNews()
+    async let rates = loadCurrencyRates()
+    async let themes = loadThemes()
+    _ = await (indices, stocks, banners, news, rates, themes)
+}
+```
+
+**WebSocket Integration:**
+
+```swift
+func startLiveUpdates() async {
+    for code in stocks.map(\.code) {
+        let stream = WebSocketManager.shared.subscribe(code: code)
+        for await update in stream {
+            latestPrices[update.code] = update
+        }
+    }
+}
+```
+
+### Home Components (17 files)
+
+| Component | File | Description |
+|-----------|------|-------------|
+| **HomeHeaderView** | `Components/HomeHeaderView.swift` | App title and user greeting with time-based message |
+| **BannerCarouselView** | `Components/BannerCarouselView.swift` | Horizontal paged carousel with auto-scroll and page indicator |
+| **DateDisplayView** | `Components/DateDisplayView.swift` | Korean-formatted date with market session status badge |
+| **MarketOverviewRowView** | `Components/MarketOverviewRowView.swift` | Horizontally scrollable market index cards; taps navigate to `MarketOverviewDetailView` |
+| **CurrencyRatesRowView** | `Components/CurrencyRatesRowView.swift` | Horizontally scrollable FX rate cards |
+| **StockListView** | `Components/StockListView.swift` | Stock list with exchange tabs, filter selection, and real-time price overlay |
+| **StockRowView** | `Components/StockRowView.swift` | Individual stock row: logo, name, price, change, volume; navigates to detail |
+| **FilterTabsView** | `Components/FilterTabsView.swift` | Horizontal pill-style filter selector (시가총액, 거래량, etc.) |
+| **StockFilterSheet** | `Components/StockFilterSheet.swift` | Bottom sheet for filter selection with descriptions |
+| **ExchangeSelectionSheet** | `Components/ExchangeSelectionSheet.swift` | Bottom sheet for exchange selection |
+| **AIMarketIssuesView** | `Components/AIMarketIssuesView.swift` | "AI 시장 이슈" section header with category tabs |
+| **MarketThemeBubbleChartView** | `Components/MarketThemeBubbleChartView.swift` | Animated bubble chart visualizing market themes by sentiment and weight |
+| **NewsSectionView** | `Components/NewsSectionView.swift` | News feed with content type tabs (뉴스/리포트/공시) |
+| **NewsCardView** | `Components/NewsCardView.swift` | Individual news card with gradient background |
+| **NewsFilterSheet** | `Components/NewsFilterSheet.swift` | News filter bottom sheet |
+| **MarketIndexCardView** | `Components/MarketIndexCardView.swift` | Single market index display card |
+| **SkeletonViews** | `Components/SkeletonViews.swift` | Collection of skeleton loading views for all home sections |
+
+---
+
+## Search Module
+
+### SearchView.swift
+
+**Location:** `Features/Search/SearchView.swift`
+
+Full-screen search interface with tabbed categories:
+
+| Tab | Label | Content |
+|-----|-------|---------|
+| 0 | 최근 | Recent searches |
+| 1 | 국내 | Domestic stocks (KOSPI/KOSDAQ) |
+| 2 | 해외 | US stocks (NASDAQ/NYSE/AMEX) |
+| 3 | ETF | ETF securities |
+| 4 | 테마 | Market themes |
+
+**Features:**
+- Cross-category search with real-time autocomplete
+- Prefix + substring matching
+- Favorite stock toggle (star icon)
+- Navigation to `StockDetailPageView` on stock tap
+- Theme search results navigate to `ThemeDetailView`
+
+### SearchViewModel.swift
+
+**Location:** `Features/Search/SearchViewModel.swift`
+
+| Method | Description |
+|--------|-------------|
+| `loadSearchStocks()` | Fetches all stocks for search pool |
+| `filterStocks()` | Filters by selected tab and search query |
+| `toggleFavorite(stock:)` | Adds/removes stock from favorites |
+| `autocompleteSuggestions` | Computed property returning matching stocks |
+
+---
+
+## Stock Detail Page Module (Primary)
+
+### StockDetailPageView.swift
+
+**Location:** `Features/StockDetailPage/StockDetailPageView.swift`
+
+The comprehensive stock detail screen with multiple content sections:
+
+```
+┌─────────────────────────────┐
+│  KLDetailNavBar             │  ← Navigation bar with stock name
+│  StockPriceHeaderView       │  ← Live price, change, venue selector
+│  StockChartView             │  ← Candlestick/line chart
+│  SubIndicatorChartView      │  ← RSI, MACD, Volume sub-charts
+│  StockDetailPeriodTabsView  │  ← 1D, 1M, 3M, 1Y, 3Y
+│  IndicatorPillsView         │  ← Active indicator chips
+│  ────── Tab Content ──────  │
+│  StockInfoGridView          │  ← Fundamentals grid
+│  StockOrderBookView         │  ← Bid/Ask levels
+│  StockDailyPriceView        │  ← Daily price history
+│  InvestorFlowDetailView     │  ← Foreign/Inst/Individual flows
+│  AnalystOpinionDetailView   │  ← Analyst consensus
+│  ReportDetailView           │  ← Research reports
+│  DividendDetailView         │  ← Dividend history
+│  FinancialDetailView        │  ← Financial statements
+└─────────────────────────────┘
+```
+
+**Content Tabs:**
+
+| Tab | Label | Component |
+|-----|-------|-----------|
+| 0 | 종목정보 | `StockInfoGridView` |
+| 1 | 호가 | `StockOrderBookView` |
+| 2 | 일별시세 | `StockDailyPriceView` |
+| 3 | 투자자 | `InvestorFlowDetailView` |
+| 4 | 의견 | `AnalystOpinionDetailView` |
+| 5 | 리포트 | `ReportDetailView` |
+| 6 | 배당 | `DividendDetailView` |
+| 7 | 재무 | `FinancialDetailView` |
+
+### StockDetailPageViewModel.swift
+
+**Location:** `Features/StockDetailPage/StockDetailPageViewModel.swift`
+
+The most complex ViewModel in the application.
+
+**Key Responsibilities:**
+
+| Responsibility | Implementation |
+|---------------|----------------|
+| Data loading | `loadDetail()` → fetches `StockDetailInfo` from repository |
+| Venue switching | Tracks `selectedVenue` (KRX/NXT/Combined), reloads on change |
+| Chart management | `rebuildChartCache()` — computes indicators, caches visible points |
+| Live prices | `startLiveUpdates()` — subscribes to WebSocket stream |
+| Period selection | Fetches new chart data when period changes (1D, 1M, 3M, 1Y, 3Y) |
+| Price scrubbing | `scrubbedIndex` — tracks finger position on chart |
+| Indicator config | `ChartSettings` management, indicator visibility toggles |
+
+**Chart Cache System:**
+
+When chart data or settings change, `rebuildChartCache()` recomputes:
+1. Visible data points based on zoom/pan
+2. Moving averages (SMA, EMA) with configurable periods
+3. Bollinger Bands (upper, middle, lower)
+4. RSI, MACD, and other sub-indicators
+5. Price range for Y-axis scaling
+
+### Stock Detail Components (19 files)
+
+| Component | Purpose |
+|-----------|---------|
+| **StockPriceHeaderView** | Current price with change, market status, and venue selector (KRX/NXT/통합) |
+| **StockChartView** | Main candlestick/line chart with overlay indicators, touch scrubbing, zoom/pan gestures |
+| **SubIndicatorChartView** | Sub-chart area rendering Volume, RSI, MACD, Stochastic, etc. |
+| **StockDetailPeriodTabsView** | Period selector: 1일, 1개월, 3개월, 1년, 3년 |
+| **StockDetailSectionsView** | Tab container hosting all 8 content sections |
+| **StockInfoGridView** | Customizable grid of stock fundamentals; user can reorder/hide fields |
+| **StockInfoEditSheet** | Modal for customizing which fields appear in the info grid |
+| **StockInfoExplanationSheet** | Modal showing explanation of each statistic field |
+| **StockOrderBookView** | 10 ask + 10 bid levels with horizontal bar visualization |
+| **StockDailyPriceView** | Tabular daily price history with date, OHLC, volume |
+| **AnalystOpinionDetailView** | Buy/Hold/Sell consensus chart + individual broker opinions with target prices |
+| **ReportDetailView** | List of analyst research reports with broker, date, recommendation |
+| **DividendDetailView** | Dividend history table + quarterly breakdown + dividend cycle info |
+| **FinancialDetailView** | Financial statements with quarterly/annual toggle, 15 metrics per period |
+| **InvestorFlowDetailView** | Bar chart showing net buying by Foreign, Institution, Individual over 15 days |
+| **IndicatorPillsView** | Horizontal row of active indicator chips with tap-to-remove |
+| **ChartSettingsSheet** | Full indicator configuration modal — overlays, sub-indicators, MA periods, BB settings |
+| **CompanyProfileCard** | Company profile summary card with key business information |
+| **ShareholderCard** | Major shareholder breakdown visualization |
+
+---
+
+## Other Feature Modules
+
+### News Detail
+
+**Location:** `Features/NewsDetail/`
+
+| File | Purpose |
+|------|---------|
+| `NewsDetailView.swift` | Full article view with title, source, date, content, related stocks |
+| `NewsDetailViewModel.swift` | Loads article content, manages related stock data |
+
+### Theme Detail
+
+**Location:** `Features/ThemeDetail/`
+
+| File | Purpose |
+|------|---------|
+| `ThemeDetailView.swift` | Market theme detail with description, related stocks, performance chart |
+| `ThemeDetailViewModel.swift` | Loads theme data and related stocks |
+
+### Market Overview
+
+**Location:** `Features/MarketOverview/`
+
+| File | Purpose |
+|------|---------|
+| `MarketOverviewDetailView.swift` | Expanded view of all market indices with detailed stats |
+
+### Stock Detail (Legacy)
+
+**Location:** `Features/StockDetail/`
+
+| File | Purpose |
+|------|---------|
+| `StockDetailView.swift` | Original stock detail implementation (superseded by `StockDetailPage`) |
+| `StockDetailViewModel.swift` | Original detail ViewModel |
+
+> **Note for maintainers:** The `StockDetail/` module is the legacy implementation. All new development should target `StockDetailPage/`. The legacy module is retained for reference but may be removed in a future cleanup.
+
+### Placeholder Screens
+
+**Location:** `Features/Placeholders/`
+
+Four placeholder views for tabs not yet implemented:
+
+| File | Tab |
+|------|-----|
+| `ProductsPlaceholderView.swift` | Products 상품 |
+| `AssetsPlaceholderView.swift` | Assets 자산 |
+| `StocksPlaceholderView.swift` | Stocks 종목 |
+| `MenuPlaceholderView.swift` | Menu 메뉴 |
+
+Each displays a centered placeholder message with the tab name. These are intended to be replaced with full feature implementations.
+
+---
+
+## Splash Module
+
+### SplashView.swift
+
+**Location:** `Features/Splash/SplashView.swift`
+
+Branded launch screen displayed for 2–3 seconds on app start:
+
+- BARO logo with animated progress bar
+- Checks stored auth token via `AuthManager`
+- Routes to Login (no token) or MainTabView (valid token)
+
+---
+
+## Auth Module
+
+### LoginView.swift
+
+**Location:** `Features/Auth/LoginView.swift`
+
+Authentication screen supporting two sign-in methods:
+
+| Method | Description |
+|--------|-------------|
+| Email/Password | Standard form with email and password text fields, validation, error messages |
+| Apple Sign In | Native `SignInWithAppleButton` integration, sends identity token to backend |
+
+**Components:**
+- `AuthTextField` — Reusable styled text field with label, placeholder, and secure entry toggle
+- Navigation link to `RegisterView` for new users
+
+### RegisterView.swift
+
+**Location:** `Features/Auth/RegisterView.swift`
+
+User registration form:
+
+| Field | Type | Validation |
+|-------|------|------------|
+| Name | Text | Required, min 2 characters |
+| Email | Email | Required, valid format |
+| Password | SecureField | Required, min 8 characters |
+
+On success, automatically logs in and navigates to MainTabView.
+
+---
+
+## AI Insights Module
+
+### AIInsightsView.swift
+
+**Location:** `Features/AIInsights/AIInsightsView.swift`
+
+AI-powered market insights hub with structured reports:
+
+**Embedded Models:**
+- `AIInsightReport` — Report with title, summary, date, category, sections
+- `AIReportSection` — Section with title, content, visual type
+- `AIVisualType` — `.text`, `.keyMetrics`, `.bullBear`, `.timeline`, `.recommendation`
+- `AINavigationHint` — Deep link hints for navigating to stock/theme detail pages
+
+**Features:**
+- Category-filtered report browsing (시장분석, 종목분석, 테마분석, 리스크)
+- Structured visual sections with key metrics, bull/bear analysis, timelines
+- Navigation hints for tapping through to detailed stock/theme pages
+
+---
+
+## My Page Module
+
+### MyPageView.swift
+
+**Location:** `Features/MyPage/MyPageView.swift`
+
+User profile and settings hub — the main view for the Menu tab:
+
+```
+┌─────────────────────────────┐
+│  Profile Section            │  ← User name, email, avatar
+│  Investment Summary         │  ← Portfolio value, returns
+│  ─── Services ───           │
+│  Notification Settings      │  → NotificationSettingsView
+│  Investment Report          │  → InvestmentReportView
+│  AI Insights Settings       │  → AIInsightSettingsView
+│  Favorites Management       │  → FavoritesManageView
+│  Browsing History           │  → BrowsingHistoryView
+│  ─── App Settings ───       │
+│  Theme (Light/Dark)         │  → ThemeSettingsView
+│  Font Size                  │  → FontSizeSettingsView
+│  Language                   │  → LanguageSettingsView
+│  ─── Information ───        │
+│  Help / FAQ                 │  → HelpFAQView
+│  Terms of Service           │  → TermsView
+│  Privacy Policy             │  → PrivacyView
+│  Open Source Licenses       │  → OpenSourceView
+│  ─────────────────          │
+│  Logout Button              │  ← Clears Keychain, returns to LoginView
+└─────────────────────────────┘
+```
+
+### MyPageDetailViews.swift
+
+**Location:** `Features/MyPage/MyPageDetailViews.swift`
+
+Contains all sub-page view implementations for MyPage navigation targets (notification settings, investment report, AI settings, favorites, history, theme, font, language, FAQ, terms, privacy, licenses).
+
+---
+
+## Events Module
+
+### EventsView.swift
+
+**Location:** `Features/Events/EventsView.swift`
+
+Event and promotion listing with filtering:
+
+| Filter | Options |
+|--------|---------|
+| Category | All, Trading, Reward, Education, Competition, Announcement |
+| Status | All, Upcoming, Active, Ended |
+
+**Features:**
+- Gradient card design matching banner style
+- Participant count badges
+- Status indicators (upcoming/active/ended)
+- Navigation to `EventDetailView`
+
+### EventDetailView.swift
+
+**Location:** `Features/Events/EventDetailView.swift`
+
+Full event detail page:
+
+| Section | Content |
+|---------|---------|
+| Header | Title, icon, status badge, gradient |
+| Dates | Start/end dates with countdown for upcoming events |
+| Details | Full description with conditions list |
+| Rewards | Reward description and eligibility |
+| Participants | Current participant count |
+| Related Stocks | Stock codes linked to the event |
+
+---
+
+## Notifications Module
+
+### NotificationView.swift
+
+**Location:** `Features/Notifications/NotificationView.swift`
+
+Notification feed displaying:
+- Price alerts (target price reached)
+- News alerts (breaking market news)
+- Event notifications (new events, status changes)
+- Read/unread state with visual indicator
+
+### NotificationSettingsView.swift
+
+**Location:** `Features/Notifications/NotificationSettingsView.swift`
+
+Notification preference toggles:
+
+| Category | Options |
+|----------|---------|
+| Price Alerts | Target price, daily summary |
+| News | Breaking news, analyst reports |
+| Events | New events, event reminders |
+| Marketing | Promotions, product updates |

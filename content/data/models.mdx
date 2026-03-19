@@ -1,0 +1,472 @@
+# Data Models
+
+<PageMeta status="live" layer="frontend" />
+
+<InfoBox type="info" title="What are data models?">
+Data models are like blueprints for information. Just like a blueprint tells builders what a house should look like, a data model tells the app what shape the data should be. Every stock, every price update, and every chart point follows its own blueprint.
+</InfoBox>
+
+All models are `Sendable` and `Identifiable` -- meaning they are safe to pass between tasks and each one has a unique ID.
+
+---
+
+<Tabs>
+<Tab label="Core Models" icon="⭐">
+
+## Core Models
+
+These are the main models that power most of the app.
+
+<Accordion>
+<AccordionItem title="Stock" icon="💹" badge="Core" defaultOpen={true}>
+
+The main stock model used in lists, carousels, and search results.
+
+```swift filename="Stock.swift"
+struct Stock: Identifiable, Sendable {
+    let id: String
+    let rank: Int
+    let name: String
+    let code: String
+    let exchange: StockExchange
+    let marketCap: String
+    let price: Int
+    let change: Int
+    let changePercent: Double
+    let volume: Int64
+    let dividendYield: Double
+    let logoStyle: LogoStyle
+    let isNXT: Bool
+    let isFractional: Bool
+
+    var isPositive: Bool { change >= 0 }
+    var tradingValue: Int64 { Int64(price) * volume }
+}
+```
+
+<InfoBox type="fun" title="How IDs work">
+Each stock's `id` is a combination of its code and venue, like `"005930-combined"`. This way, the same stock on different venues has a different identity.
+</InfoBox>
+
+</AccordionItem>
+<AccordionItem title="StockDetailInfo" icon="📋" badge="Core">
+
+The complete stock detail model with everything you see on the stock detail page -- price, fundamentals, chart data, order book, and more.
+
+```swift filename="StockDetailInfo.swift"
+struct StockDetailInfo: Identifiable, Sendable {
+    let id: String, stock: Stock
+
+    // Price
+    let prevClose: Int, open: Int, high: Int, low: Int
+    let tradingValueFormatted: String, marketCapFormatted: String
+    let foreignOwnership: Double, week52High: Int, week52Low: Int
+
+    // Fundamentals
+    let per: Double, eps: Int, pbr: Double, bps: Int, dividendPerShare: Int
+
+    // Chart
+    let chartData: [ChartPoint], marketStatus: String, nxtStatus: String
+
+    // Extended sections
+    let investorFlow: InvestorFlow       // Foreign/institution/individual net
+    let analystOpinion: AnalystOpinion   // Buy/hold/sell + broker opinions
+    let reports: [AnalystReport]         // 12+ broker research reports
+    let dividends: [DividendRecord]      // Yearly dividends
+    let dividendYearGroups: [DividendYearGroup] // Quarterly breakdown
+    let financials: [FinancialRecord]    // Summary financials
+    let quarterlyFinancials: [FinancialDetailRecord] // 15 quarterly metrics
+    let annualFinancials: [FinancialDetailRecord]    // 15 annual metrics
+    let orderBook: OrderBook             // 10 ask + 10 bid levels
+}
+```
+
+20+ nested types including `ChartPoint`, `InvestorFlow`, `AnalystOpinion`, `AnalystReport`, `DividendRecord`, `DividendYearGroup`, `FinancialRecord`, `FinancialDetailRecord`, and `OrderBook`.
+
+</AccordionItem>
+<AccordionItem title="MarketTheme" icon="🔥" badge="Core">
+
+Represents a market theme (like "HBM" or "Semiconductors") shown in the bubble chart on the home screen.
+
+```swift filename="MarketTheme.swift"
+struct MarketTheme: Identifiable, Sendable {
+    let id: String
+    let name: String            // "HBM", "반도체"
+    let changePercent: Double   // -9.01, +5.05
+    let description: String     // Summary text
+    let weight: Double          // Bubble size (0...1)
+    let sentiment: Sentiment    // .positive (blue), .negative (red), .neutral
+
+    var bubbleColor: Color { ... }
+}
+```
+
+</AccordionItem>
+<AccordionItem title="PriceUpdate" icon="⚡" badge="Real-Time">
+
+<StatusBadge status="live">NEW</StatusBadge>
+
+Real-time price update from the KIS WebSocket, delivered through the backend relay. This is what makes prices move on screen.
+
+```swift filename="PriceUpdate.swift"
+/// Real-time price update from KIS WebSocket via backend relay.
+struct PriceUpdate: Sendable, Decodable {
+    let type: String           // "trade"
+    let code: String           // "005930"
+    let price: Int             // 72300
+    let change: Int            // -200
+    let changePercent: Double  // -0.28
+    let volume: Int64          // 150 (tick volume)
+    let cumulativeVolume: Int64 // 12345678
+    let tradeTime: String     // "103025" (HHMMSS)
+}
+
+// Decoded with keyDecodingStrategy = .convertFromSnakeCase
+// Used by: WebSocketManager, StockDetailPageViewModel, HomeViewModel, StockRowView
+```
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+<Tab label="Detail Models" icon="📊">
+
+## Market & Detail Models
+
+These models support the home screen and detail views.
+
+<Accordion>
+<AccordionItem title="MarketIndex" icon="📈" badge="Market" defaultOpen={true}>
+
+Represents a market index like KOSPI, KOSDAQ, or NASDAQ.
+
+```swift filename="MarketIndex.swift"
+struct MarketIndex: Identifiable, Sendable {
+    let id: String           // "kospi"
+    let name: String         // "코스피"
+    let flag: String         // "🇰🇷"
+    let value: Double        // 2723.06
+    let change: Double       // +12.50
+    let changePercent: Double // +0.46
+    let status: String       // "장종료"
+}
+```
+
+</AccordionItem>
+<AccordionItem title="CurrencyRate" icon="💱" badge="Market">
+
+Foreign exchange rate against the Korean Won (KRW).
+
+```swift filename="CurrencyRate.swift"
+struct CurrencyRate: Identifiable, Sendable {
+    let id: String           // "usd"
+    let country: String      // "미국"
+    let code: String         // "USD"
+    let flag: String         // "🇺🇸"
+    let rate: Double         // 1481.60
+    let change: Double       // +18.70
+    let changePercent: Double // +1.28
+    let unit: Int            // 1 (per 1 unit of foreign currency)
+}
+```
+
+</AccordionItem>
+<AccordionItem title="BannerItem" icon="🎯" badge="Home">
+
+Promotional banner shown on the home screen carousel.
+
+```swift filename="BannerItem.swift"
+struct BannerItem: Identifiable, Sendable {
+    let id: String
+    let title: String           // "AI 시장 인사이트"
+    let subtitle: String        // "맞춤형 일일 시장 분석"
+    let icon: String            // "📊"
+    let gradientColors: [Color] // 3-color banner gradient
+}
+```
+
+</AccordionItem>
+<AccordionItem title="NewsArticle" icon="📰" badge="Home">
+
+A news article card displayed on the home screen.
+
+```swift filename="NewsArticle.swift"
+struct NewsArticle: Identifiable, Sendable {
+    let id: String
+    let title: String           // "서울 강남 집값..."
+    let source: String          // "한국경제"
+    let timeAgo: String         // "1시간 전"
+    let region: NewsRegion      // .domestic, .international
+    let category: NewsCategory  // .economy, .politics, .industry, .tech, .realEstate
+    let tags: [String]          // ["#경제", "#부동산"]
+    let gradientColors: [Color] // 3-color card gradient
+}
+```
+
+</AccordionItem>
+<AccordionItem title="ChartSettings" icon="📉" badge="Chart">
+
+Observable class that stores the user's chart configuration -- chart type, indicators, zoom level, and pan position.
+
+```swift filename="ChartSettings.swift"
+@Observable
+final class ChartSettings {
+    var selectedChartType: ChartType = .candle
+    var selectedOverlays: Set<OverlayIndicator> = []
+    var selectedSubIndicators: Set<String> = []
+
+    // Zoom/Pan
+    var zoomScale: CGFloat = 1.0
+    var panOffset: CGFloat = 0.5
+    var gestureZoomScale: CGFloat = 1.0
+
+    var effectiveZoom: CGFloat { ... }
+    func clampedPanOffset(_ offset: CGFloat) -> CGFloat { ... }
+    func resetZoom() { ... }
+    func commitZoomGesture() { ... }
+}
+
+// 23 ChartTypes, 17 OverlayIndicators, 155+ SubIndicators across 9 categories
+```
+
+</AccordionItem>
+<AccordionItem title="ChartSettingsData" icon="📉" badge="Chart">
+
+Data transfer object for chart configuration parameters -- MA periods, Bollinger Band standard deviation, and other indicator settings.
+
+```swift filename="ChartSettingsData.swift"
+struct ChartSettingsData: Sendable {
+    let maPeriods: [Int]             // e.g., [5, 20, 60, 120]
+    let bollingerStdDev: Double      // e.g., 2.0
+    let bollingerPeriod: Int         // e.g., 20
+    let rsiPeriod: Int               // e.g., 14
+    let macdFast: Int                // e.g., 12
+    let macdSlow: Int                // e.g., 26
+    let macdSignal: Int              // e.g., 9
+}
+```
+
+</AccordionItem>
+<AccordionItem title="IndicatorComputation" icon="🔢" badge="Chart">
+
+Holds the computed results of technical indicators so they can be rendered on the chart without recalculation.
+
+```swift filename="IndicatorComputation.swift"
+struct IndicatorComputation: Sendable {
+    let movingAverages: [String: [CGFloat?]]
+    let bollingerBands: (upper: [CGFloat?], middle: [CGFloat?], lower: [CGFloat?])
+    let rsi: [CGFloat?]
+    let macd: (macd: [CGFloat?], signal: [CGFloat?], histogram: [CGFloat?])
+}
+```
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+<Tab label="Auth & Events" icon="🔐">
+
+## Authentication, User & Event Models
+
+Models that support user authentication, profiles, and in-app events.
+
+<Accordion>
+<AccordionItem title="AuthModels" icon="🔑" badge="Auth" defaultOpen={true}>
+
+Request and response types for the authentication system -- email/password login, registration, Apple Sign In, and JWT token management.
+
+```swift filename="AuthModels.swift"
+struct LoginRequest: Sendable, Encodable {
+    let email: String
+    let password: String
+}
+
+struct RegisterRequest: Sendable, Encodable {
+    let name: String
+    let email: String
+    let password: String
+}
+
+struct AppleSignInRequest: Sendable, Encodable {
+    let identityToken: String
+    let authorizationCode: String
+    let fullName: String?
+}
+
+struct AuthTokenResponse: Sendable, Decodable {
+    let accessToken: String
+    let refreshToken: String
+    let tokenType: String
+    let expiresIn: Int
+}
+```
+
+</AccordionItem>
+<AccordionItem title="User" icon="👤" badge="Auth">
+
+The logged-in user profile model.
+
+```swift filename="User.swift"
+struct User: Identifiable, Sendable, Codable {
+    let id: String          // UUID
+    let name: String        // Display name
+    let email: String       // Email address
+    let authProvider: String // "email" or "apple"
+    let createdAt: String   // ISO-8601 timestamp
+}
+```
+
+</AccordionItem>
+<AccordionItem title="EventItem" icon="🎉" badge="Events">
+
+Represents an in-app event or promotion with category, status, participation tracking, and related stock codes.
+
+```swift filename="EventItem.swift"
+struct EventItem: Identifiable, Sendable {
+    let id: String
+    let title: String
+    let subtitle: String
+    let description: String
+    let icon: String
+    let gradientColors: [Color]
+    let category: EventCategory    // .trading, .reward, .education, .competition, .announcement
+    let status: EventStatus        // .upcoming, .active, .ended
+    let startDate: String
+    let endDate: String
+    let participants: Int
+    let reward: String?
+    let conditions: [String]
+    let details: String
+    let relatedStockCodes: [String]
+}
+```
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+<Tab label="Settings & Enums" icon="⚙️">
+
+## Enums & Utility Models
+
+These enums and models control settings, filtering, and display throughout the app.
+
+<Accordion>
+<AccordionItem title="MarketSessionStatus" icon="🕐" badge="Utility" defaultOpen={true}>
+
+Automatically detects the current market session based on system time.
+
+```swift filename="MarketSessionStatus.swift"
+enum MarketSessionStatus {
+    case preMarket  // 장전 (before 09:00)
+    case open       // 거래중 (09:00–15:30)
+    case closed     // 장마감 (after 15:30)
+    case weekend    // 휴장 (Saturday/Sunday)
+
+    static var current: MarketSessionStatus { ... }  // Auto-detects from system time
+
+    var label: String { ... }  // Korean label
+    var color: Color { ... }   // Status color
+}
+```
+
+</AccordionItem>
+<AccordionItem title="MarketVenue" icon="🏪" badge="Trading">
+
+The three trading venues for Korean stocks.
+
+```swift filename="MarketVenue.swift"
+enum MarketVenue: String, CaseIterable, Sendable {
+    case combined = "통합"  // Combined KRX + NXT
+    case krx = "정규장"     // Korea Exchange regular session
+    case nxt = "NXT"       // Korea New Exchange (alternative venue)
+}
+```
+
+</AccordionItem>
+<AccordionItem title="StockExchange" icon="🏛️" badge="Market">
+
+Supported stock exchanges -- Korean and US.
+
+```swift filename="StockExchange.swift"
+enum StockExchange: String, CaseIterable, Sendable {
+    case kospi = "KOSPI"
+    case kosdaq = "KOSDAQ"
+    case nasdaq = "NASDAQ"
+    case nyse = "NYSE"
+    case amex = "AMEX"
+
+    var flag: String { ... }        // 🇰🇷 or 🇺🇸
+    var statusLabel: String { ... } // "장마감" or "거래중"
+}
+```
+
+</AccordionItem>
+<AccordionItem title="StockFilter" icon="🔽" badge="UI">
+
+Filters for sorting stock lists on the home and explore screens.
+
+```swift filename="StockFilter.swift"
+enum StockFilter: String, CaseIterable, Sendable {
+    case marketCap = "시가총액"
+    case volume = "거래량"
+    case popular = "거래대금"
+    case gainers = "상승"
+    case losers = "하락"
+    case dividend = "배당"
+}
+```
+
+</AccordionItem>
+<AccordionItem title="LogoStyle" icon="🎨" badge="UI">
+
+How company logos are displayed -- full text, initials, or an SF Symbol.
+
+```swift filename="CompanyLogoView.swift"
+enum LogoStyle {
+    case text(String, logoColor: Color)       // Full name: "SAMSUNG"
+    case initials(String, logoColor: Color)   // Abbreviation: "H", "LG"
+    case symbol(String, logoColor: Color)     // SF Symbol: "sun.max.fill"
+}
+```
+
+</AccordionItem>
+<AccordionItem title="StatisticItem & Preferences" icon="📊" badge="Detail">
+
+The customizable statistics grid on the stock detail page. Users can pick which metrics to show.
+
+```swift filename="StatisticItem.swift"
+enum StatisticItem: String, CaseIterable, Identifiable, Sendable {
+    case prevClose = "전일"
+    case open = "시가"
+    case high = "고가"
+    case low = "저가"
+    case volume = "거래량"
+    case tradingValue = "거래대금"
+    case marketCap = "시가총액"
+    case foreignOwnership = "외국인비율"
+    case week52High = "52주 최고"
+    case week52Low = "52주 최저"
+    case per = "PER"
+    case eps = "EPS"
+    case pbr = "PBR"
+    case bps = "BPS"
+    case dividendPerShare = "주당배당금"
+}
+```
+
+```swift filename="StatisticPreferences.swift"
+@Observable
+final class StatisticPreferences {
+    var selected: [StatisticItem]    // Items shown in grid (user-customizable)
+    var unselected: [StatisticItem]  // Items hidden from grid
+
+    func move(_ item: StatisticItem, to section: Section) { ... }
+}
+```
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+</Tabs>

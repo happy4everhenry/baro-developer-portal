@@ -1,0 +1,836 @@
+# Intelligence Layer
+
+<PageMeta status="in_progress" layer="backend" />
+
+RAG pipeline, prompt caching (CAG), local LLM fine-tuning, and the 3-layer knowledge architecture that powers every AI agent in BARO. The knowledge layer architecture is finalized and CAG implementation is beginning as part of Phase 1 development.
+
+<InfoBox type="fun" title="Three ways to know things">
+  Imagine you're studying for a test. **CAG** is like having a textbook always open on your desk -- it's free to glance at anytime. **RAG** is like going to the library to find a specific book each time you have a question. **Local LLM** is knowledge you've memorized so well you just *know* it without looking anything up.
+</InfoBox>
+
+<StatGrid columns={4}>
+  <StatCard value="3" label="Knowledge Layers" />
+  <StatCard value="7" label="Input Modalities" />
+  <StatCard value="90%" label="Token Cost Reduction" />
+  <StatCard value="0ms" label="CAG Retrieval" />
+</StatGrid>
+
+---
+
+## Three-Layer Knowledge Architecture
+
+<Diagram title="Knowledge Layer Architecture">
+  <DiagramRow>
+    <DiagramNode type="data" icon="💬" label="User Query" sublabel="Natural language question" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="Routes to" />
+  <DiagramRow>
+    <DiagramGroup label="Knowledge Sources">
+      <DiagramNode type="service" icon="📖" label="Layer 1: CAG" sublabel="Stable knowledge in KV Cache — 0ms, 10% cost" />
+      <DiagramNode type="service" icon="🔍" label="Layer 2: RAG" sublabel="Dynamic retrieval via pgvector — 100ms-2s" />
+      <DiagramNode type="service" icon="🧠" label="Layer 3: Local LLM" sublabel="Fine-tuned model — 0 API cost" />
+    </DiagramGroup>
+  </DiagramRow>
+  <DiagramArrow direction="down" label="Merged context" />
+  <DiagramRow>
+    <DiagramNode type="repo" icon="🤖" label="Claude (Anthropic)" sublabel="Final response generation" />
+  </DiagramRow>
+</Diagram>
+
+<InfoBox type="tip" title="Core Distinction">
+  **RAG** = knowledge that changes. **CAG** = knowledge that stays stable. **Local LLM** = knowledge baked into the model.
+</InfoBox>
+
+---
+
+## Complete Knowledge Layer Map
+
+Every piece of knowledge in BARO is classified into exactly one of the three layers. Here is the full map showing what goes where and why.
+
+<InfoBox type="fun" title="Think of it this way">
+  If knowledge were food, **CAG** is the pantry (always stocked, grab what you need), **RAG** is the grocery store (go get fresh stuff when you need it), and **Local LLM** is your cooking instinct (you just know how to make it without a recipe).
+</InfoBox>
+
+<Tabs>
+  <Tab label="CAG (Stable)">
+    Knowledge that rarely changes and is always available at zero retrieval cost.
+
+    | Knowledge Type | Example Content | Update Frequency |
+    |---|---|---|
+    | System Prompts | Agent identity, behavior rules, output format | On deployment only |
+    | FSC Regulatory | Suitability rules, AML thresholds, disclosure requirements | Monthly or on regulatory change |
+    | Market Structure | Tick sizes, trading hours, circuit breaker rules | Annually (KRX updates) |
+    | Glossary | Korean/English/Chinese financial terminology | Quarterly |
+    | MCP Tools | Tool definitions, parameter schemas, usage instructions | On deployment |
+    | Templates | Response templates, notification formats, citation formats | Monthly |
+    | User Profile (session) | Risk tolerance, portfolio summary, preferences | Per session |
+  </Tab>
+
+  <Tab label="RAG (Dynamic)">
+    Knowledge that changes frequently and must be retrieved fresh each time.
+
+    | Knowledge Type | Example Content | Update Frequency |
+    |---|---|---|
+    | Live Market Data | Prices, volumes, order books, indices | Real-time (seconds) |
+    | News Articles | Naver Finance, KRX announcements, press releases | Minutes to hours |
+    | Research Chunks | Broker report paragraphs, analyst notes | Daily |
+    | Portfolio State | Current positions, unrealized P/L, transactions | Real-time |
+    | Earnings Call Transcripts | Samsung IR, SK Hynix quarterly calls | Quarterly |
+    | Chart Captions | AI-generated descriptions of financial charts | On ingestion |
+    | Conversation History | Recent chat messages in current session | Per message |
+  </Tab>
+
+  <Tab label="Local LLM (Learned)">
+    Knowledge baked into the fine-tuned model weights. Zero API cost, zero context window.
+
+    | Knowledge Type | What the Model Learns | Training Source |
+    |---|---|---|
+    | Platform Patterns | Standard UX flows, common response structures | Chatbot interaction logs |
+    | Korean Financial Domain | Korean market conventions, chaebol structures | Expert annotations + domain data |
+    | Signal Reasoning | How to interpret technical indicators, entry/exit logic | Trade signal event logs |
+    | Document Understanding | How to parse DART filings, broker note structure | Document analysis logs |
+  </Tab>
+</Tabs>
+
+---
+
+## Deep Dive
+
+<Tabs>
+  <Tab label="Knowledge Layers">
+    ### The Three Layers Explained
+
+    <Accordion>
+      <AccordionItem title="Layer 1 — CAG (Cache-Augmented Generation)" icon="📖" badge="0ms retrieval">
+        Stable, broad knowledge stored in Claude's KV Cache. Because this content rarely changes, it can be cached and reused across requests at just **10% of normal token cost** with **0ms retrieval latency**.
+
+        **What lives here:**
+        - FSC regulations and market structure rules
+        - System prompts for all 12 agents
+        - Terminology glossary (Korean financial terms)
+        - Platform-wide instructions and guardrails
+
+        <InfoBox type="fun" title="Think of it this way">
+          CAG is the textbook that's always open on your desk. You never have to get up to find it -- just glance down and the answer is right there. And because you already have it open, it costs almost nothing to look at again.
+        </InfoBox>
+      </AccordionItem>
+
+      <AccordionItem title="Layer 2 — RAG (Retrieval-Augmented Generation)" icon="🔍" badge="100ms-2s retrieval">
+        Dynamic, query-specific knowledge retrieved in real time using **pgvector hybrid search** combined with **Cohere Rerank** for precision. Charged at full token price because the content changes constantly.
+
+        **What lives here:**
+        - Live market data and price feeds
+        - Recent news articles and earnings reports
+        - Document chunks from financial filings
+        - Current portfolio state and positions
+
+        **Pipeline:** 8-stage pipeline ingesting from 7 input modalities, processed through chunking, embedding, hybrid search, reranking, and context assembly before reaching Claude.
+
+        <InfoBox type="fun" title="Think of it this way">
+          RAG is like going to the library every time you have a new question. It takes a moment to find the right book, but you always get the latest edition with the most current information.
+        </InfoBox>
+      </AccordionItem>
+
+      <AccordionItem title="Layer 3 — Local LLM (QLoRA Fine-Tuned)" icon="🧠" badge="$0 API cost">
+        A locally hosted model fine-tuned with **QLoRA** on proprietary interaction data. Consumes no API budget and no context window -- the knowledge is baked directly into model weights.
+
+        **What lives here:**
+        - Platform-specific UX patterns and responses
+        - Korean financial domain expertise
+        - Standard response templates
+        - Signal reasoning and pattern recognition
+
+        <InfoBox type="fun" title="Think of it this way">
+          The Local LLM is knowledge you've studied so many times it's permanently memorized. You don't need a textbook or a library -- you just *know* it. And because it's in your head, it doesn't cost anything to recall.
+        </InfoBox>
+      </AccordionItem>
+    </Accordion>
+  </Tab>
+
+  <Tab label="CAG Deep Dive">
+    ### Claude Prompt Caching (CAG)
+
+    CAG uses **Claude Prompt Caching** with `cache_control` breakpoints. Cached content has a **5-minute TTL** and is reused across requests, slashing costs dramatically.
+
+    <InfoBox type="warning" title="The Golden Rule: Byte-for-Byte Identical">
+      For prompt caching to work, the cached portion of the prompt must be **byte-for-byte identical** across requests. Even a single character difference breaks the cache and you pay full price. This is why the 7 prompt layers are ordered from most stable to least stable.
+    </InfoBox>
+
+    ### The 7 Prompt Layers
+
+    Ordered from most stable (top, always cached) to least stable (bottom, never cached):
+
+    <StepGuide>
+      <Step number={1} title="System Prompt" status="complete">
+        Core identity and behavior rules for each agent. Changes only on deployment. **Always cached.**
+      </Step>
+      <Step number={2} title="Stable Knowledge (CAG)" status="complete">
+        FSC regulations, market structure rules, glossary. Updated weekly at most. **Always cached.**
+      </Step>
+      <Step number={3} title="Session Context" status="complete">
+        User profile, risk tolerance, portfolio summary. Stable within a session. **Usually cached.**
+      </Step>
+      <Step number={4} title="Dynamic RAG Results" status="active">
+        Retrieved document chunks relevant to the current query. Changes per request. **Not cached.**
+      </Step>
+      <Step number={5} title="Live Market Data" status="active">
+        Real-time prices, volumes, order book snapshots. Changes every second. **Not cached.**
+      </Step>
+      <Step number={6} title="Conversation History" status="active">
+        Recent messages in the current chat session. Grows with each turn. **Not cached.**
+      </Step>
+      <Step number={7} title="User Query" status="active">
+        The actual question or command from the user. Unique every time. **Never cached.**
+      </Step>
+    </StepGuide>
+
+    ### Cached Content Per Agent
+
+    Each agent has a specific set of cached content with known token counts and invalidation triggers.
+
+    <InfoBox type="fun" title="Think of it this way">
+      Each agent has its own personal textbook. The AI Advisor's textbook has regulations and a glossary. The Trade Signal agent's textbook has circuit breaker rules and tick sizes. When a regulation changes, only the agents whose textbooks contain that regulation need a new edition.
+    </InfoBox>
+
+    <Accordion>
+      <AccordionItem title="AI Advisor Chatbot — 22,600 tokens" icon="💬" badge="Largest cache">
+        **Cached content:** System prompt + FSC disclosure requirements + terminology glossary (KO/EN/CN) + MCP tool definitions
+
+        **Total cached tokens:** 22,600
+
+        **Invalidation triggers:**
+        - Spec amendment (system prompt or tool changes)
+        - FSC regulatory update (disclosure requirements change)
+
+        This is the largest cache because the Advisor needs the broadest knowledge base -- it handles general questions across all financial topics and must always include trilingual terminology and full regulatory disclosures.
+      </AccordionItem>
+
+      <AccordionItem title="Trade Signal — 8,100 tokens" icon="📊" badge="Annual refresh">
+        **Cached content:** System prompt + circuit breaker rules + tick size tables + signal generation framework + technical indicator definitions
+
+        **Total cached tokens:** 8,100
+
+        **Invalidation triggers:**
+        - Spec amendment (signal framework changes)
+        - Annual KRX structure update (tick sizes, circuit breaker thresholds)
+
+        Relatively stable because KRX market structure rules change only once a year. The signal framework and indicator definitions are locked at deployment.
+      </AccordionItem>
+
+      <AccordionItem title="Risk Guard — 18,000 tokens" icon="🛡️" badge="BLOCKING invalidation">
+        **Cached content:** System prompt + FSC/KoFIU AML regulations + STR (Suspicious Transaction Report) thresholds + compliance templates
+
+        **Total cached tokens:** 18,000
+
+        **Invalidation triggers:**
+        - FSC regulatory update (**BLOCKING** -- see below)
+        - Spec amendment
+
+        <InfoBox type="warning" title="Blocking Invalidation Rule">
+          When Risk Guard's cache is invalidated by an FSC update, cache rebuilding **blocks ALL compliance queries**. During rebuilding, the system returns "compliance review temporarily delayed" instead of processing requests. This is by design: **correctness over availability**. A compliance check with stale regulations is worse than no compliance check at all.
+        </InfoBox>
+      </AccordionItem>
+
+      <AccordionItem title="Market Analysis — 8,600 tokens" icon="📈" badge="Multi-market">
+        **Cached content:** System prompt + trading hours for 6 markets + index composition data + technical indicator guide
+
+        **Total cached tokens:** 8,600
+
+        **Invalidation triggers:**
+        - Spec amendment
+        - Market structure changes (trading hour adjustments, index rebalancing)
+
+        Covers KOSPI, KOSDAQ, NYSE, NASDAQ, Shanghai, and Hong Kong trading sessions with their respective holidays and special trading hours.
+      </AccordionItem>
+
+      <AccordionItem title="Portfolio Optimizer — 10,600 tokens" icon="💼" badge="Suitability rules">
+        **Cached content:** System prompt + FSC suitability requirements + concentration limit rules + explanation templates
+
+        **Total cached tokens:** 10,600
+
+        **Invalidation triggers:**
+        - FSC suitability rule changes
+        - Spec amendment (concentration limit adjustments)
+
+        Includes all FSC-mandated suitability assessment criteria and the templates used to explain portfolio recommendations in plain language.
+      </AccordionItem>
+
+      <AccordionItem title="Smart Notification — 5,200 tokens" icon="🔔" badge="Trilingual">
+        **Cached content:** System prompt + notification templates (KO/EN/CN) + Kakao Alimtalk format specifications
+
+        **Total cached tokens:** 5,200
+
+        **Invalidation triggers:**
+        - Template updates
+        - Kakao API format changes
+
+        Smallest functional cache. Templates are tightly structured for Kakao Alimtalk delivery, which has strict character limits and formatting requirements.
+      </AccordionItem>
+
+      <AccordionItem title="News Sentiment — 5,400 tokens" icon="📰" badge="Chaebol mapping">
+        **Cached content:** System prompt + sentiment scoring rubric + company name dictionary (chaebol names mapped to ticker symbols)
+
+        **Total cached tokens:** 5,400
+
+        **Invalidation triggers:**
+        - Scoring rubric changes
+        - Company name/ticker mapping updates (M&A, IPOs, delistings)
+
+        The chaebol-to-ticker dictionary is essential because Korean news often uses conglomerate group names rather than specific listed entity names.
+      </AccordionItem>
+
+      <AccordionItem title="Document Analysis — 5,700 tokens" icon="📄" badge="Citation formats">
+        **Cached content:** System prompt + document type reference (DART filing types, broker report structures, FSC disclosure formats) + citation templates
+
+        **Total cached tokens:** 5,700
+
+        **Invalidation triggers:**
+        - DART format changes
+        - Citation template updates
+
+        The document type reference allows the agent to correctly identify and parse different Korean financial document formats without re-learning the structure each time.
+      </AccordionItem>
+    </Accordion>
+
+    ### Before vs. After Prompt Caching
+
+    <Compare
+      left={{ title: "Without KV Cache", content: "Every request sends the full prompt (system prompt + regulations + glossary + context) to Claude. At 10K MAU with 12 agents, this means billions of redundant tokens per month. Each token is charged at full price. Latency is higher because Claude must re-process the entire prompt from scratch every single time." }}
+      right={{ title: "With Prompt Caching", content: "Stable layers (system prompt, regulations, glossary) are sent once and cached in Claude's KV Cache for 5 minutes. Subsequent requests within the TTL pay only 10% of normal token cost for cached content. At 10K MAU, this saves $49,381/month across all agents. Latency drops because cached layers are pre-processed." }}
+    />
+  </Tab>
+
+  <Tab label="RAG Pipeline">
+    ### 8-Stage RAG Pipeline
+
+    From raw data to Claude-ready context in 8 steps, ingesting from 7 input modalities.
+
+    <Diagram title="RAG Pipeline: 7 Modalities to Claude-Ready Context">
+      <DiagramRow>
+        <DiagramGroup label="7 Input Modalities">
+          <DiagramNode type="data" icon="📈" label="Market Data" sublabel="Prices, volumes, order books" />
+          <DiagramNode type="data" icon="📰" label="News" sublabel="Articles, press releases" />
+          <DiagramNode type="data" icon="📄" label="Documents" sublabel="Filings, reports, disclosures" />
+          <DiagramNode type="data" icon="💼" label="Portfolio" sublabel="User positions, transactions" />
+        </DiagramGroup>
+      </DiagramRow>
+      <DiagramArrow direction="down" label="Ingest + Convert" />
+      <DiagramRow>
+        <DiagramGroup label="Processing">
+          <DiagramNode type="service" icon="✂️" label="Chunking" sublabel="Semantic splitting" />
+          <DiagramNode type="service" icon="📐" label="Embedding" sublabel="BGE-M3 vectors" />
+        </DiagramGroup>
+      </DiagramRow>
+      <DiagramArrow direction="down" label="Store" />
+      <DiagramRow>
+        <DiagramNode type="repo" icon="🗄️" label="pgvector" sublabel="Hybrid vector + keyword search" />
+      </DiagramRow>
+      <DiagramArrow direction="down" label="Query then Retrieve then Rerank" />
+      <DiagramRow>
+        <DiagramGroup label="Retrieval">
+          <DiagramNode type="service" icon="🔍" label="Hybrid Search" sublabel="Dense + BM25 + Metadata" />
+          <DiagramNode type="service" icon="🏆" label="Cohere Rerank" sublabel="Re-score by relevance" />
+        </DiagramGroup>
+      </DiagramRow>
+      <DiagramArrow direction="down" label="Assemble context" />
+      <DiagramRow>
+        <DiagramNode type="repo" icon="🤖" label="Claude-Ready Context" sublabel="Top-k chunks within token budget" />
+      </DiagramRow>
+    </Diagram>
+
+    <FeatureGrid columns={3}>
+      <FeatureCard icon="🔀" title="Hybrid Search" description="Combines dense vector similarity with sparse keyword matching for higher recall" />
+      <FeatureCard icon="🏆" title="Cohere Rerank" description="Re-scores retrieved chunks by semantic relevance, pushing the best matches to the top" />
+      <FeatureCard icon="📊" title="7 Modalities" description="PDFs, charts, audio, video, tables, HTML, and user interaction data" />
+    </FeatureGrid>
+
+    ### Pipeline Stages in Detail
+
+    <Accordion>
+      <AccordionItem title="Stage 1 — Ingestion: 7 Input Modalities" icon="📥" badge="Multi-format">
+        The pipeline accepts 7 distinct input types, each with a specialized converter that produces clean, embeddable text.
+
+        <InfoBox type="fun" title="Think of it this way">
+          The pipeline is like a multilingual translator who can read books, look at pictures, listen to recordings, and watch videos -- then summarize everything in one common language that Claude can understand.
+        </InfoBox>
+
+        | # | Modality | Source Examples | Converter Stack | Output Format |
+        |---|---|---|---|---|
+        | 1 | PDF Research Reports | KIS/Mirae broker notes, FSC filings | PyMuPDF + Google Doc AI OCR + pdfplumber | Structured text + table JSON |
+        | 2 | Charts and Financial Images | Broker charts, TradingView screenshots | LLaVA-1.6 (Railway GPU) or GPT-4o Vision fallback | 150-300 word domain captions |
+        | 3 | Audio (Earnings Calls) | Samsung/SK IR, Bank of Korea pressers | Whisper large-v3 + Naver Clova Speech | Timestamped transcript with speaker diarization |
+        | 4 | Video (Investor Presentations) | Webcasts, factory tours | FFmpeg to Whisper + frames to LLaVA | Interleaved multimodal transcript |
+        | 5 | Financial Tables | KIS exports, DART tables | openpyxl + pandas + PyMuPDF | Label-preserving tabular text |
+        | 6 | HTML and Web Content | Naver Finance, KRX announcements | BeautifulSoup + Playwright | Clean article text |
+        | 7 | User Interaction Data | Chatbot conversations, trade signals | PostgreSQL export | JSONL instruction-tuning format, PIPA anonymization nightly |
+      </AccordionItem>
+
+      <AccordionItem title="Stage 2 — Conversion and OCR" icon="🔄" badge="0.85 confidence threshold">
+        Raw files are converted to clean text. For scanned documents and images, OCR is applied with a **confidence threshold of 0.85**. Any document where OCR confidence falls below 0.85 is flagged for **human review** before entering the pipeline.
+
+        <InfoBox type="note" title="Why 0.85?">
+          Financial documents contain numbers where a single wrong digit can change the meaning entirely. A confidence score below 0.85 means the OCR is not sure enough about the text -- and in finance, "pretty sure" is not good enough.
+        </InfoBox>
+      </AccordionItem>
+
+      <AccordionItem title="Stage 3 — Semantic Chunking" icon="✂️" badge="200-400 tokens">
+        Documents are split into semantically meaningful chunks rather than arbitrary fixed-size windows.
+
+        **Chunking rules:**
+        - **Prose text:** 200-400 tokens per chunk
+        - **Tables:** Never split -- always kept as a complete unit
+        - **Overlap:** 50 tokens between adjacent chunks to preserve context at boundaries
+        - **Metadata attached to every chunk:**
+
+        | Metadata Field | Purpose |
+        |---|---|
+        | `source_doc_id` | Trace back to the original document |
+        | `page_number` | Locate the chunk within the document |
+        | `section_heading` | Understand the chunk's context |
+        | `modality` | Know what type of content this is (text, table, caption) |
+        | `language` | Route to correct language processing |
+        | `access_level` | Enforce data access permissions |
+
+        <InfoBox type="fun" title="Think of it this way">
+          Chunking is like cutting a long article into index cards. Each card has enough text to make sense on its own, plus a little overlap with the card before it so you don't lose the thread. Tables are never cut in half -- you always keep the whole table on one card.
+        </InfoBox>
+      </AccordionItem>
+
+      <AccordionItem title="Stage 4 — Embedding" icon="📐" badge="BGE-M3 primary">
+        Each chunk is converted into a high-dimensional vector that captures its semantic meaning.
+
+        | Model | Dimensions | Cost | Role |
+        |---|---|---|---|
+        | **BGE-M3** | 1024 | $0 (local) | **Primary** -- multilingual, runs on our infrastructure |
+        | text-embedding-3-small | 1536 | Per-token API cost | **Fallback** -- OpenAI hosted, used if BGE-M3 is down |
+        | CLIP ViT-L/14 | 512 | $0 (local) | **Phase 3** -- image embeddings for chart similarity |
+        | ImageBind | 1024 | $0 (local) | **Phase 3** -- cross-modal (text to image to audio) |
+
+        <InfoBox type="fun" title="Think of it this way">
+          Embedding is like assigning GPS coordinates to every index card. Cards about similar topics end up with similar coordinates, so when someone asks a question, we can find the "nearest" cards by checking which coordinates are closest.
+        </InfoBox>
+      </AccordionItem>
+
+      <AccordionItem title="Stages 5-6 — Hybrid Retrieval" icon="🔍" badge="3 strategies">
+        When a user query arrives, three retrieval strategies work together to find the most relevant chunks.
+
+        **pgvector schema:**
+
+        | Column | Type | Purpose |
+        |---|---|---|
+        | `chunk_id` | UUID | Unique chunk identifier |
+        | `doc_id` | UUID | Parent document reference |
+        | `text_content` | TEXT | The actual chunk text |
+        | `embedding` | VECTOR(1024) | BGE-M3 dense vector |
+        | `modality` | ENUM | Content type (text, table, caption, transcript) |
+        | `page_number` | INT | Source page |
+        | `section_heading` | TEXT | Section context |
+        | `language` | ENUM | KO, EN, or CN |
+        | `access_level` | ENUM | Public, user, admin |
+
+        **Three retrieval strategies combined:**
+
+        | Strategy | Weight | How It Works |
+        |---|---|---|
+        | Dense Vector Search | 50% | Cosine similarity against BGE-M3 embeddings -- finds semantically similar content |
+        | BM25 Keyword Search | 30% | Traditional keyword matching -- catches exact terms that vectors might miss |
+        | Metadata Filtering | Applied first | Filters by language, access level, modality, and date range before any scoring |
+
+        Results from dense and BM25 search are combined using **Reciprocal Rank Fusion (RRF)**, which merges ranked lists by giving higher scores to chunks that appear near the top in multiple strategies.
+
+        <InfoBox type="fun" title="Think of it this way">
+          Imagine asking three librarians to each find the 10 best books for your question. One librarian picks books by meaning (vector search), another picks by exact keywords (BM25), and the third filters out books you are not allowed to read (metadata). Then they compare notes -- books that all three librarians agree on go to the top of the stack.
+        </InfoBox>
+      </AccordionItem>
+
+      <AccordionItem title="Stage 7 — Re-ranking" icon="🏆" badge="Largest quality jump">
+        After hybrid retrieval returns a candidate set, a dedicated reranker re-scores every chunk against the original query for fine-grained relevance.
+
+        | Reranker | Cost | Role |
+        |---|---|---|
+        | **Cohere Rerank API** | $1 per 1,000 calls | **Primary** -- highest quality semantic reranking |
+        | BGE Reranker v2 | $0 (local) | **Fallback** -- used if Cohere is unavailable |
+
+        **This stage produces the single largest quality improvement in the entire pipeline.** Hybrid retrieval casts a wide net (high recall), but reranking precisely orders the results (high precision). Without reranking, the top chunks often include near-misses that waste context window tokens.
+
+        <InfoBox type="note" title="Why reranking matters most">
+          The difference between "pretty relevant" and "exactly what was asked" is enormous when you only have 2,000 tokens of context budget. Reranking ensures those 2,000 tokens contain the best possible information.
+        </InfoBox>
+      </AccordionItem>
+
+      <AccordionItem title="Stage 8 — Context Assembly" icon="📦" badge="~3,600 tokens typical">
+        The final stage assembles all context into a structured prompt that fits within Claude's token budget.
+
+        **Token budget breakdown (typical request):**
+
+        | Component | Tokens | Source |
+        |---|---|---|
+        | System prompt | ~500 | CAG (cached) |
+        | User query | ~100 | Direct input |
+        | Retrieved chunks | ~2,000 | RAG pipeline output |
+        | Live market data | ~300 | Real-time feeds |
+        | User profile context | ~200 | Session state |
+        | Conversation history | ~500 | Recent messages |
+        | **Total** | **~3,600** | **Combined** |
+
+        The assembler respects strict ordering: cached content first (to maintain cache hits), then dynamic content, then the user query last. This ordering is critical for prompt caching to work -- remember the byte-for-byte identical rule.
+
+        <InfoBox type="fun" title="Think of it this way">
+          Context assembly is like packing a suitcase with a strict weight limit. You have to fit the essentials (system prompt, user question), the best research (top-ranked chunks), and some useful extras (market data, chat history) -- all within about 3,600 tokens. The packing order matters too: heavy stable items go at the bottom (cached), lighter changing items on top.
+        </InfoBox>
+      </AccordionItem>
+    </Accordion>
+  </Tab>
+
+  <Tab label="Multimodal RAG (Phase 3)">
+    ### Phase 3: Full Multimodal RAG
+
+    Phase 3 upgrades the pipeline from text-only retrieval to true cross-modal search, where users can find content across text, images, audio, and video simultaneously.
+
+    <InfoBox type="fun" title="Think of it this way">
+      Today, our library only searches by reading the text on each index card. Phase 3 gives the library the ability to also search by looking at pictures, listening to audio recordings, and even matching a chart you show it against charts it has seen before.
+    </InfoBox>
+
+    <StatGrid columns={3}>
+      <StatCard value="CLIP" label="Image Embedding Model" />
+      <StatCard value="ImageBind" label="Cross-Modal Model" />
+      <StatCard value="Qdrant" label="Vector DB Upgrade" />
+    </StatGrid>
+
+    ### Why It Matters
+
+    <FeatureGrid columns={2}>
+      <FeatureCard icon="📊" title="Chart Pattern Similarity" description="Upload a chart pattern and find similar historical patterns across thousands of stored charts -- visual similarity search without describing the pattern in words" />
+      <FeatureCard icon="🎙️" title="Audio Tone Analysis" description="Detect sentiment shifts in earnings call audio that transcription alone misses -- hesitation, confidence, and tone carry signal" />
+      <FeatureCard icon="🔗" title="Cross-Modal Matching" description="Search across modalities: find the chart that matches a text description, or the transcript segment that discusses a specific chart" />
+      <FeatureCard icon="🖼️" title="Image-to-Image Search" description="Find visually similar financial documents, chart formations, or data visualizations by example rather than keywords" />
+    </FeatureGrid>
+
+    ### Technology Stack
+
+    | Component | Technology | Purpose |
+    |---|---|---|
+    | Image Embeddings | CLIP ViT-L/14 (512 dimensions) | Convert charts, screenshots, and images into searchable vectors |
+    | Cross-Modal Embeddings | ImageBind | Shared embedding space across text, image, and audio |
+    | Vector Database | Qdrant or Weaviate | Replaces pgvector for native multi-vector and cross-modal indexing |
+    | Image Captioning | LLaVA-1.6 (already in pipeline) | Generate text descriptions for hybrid text+visual search |
+
+    ### Trigger Conditions
+
+    <InfoBox type="warning" title="When to upgrade — not before">
+      Phase 3 is deliberately not scheduled by date. It activates only when one or more of these conditions are met. Premature optimization wastes engineering time.
+    </InfoBox>
+
+    - Users actively request chart pattern matching ("find me charts that look like this")
+    - Audio tone analysis demonstrably adds signal value beyond transcription alone
+    - Text-only retrieval quality becomes a measurable bottleneck (retrieval precision drops below target)
+    - Image-to-image search demand emerges from user behavior data
+  </Tab>
+
+  <Tab label="Local LLM">
+    ### Local LLM Training Strategy
+
+    The Local LLM is not built on Day 1. Instead, data collection starts from Day 1, and the first fine-tuned model is trained once enough high-quality data accumulates.
+
+    <InfoBox type="fun" title="Think of it this way">
+      Training a local model is like raising a student. First, you let them observe the expert teacher (Claude) handling real questions. You carefully record every lesson. After enough observations, the student can handle routine questions on their own -- freeing the expert teacher for the hard problems.
+    </InfoBox>
+
+    ### Data Collection from Day 1
+
+    Every interaction is logged to a `training_events` table for future fine-tuning. All data collection is **PIPA compliant** (Korea's Personal Information Protection Act).
+
+    | PIPA Requirement | Implementation |
+    |---|---|
+    | User consent | Explicit opt-in during onboarding |
+    | Training opt-in | Separate toggle in user settings |
+    | Deletion rights | User can request full data deletion at any time |
+    | Anonymization | Nightly batch job strips all PII from training data |
+
+    ### 6 Data Types Collected
+
+    <Accordion>
+      <AccordionItem title="1. Chatbot Interactions" icon="💬" badge="Highest volume">
+        User questions and Claude's responses from the AI Advisor. Captures natural Korean financial language, user intent patterns, and effective response structures.
+      </AccordionItem>
+
+      <AccordionItem title="2. Trade Signal Events" icon="📊" badge="Decision data">
+        Signal generation inputs, outputs, and whether the user acted on the signal. Teaches the model how to interpret technical indicators and generate actionable signals.
+      </AccordionItem>
+
+      <AccordionItem title="3. Document Analyses" icon="📄" badge="Domain structure">
+        How Claude parsed and summarized DART filings, broker reports, and FSC disclosures. Teaches document structure understanding specific to Korean financial documents.
+      </AccordionItem>
+
+      <AccordionItem title="4. Market Analysis Sessions" icon="📈" badge="Reasoning chains">
+        Full analysis reasoning chains including which data points were considered, how they were weighted, and the final conclusion.
+      </AccordionItem>
+
+      <AccordionItem title="5. Compliance Decisions" icon="🛡️" badge="Critical accuracy">
+        Risk Guard outputs including flagged transactions, reasoning, and outcomes. Requires the highest accuracy bar before the local model can take over.
+      </AccordionItem>
+
+      <AccordionItem title="6. Expert Annotations" icon="👨‍💼" badge="Gold standard">
+        Human expert corrections and ratings of AI outputs. These are the highest-value training examples because they directly encode domain expertise.
+      </AccordionItem>
+    </Accordion>
+
+    ### Base Model Selection
+
+    | Model | Parameters | Role | Why |
+    |---|---|---|---|
+    | **EXAONE 3.5** | **7.8B** | **PRIMARY** | LG AI Research. Korean-native, strong financial reasoning, permissive license |
+    | Qwen2.5 | 7B | SECONDARY | Alibaba. Excellent trilingual (KO/EN/CN) support |
+    | EEVE-Korean | 10.8B | ALTERNATIVE | Upstage. Purpose-built for Korean NLP tasks |
+    | Llama 3.1 | 8B | FALLBACK | Meta. Largest community, most tooling support |
+
+    <InfoBox type="note" title="Why EXAONE 3.5 is primary">
+      EXAONE 3.5 is built by LG AI Research specifically with Korean language and business use cases in mind. For a Korean financial platform, starting with a Korean-native model produces better results with less training data than adapting an English-first model.
+    </InfoBox>
+
+    ### QLoRA Fine-Tuning
+
+    | Parameter | Value |
+    |---|---|
+    | Hardware | 1x NVIDIA A100 (80GB) |
+    | Training time | 12-24 hours per run |
+    | Cost per run | $30-80 |
+    | Quality vs. full fine-tune | Approximately 90% |
+    | Memory savings | 4-bit quantization reduces VRAM from 60GB+ to under 24GB |
+
+    <InfoBox type="fun" title="Think of it this way">
+      Full fine-tuning is like rebuilding an entire car engine to make it faster. QLoRA is like adding a turbocharger -- you get 90% of the speed improvement at a fraction of the cost, and you can swap it out easily if you want to try a different configuration.
+    </InfoBox>
+
+    ### Serving Infrastructure
+
+    | Framework | Use Case | Why |
+    |---|---|---|
+    | **vLLM** | **Production serving** | Continuous batching, PagedAttention, highest throughput |
+    | Ollama | Development and testing | Easy local setup, fast iteration |
+    | llama.cpp | CPU-only environments | Runs on CPU when GPU is unavailable |
+    | TGI (Text Generation Inference) | HuggingFace ecosystem | Good integration with HF model hub |
+
+    **Production deployment:** EXAONE 3.5 7.8B served via vLLM on a Railway L4 GPU instance at approximately $0.80/hour.
+  </Tab>
+
+  <Tab label="Dual LLM Routing">
+    ### Dual LLM Routing Strategy
+
+    Not every query needs Claude. The routing layer decides whether a query goes to the expensive cloud LLM (Claude) or the free local LLM, based on 6 dimensions.
+
+    <InfoBox type="fun" title="Think of it this way">
+      Imagine a hospital triage system. Critical patients go to the specialist (Claude). Routine checkups go to the general practitioner (Local LLM). The triage nurse (router) decides who goes where based on how complex, urgent, and high-stakes the situation is.
+    </InfoBox>
+
+    ### 6 Routing Dimensions
+
+    | Dimension | Routes to Local LLM | Routes to Claude |
+    |---|---|---|
+    | Query Complexity | Simple lookups, FAQs, template responses | Multi-step reasoning, novel questions |
+    | Domain Familiarity | Well-covered in training data | Edge cases, unusual instruments |
+    | Stakes | Informational queries, general education | Compliance, trade execution, regulatory |
+    | Output Format | Standard templates, short answers | Complex analysis, detailed explanations |
+    | Latency Requirement | Latency-sensitive (notifications) | Quality-sensitive (advisory) |
+    | Language | Korean (strongest local model language) | English/Chinese or mixed-language |
+
+    ### Traffic Split Over Time
+
+    <StepGuide>
+      <Step number={1} title="Phase 1: Cloud Only" status="complete">
+        **0% local traffic.** All queries go to Claude. Data collection is active. No local model exists yet.
+      </Step>
+      <Step number={2} title="Phase 2 Early: First Fine-Tune" status="active">
+        **20-30% local traffic.** First EXAONE fine-tune handles simple Korean FAQs and template responses. Rule-based router.
+      </Step>
+      <Step number={3} title="Phase 2 Mature: Expanding Coverage" status="active">
+        **50-60% local traffic.** Multiple fine-tuning iterations. Local model handles standard advisory, basic signals, and document summaries.
+      </Step>
+      <Step number={4} title="Phase 3: Confidence-Based Routing" status="pending">
+        **70-80% local traffic.** ML-based router with confidence scoring. Local model handles most Korean financial queries.
+      </Step>
+      <Step number={5} title="Long-Term Steady State" status="pending">
+        **85-90% local traffic.** Continuous training loop. Claude reserved for novel queries, compliance, and complex multi-step reasoning.
+      </Step>
+    </StepGuide>
+
+    ### Confidence-Based Fallback
+
+    Starting in Phase 3, the router uses a **confidence threshold of 0.75**. If the local model's confidence score falls below 0.75 on any query, it automatically routes to Claude instead.
+
+    <InfoBox type="warning" title="Safety net, not a gamble">
+      The confidence fallback ensures users never receive a low-quality response just to save money. If the local model is not confident, Claude takes over transparently. The user never knows the difference.
+    </InfoBox>
+
+    ### Cost Impact
+
+    Modeled at **500,000 queries/month** with **10,000 MAU**:
+
+    | Phase | Local Traffic | Monthly API Cost | Savings vs Phase 1 |
+    |---|---|---|---|
+    | Phase 1 (Cloud Only) | 0% | $5,000 | -- |
+    | Phase 2 Early | 20-30% | $3,750 | 25% |
+    | Phase 2 Mature | 50-60% | $2,250 | 55% |
+    | Phase 3 | 70-80% | $1,350 | 73% |
+    | Long-Term | 85-90% | $625 | 87% |
+
+    <StatGrid columns={3}>
+      <StatCard value="$5,000" label="Phase 1 Monthly Cost" />
+      <StatCard value="$1,350" label="Phase 3 Monthly Cost" />
+      <StatCard value="73%" label="Cost Reduction" />
+    </StatGrid>
+
+    <ProgressBar label="Phase 1 — Cloud Only" value={100} description="$5,000/month — all queries to Claude" />
+    <ProgressBar label="Phase 2 Early" value={75} description="$3,750/month — 25% reduction" />
+    <ProgressBar label="Phase 2 Mature" value={45} description="$2,250/month — 55% reduction" />
+    <ProgressBar label="Phase 3" value={27} description="$1,350/month — 73% reduction" />
+    <ProgressBar label="Long-Term" value={13} description="$625/month — 87% reduction" />
+  </Tab>
+
+  <Tab label="Cost Analysis">
+    ### Prompt Caching Savings by Agent
+
+    At **10,000 MAU**, prompt caching delivers **$49,381/month** in total savings across all agents.
+
+    | Agent | Queries/Month | Cached Tokens | Monthly Savings |
+    |---|---|---|---|
+    | AI Advisor Chatbot | 200,000 | 22,600 | $10,983 |
+    | **Risk Guard** | **500,000** | **18,000** | **$21,870** |
+    | Trade Signal | 300,000 | 8,100 | $5,905 |
+    | Other Agents | -- | -- | $10,623 |
+    | **Total** | **--** | **--** | **$49,381** |
+
+    <InfoBox type="note" title="Why Risk Guard saves the most">
+      Risk Guard is called on **every single transaction**, generating the highest query volume (500K/month). Even though it caches fewer tokens than AI Advisor, the sheer volume of calls makes it the biggest cost saver.
+    </InfoBox>
+
+    ### Cost Reduction at Scale
+
+    <StatGrid columns={3}>
+      <StatCard value="90%" label="Token Cost Reduction (cached)" />
+      <StatCard value="73%" label="Overall Cost Reduction at Scale" />
+      <StatCard value="$49,381" label="Monthly Savings at 10K MAU" />
+    </StatGrid>
+
+    <ProgressBar label="CAG Token Cost vs. Full Price" value={10} description="Cached tokens cost only 10% of normal price" />
+    <ProgressBar label="Overall Cost Reduction at Scale" value={73} description="73% reduction across all agents and layers" />
+
+    ### Local LLM: Zero Marginal Cost
+
+    The QLoRA fine-tuned Local LLM handles standard responses and pattern recognition with **$0 API cost** and **0 context window consumed**. Every query routed to the Local LLM instead of Claude is a query that costs nothing.
+  </Tab>
+</Tabs>
+
+---
+
+## Implementation Timeline
+
+The intelligence layer is built incrementally across all three project phases. Each milestone builds on the previous one.
+
+<InfoBox type="fun" title="Think of it this way">
+  Building the intelligence layer is like learning to cook. First you learn to follow recipes exactly (Phase 1 -- text RAG, use Claude for everything). Then you start improvising and developing your own style (Phase 2 -- fine-tune a local model, start routing). Eventually you're a chef who can cook most things from memory and only consults cookbooks for exotic dishes (Phase 3 -- local model handles 80%+ of queries).
+</InfoBox>
+
+<Tabs>
+  <Tab label="Phase 1 Milestones">
+    ### Phase 1: Foundation
+
+    <StepGuide>
+      <Step number={1} title="Text RAG Baseline" status="active">
+        **Deliverable:** Working 8-stage pipeline for text documents only (PDFs, HTML, tables).
+
+        - pgvector deployed with BGE-M3 embeddings
+        - Semantic chunking with 200-400 token windows
+        - BM25 + dense vector hybrid search
+        - Cohere Rerank integration
+        - Context assembly within token budgets
+
+        **Status:** Architecture finalized. Implementation beginning alongside Phase 1 agent development.
+      </Step>
+      <Step number={2} title="Prompt Caching (CAG)" status="active">
+        **Deliverable:** All 8 agent caches configured and validated.
+
+        - 7 prompt layers ordered by stability
+        - Agent-specific cache content defined (5,200 to 22,600 tokens each)
+        - Invalidation triggers mapped per agent
+        - Risk Guard blocking invalidation rule implemented
+        - Cache hit rate monitoring in place
+
+        **Status:** Architecture finalized. CAG implementation is beginning as part of Phase 1 infrastructure.
+      </Step>
+      <Step number={3} title="Training Data Collection" status="pending">
+        **Deliverable:** `training_events` table active, PIPA compliance verified.
+
+        - All 6 data types being captured
+        - Nightly anonymization batch job running
+        - User consent and opt-in flows implemented
+        - Data quality metrics tracked
+
+        **Status:** Specified. Implementation follows after RAG and CAG foundations are in place.
+      </Step>
+    </StepGuide>
+  </Tab>
+
+  <Tab label="Phase 2 Milestones">
+    ### Phase 2: Intelligence
+
+    <StepGuide>
+      <Step number={1} title="Hybrid Multimodal Ingestion" status="pending">
+        **Deliverable:** Pipeline accepts all 7 input modalities.
+
+        - Audio ingestion via Whisper large-v3 + Naver Clova Speech
+        - Image captioning via LLaVA-1.6 on Railway GPU
+        - Video processing via FFmpeg + Whisper + LLaVA
+        - OCR confidence threshold (0.85) with human review queue
+      </Step>
+      <Step number={2} title="First Fine-Tune" status="pending">
+        **Deliverable:** EXAONE 3.5 7.8B fine-tuned with QLoRA, deployed on Railway L4 GPU.
+
+        - Minimum training data threshold met
+        - QLoRA training on 1x A100 ($30-80 per run)
+        - vLLM serving configured
+        - Quality evaluation against Claude baseline
+      </Step>
+      <Step number={3} title="Rule-Based Router" status="pending">
+        **Deliverable:** 20-30% of queries routed to local model.
+
+        - 6-dimension routing rules implemented
+        - Simple queries (FAQs, templates) routed to local model
+        - All compliance and high-stakes queries stay on Claude
+        - A/B testing framework to measure quality
+      </Step>
+    </StepGuide>
+  </Tab>
+
+  <Tab label="Phase 3 Milestones">
+    ### Phase 3: Mastery
+
+    <StepGuide>
+      <Step number={1} title="Full Multimodal RAG" status="pending">
+        **Deliverable:** Cross-modal search with CLIP and ImageBind.
+
+        - CLIP ViT-L/14 for image embeddings
+        - ImageBind for cross-modal matching
+        - Qdrant or Weaviate replaces pgvector for multi-vector indexing
+        - Chart pattern similarity search operational
+        - Triggered only when user demand warrants it
+      </Step>
+      <Step number={2} title="Continuous Training Loop" status="pending">
+        **Deliverable:** Automated retraining pipeline.
+
+        - Scheduled retraining as new data accumulates
+        - Quality regression testing before each deployment
+        - Model versioning and rollback capability
+        - Local model handles 70-80% of traffic
+      </Step>
+      <Step number={3} title="Confidence-Based Fallback Router" status="pending">
+        **Deliverable:** ML-based router with 0.75 confidence threshold.
+
+        - Replaces rule-based router with learned routing model
+        - Automatic fallback to Claude below 0.75 confidence
+        - Per-agent routing thresholds (stricter for compliance)
+        - Target: 85-90% local traffic at steady state
+      </Step>
+    </StepGuide>
+  </Tab>
+</Tabs>

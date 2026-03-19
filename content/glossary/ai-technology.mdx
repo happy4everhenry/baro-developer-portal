@@ -1,0 +1,526 @@
+---
+title: AI & Technology
+description: All the AI and tech words used in BARO — explained so simply that an elementary school kid could understand!
+---
+
+<PageMeta status="live" layer="shared" />
+
+# AI & Technology Glossary
+
+## Every AI and Tech Term in BARO — Made Simple
+
+BARO uses a lot of fancy-sounding technology words. But don't worry — every single one of them can be explained in plain, simple language. Let's break them all down!
+
+<InfoBox type="fun" title="Think of AI like a school">
+Imagine a school where the students are computers. Some are just learning to read (Machine Learning). Some have read millions of books and can write essays (LLMs). Some are specialists — one is great at math, another at art (AI Agents). And they all follow school rules to stay safe (Security). That's basically what BARO's AI system looks like!
+</InfoBox>
+
+---
+
+## How It All Fits Together
+
+Before we dive into each term, here's the big picture of how BARO's AI system works:
+
+<Diagram title="BARO AI System — The Big Picture">
+  <DiagramRow>
+    <DiagramNode type="view" icon="📱" label="You (the User)" sublabel="Ask questions, get answers" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="You talk to the app" />
+  <DiagramRow>
+    <DiagramNode type="vm" icon="🧠" label="Orchestration Layer" sublabel="Organizes the AI agents" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="Assigns tasks to agents" />
+  <DiagramRow>
+    <DiagramNode type="service" icon="🤖" label="AI Agent 1" sublabel="Chart Reader" />
+    <DiagramNode type="service" icon="🤖" label="AI Agent 2" sublabel="News Summarizer" />
+    <DiagramNode type="service" icon="🤖" label="AI Agent 3" sublabel="Risk Checker" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="Agents look up information" />
+  <DiagramRow>
+    <DiagramNode type="repo" icon="📚" label="RAG Pipeline" sublabel="Reads documents" />
+    <DiagramNode type="data" icon="🗄️" label="Vector Database" sublabel="Finds similar things" />
+    <DiagramNode type="model" icon="🧮" label="LLM (Claude)" sublabel="Thinks and writes" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="Everything is logged" />
+  <DiagramRow>
+    <DiagramNode type="default" icon="🔒" label="Security & Audit" sublabel="Keeps everything safe" />
+  </DiagramRow>
+</Diagram>
+
+---
+
+## AI Basics
+
+The fundamental building blocks of artificial intelligence.
+
+<InfoBox type="info" title="Why does BARO use AI?">
+Most stock apps just show you numbers. BARO wants to **explain** those numbers. Instead of just showing "Samsung went up 3%," BARO's AI can tell you **why** it went up and what it might mean. That's the magic of AI!
+</InfoBox>
+
+<Accordion>
+  <AccordionItem title="AI (Artificial Intelligence)" icon="🧠" badge="Core Concept">
+    **A computer that can learn and make decisions — like a very smart calculator.**
+
+    Think about a regular calculator: you press buttons, it gives you an answer. It can only do exactly what you tell it. But an AI is different — it can **figure things out on its own**.
+
+    Imagine a calculator that doesn't just do math, but can also:
+    - Read a story and tell you what it's about
+    - Look at a picture and describe what's in it
+    - Answer questions in plain English
+
+    That's AI! In BARO, AI helps you understand the stock market by reading news, analyzing charts, and explaining things in simple words.
+
+    <InfoBox type="fun" title="Real-life analogy">
+    A regular calculator is like a vending machine — put in a coin, press a button, get exactly what you asked for. AI is more like a helpful librarian — you can ask a question in your own words, and they'll figure out what you need and find it for you.
+    </InfoBox>
+  </AccordionItem>
+
+  <AccordionItem title="LLM (Large Language Model)" icon="📖" badge="Core Concept">
+    **A computer that learned to read and write by studying millions of books — like Claude!**
+
+    An LLM is a special type of AI that is really, really good at language. How did it get so good? By reading an enormous amount of text — books, websites, articles, conversations — and learning patterns.
+
+    It's like if you read every single book in the world's biggest library. After reading all that, you'd be pretty good at writing essays, answering questions, and having conversations, right? That's exactly what an LLM does!
+
+    **BARO uses Claude** (made by Anthropic) as its LLM to understand your questions and give helpful answers about stocks.
+
+    <InfoBox type="tip" title="Where you'll see this in BARO">
+    When you chat with BARO's AI advisor and it writes back in complete sentences explaining what's happening with a stock — that's the LLM at work!
+    </InfoBox>
+  </AccordionItem>
+
+  <AccordionItem title="Machine Learning" icon="🎓" badge="Core Concept">
+    **Teaching a computer by showing it lots of examples instead of giving it rules.**
+
+    Imagine you want to teach a kid what a cat looks like. You could try writing down rules: "A cat has four legs, pointy ears, whiskers, and a tail." But there are lots of animals with those features!
+
+    A better way? Just show the kid thousands of pictures of cats. Eventually, they'll just **know** what a cat looks like — even cats they've never seen before.
+
+    That's Machine Learning! Instead of writing rules, you show the computer lots of examples, and it figures out the patterns by itself.
+
+    <InfoBox type="fun" title="Real-life analogy">
+    It's like learning to ride a bike. Nobody can explain the exact angle to lean or how hard to pedal — you just practice a lot and your brain figures it out! Machine Learning is the same idea, but for computers.
+    </InfoBox>
+  </AccordionItem>
+
+  <AccordionItem title="Fine-tuning" icon="🎯" badge="Training">
+    **Extra lessons for an AI that already knows the basics, to teach it something specific.**
+
+    Imagine a student who already graduated from school and knows a lot about everything. But now they want to become a doctor. They don't need to re-learn reading and math — they just need **extra training** specifically about medicine.
+
+    Fine-tuning is the same idea for AI. The LLM already knows how to read and write. Fine-tuning gives it extra lessons about a specific topic — like the Korean stock market — so it becomes an expert in that area.
+
+    <InfoBox type="tip" title="In BARO">
+    BARO fine-tunes its AI models to be experts in Korean financial terminology, KOSPI/KOSDAQ stocks, and FSC regulations — so it gives you better answers about Korean stocks than a general-purpose AI would.
+    </InfoBox>
+  </AccordionItem>
+</Accordion>
+
+---
+
+## BARO AI Architecture
+
+How BARO's AI system is designed and built.
+
+<InfoBox type="info" title="Why so many pieces?">
+Building an AI system is like building a sports team. You don't want one player doing everything — you want a goalie, forwards, and defenders, each doing their specific job really well. BARO's AI works the same way!
+</InfoBox>
+
+<Accordion>
+  <AccordionItem title="AI Agent" icon="🤖" badge="Architecture">
+    **A specialized AI worker with one specific job — like a team member.**
+
+    In BARO, there isn't just one big AI that does everything. Instead, there are **12 different AI agents**, each one specializing in something different:
+
+    - One agent reads charts and spots patterns
+    - Another agent summarizes news articles
+    - Another one checks if your portfolio is too risky
+    - And so on!
+
+    It's like a hospital: instead of one doctor who does everything, you have specialists — a heart doctor, an eye doctor, a bone doctor. Each one is really good at their specific thing.
+
+    <InfoBox type="tip" title="Learn more">
+    Check out the full list of all 12 agents on the [AI Services roadmap page](/roadmap/ai-services) or the detailed [AI Stack](/ai-platform/ai-stack) architecture.
+    </InfoBox>
+  </AccordionItem>
+
+  <AccordionItem title="LangGraph" icon="🗺️" badge="Framework">
+    **The system that tells AI agents what steps to follow — like a recipe book.**
+
+    When you bake a cake, you don't just throw all the ingredients together randomly. You follow a recipe: first mix the dry ingredients, then add eggs, then bake at 350 degrees.
+
+    LangGraph is like a recipe book for AI agents. It tells them: "First, read the user's question. Then, look up the relevant data. Then, think about the answer. Then, check if the answer makes sense. Finally, send it back."
+
+    Without LangGraph, the AI agents would be like chefs without recipes — talented, but chaotic!
+  </AccordionItem>
+
+  <AccordionItem title="MCP (Model Context Protocol)" icon="🔌" badge="Protocol">
+    **A standard way for AI agents to use tools — like a universal remote.**
+
+    You know how you might have a TV remote, a DVD remote, and a sound system remote — all different? A universal remote replaces all of them with one device that works with everything.
+
+    MCP does the same thing for AI agents. It's a **standard way** for any AI agent to connect to and use any tool — databases, search engines, calculators, or APIs. Instead of each agent needing its own special connection, MCP gives them all the same "universal remote."
+
+    <InfoBox type="fun" title="Real-life analogy">
+    MCP is like USB ports on a computer. Before USB, every device (printer, mouse, keyboard) needed its own special plug. USB made one plug that works for everything. MCP is the "USB for AI tools."
+    </InfoBox>
+  </AccordionItem>
+
+  <AccordionItem title="HITL (Human-in-the-Loop)" icon="👨‍✈️" badge="Safety">
+    **A rule that says a human must approve before anything important happens.**
+
+    Imagine a self-driving car that can drive itself, but before it makes a turn at a busy intersection, it asks the driver: "Should I turn left here?" That's Human-in-the-Loop.
+
+    In BARO, before the AI does anything important — like suggesting a big trade or making a major decision — it **stops and asks a human to approve first**. This keeps things safe because even the smartest AI can make mistakes.
+
+    <InfoBox type="info" title="Why this matters">
+    This is especially important for financial apps! You wouldn't want an AI to buy or sell stocks without checking with you first. HITL makes sure humans always have the final say on important decisions.
+    </InfoBox>
+  </AccordionItem>
+
+  <AccordionItem title="Orchestration" icon="🎵" badge="Architecture">
+    **Organizing multiple AI agents to work together smoothly.**
+
+    Think of an orchestra: you have violins, trumpets, drums, and flutes — all playing at the same time. Without a conductor, it would be noisy chaos. The conductor tells each section when to play, how loud, and how fast.
+
+    Orchestration in BARO is the conductor for AI agents. It decides:
+    - Which agent should handle your question
+    - What order things should happen in
+    - How to combine the results from multiple agents into one helpful answer
+
+    <InfoBox type="fun" title="Real-life analogy">
+    It's like a restaurant kitchen. The head chef (orchestrator) tells one cook to prep vegetables, another to grill the meat, and another to make the sauce. They all work at the same time, and the head chef makes sure everything comes together on one plate at the right moment.
+    </InfoBox>
+  </AccordionItem>
+</Accordion>
+
+---
+
+## Knowledge & Data
+
+How BARO's AI finds, stores, and uses information.
+
+<InfoBox type="fun" title="Think of it like studying for a test">
+Some students memorize everything (CAG). Some bring their notes and look things up (RAG). Some use flashcards with key facts (Embeddings). And the classroom has a smart filing system that can find related topics even if you don't know the exact name (Vector Database). BARO's AI uses all of these strategies!
+</InfoBox>
+
+<Diagram title="How BARO's AI Finds Information">
+  <DiagramRow>
+    <DiagramNode type="view" icon="❓" label="Your Question" sublabel="'Why did Samsung go up?'" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="Turned into numbers (Embeddings)" />
+  <DiagramRow>
+    <DiagramNode type="data" icon="🔢" label="Embeddings" sublabel="Text becomes numbers" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="Search for similar content" />
+  <DiagramRow>
+    <DiagramNode type="repo" icon="🗄️" label="Vector Database" sublabel="pgvector finds matches" />
+    <DiagramNode type="repo" icon="⚡" label="Cache (CAG)" sublabel="Pre-loaded common knowledge" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="Relevant info sent to LLM (RAG)" />
+  <DiagramRow>
+    <DiagramNode type="model" icon="🧮" label="LLM (Claude)" sublabel="Reads info and writes answer" />
+  </DiagramRow>
+</Diagram>
+
+<Accordion>
+  <AccordionItem title="RAG (Retrieval-Augmented Generation)" icon="📚" badge="Knowledge">
+    **The AI looks up information before answering — like checking a textbook during a test.**
+
+    Imagine you're taking a test, and the teacher says: "You can use your notes!" Instead of relying only on what you memorized, you can look up facts to make sure your answers are correct.
+
+    RAG works the same way. When you ask BARO a question, the AI doesn't just guess from what it learned during training. It **first looks up the latest, most relevant information** — recent news articles, financial reports, market data — and then uses that information to write its answer.
+
+    This is super important because the stock market changes every day. You want answers based on **today's data**, not just what the AI learned months ago.
+
+    <InfoBox type="tip" title="In BARO">
+    When you ask "What happened with Samsung today?" the RAG pipeline searches through today's news, earnings reports, and market data before the AI writes its answer. See the full architecture at [Intelligence Layer](/ai-platform/intelligence-layer).
+    </InfoBox>
+  </AccordionItem>
+
+  <AccordionItem title="CAG (Cache-Augmented Generation)" icon="⚡" badge="Knowledge">
+    **Pre-loading common knowledge so the AI doesn't have to look it up every time — like memorizing multiplication tables.**
+
+    You know how you memorized that 7 x 8 = 56? You don't need to calculate it every time — you just know it. That saves time!
+
+    CAG does the same thing for AI. Facts that get asked about a lot — like "What is KOSPI?" or "What does Samsung Electronics make?" — get **pre-loaded into the AI's memory**. So instead of looking them up every single time, the AI already has them ready to go.
+
+    This makes answers **faster** because the AI skips the lookup step for common questions.
+  </AccordionItem>
+
+  <AccordionItem title="Embeddings" icon="🔢" badge="Data">
+    **Converting text into numbers so computers can compare how similar things are.**
+
+    Computers don't understand words the way we do. They understand numbers. So how do you teach a computer that "dog" and "puppy" are similar, but "dog" and "airplane" are not?
+
+    Embeddings! They convert each word (or sentence) into a list of numbers. Words with similar meanings get similar numbers. So "dog" might become [0.9, 0.1, 0.8] and "puppy" might become [0.85, 0.12, 0.78] — very close! But "airplane" would be [0.1, 0.9, 0.2] — very different.
+
+    <InfoBox type="fun" title="Real-life analogy">
+    It's like putting cities on a map. Tokyo and Seoul are close together on the map because they're similar (both big Asian cities). Tokyo and Buenos Aires are far apart. Embeddings create a "map" for words, where similar words are close together.
+    </InfoBox>
+  </AccordionItem>
+
+  <AccordionItem title="Vector Database (pgvector)" icon="🗄️" badge="Data">
+    **A special database that finds similar things, not just exact matches.**
+
+    A normal database is like a phone book — you look up "John Smith" and it finds exactly "John Smith." But what if you want to find "people similar to John Smith"? A regular database can't do that.
+
+    A vector database can! It stores embeddings (those number lists we just talked about) and can quickly find the **most similar** items. In BARO, pgvector is the vector database that finds:
+    - News articles similar to your question
+    - Stocks that behave similarly to one you're looking at
+    - Financial concepts related to what you asked about
+  </AccordionItem>
+
+  <AccordionItem title="QLoRA" icon="🎒" badge="Training">
+    **A way to teach an AI new things using very little computer power.**
+
+    Normally, fine-tuning a big AI model takes **enormous** computers — the kind that cost millions of dollars. It's like needing a whole stadium just to practice basketball.
+
+    QLoRA is a clever trick that lets you fine-tune the AI using a **regular computer**. It does this by only changing a tiny part of the AI's brain instead of retraining the whole thing. It's like teaching a basketball player a new move — you don't need to re-teach them everything from scratch, just add one new skill.
+
+    <InfoBox type="tip" title="Why BARO uses QLoRA">
+    QLoRA lets BARO create specialized AI models for Korean finance without needing a supercomputer. This keeps costs down while still making the AI really smart about Korean stocks.
+    </InfoBox>
+  </AccordionItem>
+</Accordion>
+
+---
+
+## Specialized AI Models
+
+The specific AI models and algorithms that BARO uses for Korean financial analysis.
+
+<InfoBox type="info" title="Why specialized models?">
+General-purpose AI (like ChatGPT or Claude) knows a little about everything. But BARO needs models that are **experts** in Korean finance. These specialized models understand Korean financial terminology, Korean market patterns, and Korean regulatory requirements much better than a general model would.
+</InfoBox>
+
+<Accordion>
+  <AccordionItem title="EXAONE" icon="🇰🇷" badge="LLM">
+    **A Korean-language AI model built by LG AI Research — one of Korea's best home-grown LLMs.**
+
+    Most famous LLMs (like GPT or Claude) were primarily trained on English text. While they can handle Korean, they sometimes miss nuances or make awkward translations.
+
+    EXAONE was built specifically with Korean language and culture in mind. It understands Korean grammar, honorifics, and terminology naturally. Think of it like the difference between a Korean-American who speaks good Korean vs. someone who grew up in Seoul — the native speaker just *gets* things differently.
+
+    <InfoBox type="tip" title="In BARO">
+    BARO can use EXAONE for tasks that require deep Korean language understanding, like summarizing Korean financial news or explaining Korean market regulations in natural Korean.
+    </InfoBox>
+  </AccordionItem>
+
+  <AccordionItem title="KoBERT" icon="📝" badge="NLP Model">
+    **A Korean-optimized version of BERT — great at understanding the meaning of Korean text.**
+
+    BERT (Bidirectional Encoder Representations from Transformers) is a famous AI model that's really good at **understanding** text (not generating it, but understanding what existing text means).
+
+    KoBERT is BERT fine-tuned specifically for Korean. It breaks Korean words into the right pieces (Korean has complex word forms!) and understands Korean sentence structure. It's like having a reading comprehension expert who is a native Korean speaker.
+
+    <InfoBox type="tip" title="In BARO">
+    KoBERT helps classify Korean financial news articles, detect sentiment in Korean market commentary, and match Korean search queries to the right stocks or themes.
+    </InfoBox>
+  </AccordionItem>
+
+  <AccordionItem title="FinBERT-KO" icon="💰" badge="NLP Model">
+    **KoBERT with extra training on Korean financial text — a finance + Korean language specialist.**
+
+    If KoBERT is a Korean reading expert, FinBERT-KO is a Korean reading expert who also studied finance. It was fine-tuned on Korean financial documents: earnings reports, analyst notes, DART disclosures, and financial news.
+
+    This means it understands that "실적 호전" (improved results) is positive, "유상증자" (capital increase) might be negative for existing shareholders, and "배당 확대" (dividend increase) is generally good news.
+
+    <InfoBox type="fun" title="Real-life analogy">
+    Imagine three people reading a Korean medical document: a foreigner (general BERT), a Korean person (KoBERT), and a Korean doctor (FinBERT-KO). The Korean doctor understands it best because they know both the language and the subject matter!
+    </InfoBox>
+  </AccordionItem>
+
+  <AccordionItem title="Isolation Forest" icon="🌲" badge="Algorithm">
+    **An algorithm that finds weird outliers by trying to isolate data points — like finding the odd one out.**
+
+    Imagine a classroom where most students are sitting in groups. One student is sitting alone in the corner. It's easy to "isolate" that student — you just draw a circle around them. The students in groups are harder to isolate because they're surrounded by others.
+
+    Isolation Forest works the same way with data. It tries to isolate each data point by randomly splitting the data. Points that are easy to isolate (few splits needed) are **anomalies** — they're unusual.
+
+    <InfoBox type="tip" title="In BARO">
+    BARO uses Isolation Forest to detect unusual trading patterns — sudden spikes in volume, abnormal price movements, or unusual investor behavior that might signal something important is happening with a stock.
+    </InfoBox>
+  </AccordionItem>
+
+  <AccordionItem title="Black-Litterman Model" icon="📐" badge="Algorithm">
+    **A mathematical model for building investment portfolios that combines market data with expert opinions.**
+
+    Imagine you're planning a road trip. You could just follow the GPS (market data), or you could also ask a local friend for tips ("take this shortcut, avoid that road"). The Black-Litterman model does both — it starts with what the market is telling us, then adjusts based on expert views.
+
+    The traditional approach (Markowitz) only uses math and often gives extreme results ("put 90% in one stock!"). Black-Litterman is more balanced because it starts with the market's natural balance and only tilts when there's a good reason.
+
+    <InfoBox type="tip" title="In BARO">
+    BARO's portfolio optimization agent uses Black-Litterman to suggest balanced portfolio allocations. It starts with market-cap-weighted positions and adjusts based on AI-generated views about which sectors or stocks might outperform.
+    </InfoBox>
+  </AccordionItem>
+</Accordion>
+
+---
+
+## Security & Safety
+
+How BARO keeps its AI safe and trustworthy.
+
+<InfoBox type="info" title="Why AI safety matters">
+An AI that handles financial information needs to be **really** secure. Imagine if someone could trick the AI into giving wrong stock advice, or if the AI learned from bad data and started making mistakes. BARO takes safety very seriously — here's how.
+</InfoBox>
+
+<Accordion>
+  <AccordionItem title="Prompt Injection" icon="🎭" badge="Threat">
+    **Tricking an AI into doing something it shouldn't — like giving someone a fake ID.**
+
+    When you talk to an AI, you give it a "prompt" (your message). A prompt injection is when a bad actor hides secret instructions inside what looks like a normal message, trying to trick the AI into:
+    - Ignoring its safety rules
+    - Revealing private information
+    - Doing something it's not supposed to do
+
+    It's like writing "FREE CANDY" on a sign to lure someone into a trap. The AI sees what looks like a normal question, but there are hidden instructions sneaked in.
+
+    <InfoBox type="info" title="How BARO defends against this">
+    BARO uses input validation, content filtering, and strict system prompts to make sure the AI can't be tricked. It's like having a security guard who checks every visitor's ID before letting them in.
+    </InfoBox>
+  </AccordionItem>
+
+  <AccordionItem title="Data Poisoning" icon="☠️" badge="Threat">
+    **Feeding an AI bad information so it learns the wrong things.**
+
+    Remember how Machine Learning works — the AI learns from examples? Well, what if someone secretly slipped in **bad examples**? The AI would learn the wrong patterns.
+
+    It's like if someone replaced some of your textbooks with books full of wrong answers. You'd study hard, feel confident, and then get everything wrong on the test — through no fault of your own.
+
+    BARO prevents this by carefully checking all training data and using only trusted sources for market information.
+  </AccordionItem>
+
+  <AccordionItem title="Canary Test" icon="🐤" badge="Safety">
+    **A safety test that runs automatically to make sure the AI is behaving correctly.**
+
+    In the old days, coal miners would bring a canary bird into the mine. If the canary stopped singing, it meant there was dangerous gas — time to get out! The bird was an early warning system.
+
+    Canary tests work the same way for AI. BARO automatically sends **test questions with known correct answers** to the AI on a regular schedule. If the AI starts giving wrong answers to these test questions, the system knows something is wrong — and it can sound the alarm before real users are affected.
+
+    <InfoBox type="fun" title="Real-life analogy">
+    It's like a teacher who gives a pop quiz every morning. If a student who usually gets 100% suddenly gets 50%, the teacher knows something is wrong and can help before the big test.
+    </InfoBox>
+  </AccordionItem>
+
+  <AccordionItem title="Audit Trail" icon="📹" badge="Compliance">
+    **A record of everything that happened — like security camera footage.**
+
+    An audit trail is a detailed log that records every action the AI takes: what question was asked, what data it looked up, what answer it gave, and when it all happened.
+
+    Why? Two reasons:
+    1. **If something goes wrong**, you can rewind and figure out exactly what happened
+    2. **Regulators (like FSC)** require financial apps to keep these records
+
+    It's like the black box in an airplane — it records everything so investigators can understand what happened if there's ever a problem. See [Operations & Audit](/ai-platform/operations-audit) for the full details.
+  </AccordionItem>
+
+  <AccordionItem title="FSC (Financial Services Commission)" icon="🏛️" badge="Regulation">
+    **Korea's Financial Services Commission — the organization that makes rules for financial apps.**
+
+    Every country has a group of people whose job is to make sure financial companies play by the rules. In Korea, that group is called the **FSC (금융위원회)**.
+
+    They create rules about:
+    - How financial apps can operate
+    - What information must be shared with customers
+    - How customer data must be protected
+    - What AI systems are allowed to do in finance
+
+    BARO follows all FSC rules. It's like how a restaurant follows health department rules — you want to know that the place serving your food is following the rules, and you want to know that the app handling your money is too. See [AI Governance](/ai-platform/ai-governance) for BARO's compliance approach.
+  </AccordionItem>
+</Accordion>
+
+---
+
+## Infrastructure
+
+The technology that keeps BARO running behind the scenes.
+
+<InfoBox type="fun" title="Think of it like a restaurant kitchen">
+The app you see is like the dining room of a restaurant — it looks nice and you get your food there. But behind the scenes, there's a whole kitchen (infrastructure) making it all work: fridges to store ingredients (databases), an intercom to take orders (APIs), and a prep station for quick items (cache). Let's look at each piece!
+</InfoBox>
+
+<Accordion>
+  <AccordionItem title="WebSocket" icon="📞" badge="Connection">
+    **A connection that stays open for real-time updates — like a phone call vs texting.**
+
+    When you text someone, each message is separate: you send one, wait for a reply, send another. But on a phone call, the connection **stays open** — you can talk back and forth instantly.
+
+    A WebSocket is like a phone call between your app and the server. The connection stays open, so the server can **push updates to you instantly** — like real-time stock price changes. Without WebSockets, the app would have to keep asking "Any updates? Any updates? Any updates?" over and over (that's slow and wasteful).
+
+    <InfoBox type="tip" title="In BARO">
+    When you see stock prices updating in real-time on the home screen with smooth animations — that's WebSockets at work! The KIS relay sends live price data through an always-open WebSocket connection.
+    </InfoBox>
+  </AccordionItem>
+
+  <AccordionItem title="REST API" icon="🍽️" badge="Connection">
+    **A way for apps to ask servers for information — like ordering at a restaurant.**
+
+    At a restaurant, you look at the menu, tell the waiter what you want, the kitchen makes it, and the waiter brings it back. REST APIs work the same way:
+
+    1. **The menu** = the list of available data (stock prices, company info, news)
+    2. **Your order** = a request from the app ("Give me Samsung's stock price")
+    3. **The kitchen** = the server that processes your request
+    4. **Your food** = the data that comes back to the app
+
+    BARO's backend has REST APIs for stock quotes, charts, orderbooks, rankings, and more.
+  </AccordionItem>
+
+  <AccordionItem title="Redis" icon="📝" badge="Storage">
+    **Super-fast temporary storage — like a sticky note pad.**
+
+    Imagine your desk has two things: a big filing cabinet (for important documents you keep forever) and a pad of sticky notes (for quick reminders you use right now).
+
+    Redis is the sticky note pad. It stores information that needs to be accessed **super quickly** but doesn't need to last forever. Things like:
+    - The latest stock price (changes every second)
+    - Who's currently logged in
+    - Temporary calculation results
+
+    It's incredibly fast because it keeps everything in the computer's memory (RAM) instead of writing to a hard drive.
+  </AccordionItem>
+
+  <AccordionItem title="PostgreSQL" icon="🗃️" badge="Storage">
+    **A reliable database for important data — like a filing cabinet.**
+
+    If Redis is the sticky note pad, PostgreSQL is the **big, sturdy filing cabinet**. It stores important data that needs to be kept safely and permanently:
+    - User accounts and settings
+    - Transaction history
+    - Company financial data
+    - Historical stock prices
+
+    PostgreSQL is trusted by huge companies around the world because it's reliable, secure, and can handle enormous amounts of data. In BARO, it's also where **pgvector** lives — the vector database feature that powers similarity search.
+  </AccordionItem>
+
+  <AccordionItem title="Supabase" icon="☁️" badge="Platform">
+    **A cloud service that provides database + authentication + security — all in one.**
+
+    Building a backend from scratch is like building a house: you need to lay the foundation, install plumbing, wire the electricity, and more. It takes a long time!
+
+    Supabase is like moving into a fully furnished apartment. It comes with:
+    - A **PostgreSQL database** already set up
+    - **User login/signup** (authentication) ready to go
+    - **Security rules** (Row Level Security) built in
+    - **Real-time updates** out of the box
+
+    BARO uses Supabase so the team can focus on building cool features instead of spending months setting up basic infrastructure.
+
+    <InfoBox type="tip" title="In BARO">
+    Supabase handles user accounts, stores persistent data, enforces security policies, and hosts the pgvector database — all from one platform. See [AI Security](/ai-platform/ai-security) for how BARO configures Supabase's security features.
+    </InfoBox>
+  </AccordionItem>
+</Accordion>
+
+---
+
+## Quick Reference
+
+<FeatureGrid columns={2}>
+  <FeatureCard icon="🧠" title="AI Basics" description="AI, LLM, Machine Learning, Fine-tuning — the building blocks of artificial intelligence." />
+  <FeatureCard icon="🤖" title="BARO Architecture" description="AI Agents, LangGraph, MCP, HITL, Orchestration — how BARO's AI system is designed." />
+  <FeatureCard icon="📚" title="Knowledge & Data" description="RAG, CAG, Embeddings, Vector DB, QLoRA — how AI finds and uses information." />
+  <FeatureCard icon="🔒" title="Security & Safety" description="Prompt Injection, Data Poisoning, Canary Tests, Audit Trails, FSC — keeping AI safe." />
+  <FeatureCard icon="🏗️" title="Infrastructure" description="WebSocket, REST API, Redis, PostgreSQL, Supabase — the tech that runs behind the scenes." />
+  <FeatureCard icon="🇰🇷" title="Specialized Models" description="EXAONE, KoBERT, FinBERT-KO, Isolation Forest, Black-Litterman — Korean finance AI specialists." />
+  <FeatureCard icon="🗺️" title="Explore AI Platform" description="Dive deeper into BARO's AI architecture, security, and governance." href="/ai-platform" />
+</FeatureGrid>

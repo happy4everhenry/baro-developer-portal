@@ -1,0 +1,374 @@
+# Authentication
+
+<PageMeta status="live" layer="backend" />
+
+<InfoBox type="info" title="How does authentication work here?">
+Imagine the BARO backend is a trusted friend who has the keys to the stock market data. Your iPhone app just asks the friend for data -- it never needs to carry any keys itself. The friend (backend) handles all the secret passwords and tokens behind the scenes.
+</InfoBox>
+
+KIS (Korea Investment & Securities) OAuth2 token management. The backend handles all upstream authentication -- iOS clients connect without API keys.
+
+---
+
+## Architecture Overview
+
+<Diagram title="Authentication Flow">
+  <DiagramRow>
+    <DiagramNode type="view" icon="📱" label="iOS App" sublabel="No API keys needed" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="Unauthenticated REST/WS" />
+  <DiagramRow>
+    <DiagramNode type="service" icon="⚙️" label="FastAPI Backend" sublabel="kis_auth.py -- Token management" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="Bearer token + appkey/appsecret" />
+  <DiagramRow>
+    <DiagramNode type="data" icon="🏦" label="KIS Open API" sublabel="openapi.koreainvestment.com:9443" />
+  </DiagramRow>
+</Diagram>
+
+<InfoBox type="tip" title="Key principle">
+The BARO backend acts as a proxy to KIS Open API. All authentication credentials (app key, app secret, OAuth tokens) live on the server. iOS clients never handle or see KIS credentials. This keeps the mobile app simple and prevents credential exposure on user devices.
+</InfoBox>
+
+---
+
+## Token Types
+
+<Tabs>
+<Tab label="REST Token" icon="🔑">
+
+### OAuth2 Access Token
+
+KIS uses a `client_credentials` OAuth2 flow. The backend requests an access token using the app key and secret, then includes it as a Bearer token in all REST API calls.
+
+<StepGuide>
+<Step number={1} title="Backend sends credentials to KIS">
+The server sends `appkey` and `appsecret` to the KIS token endpoint.
+</Step>
+<Step number={2} title="KIS returns an access token">
+KIS sends back a token that is valid for about 24 hours.
+</Step>
+<Step number={3} title="Backend caches the token">
+The token is saved in memory so it can be reused for every API call.
+</Step>
+<Step number={4} title="Auto-refresh before expiry">
+5 minutes before the token expires, the backend automatically gets a new one -- no downtime.
+</Step>
+</StepGuide>
+
+<ApiEndpoint method="POST" path="/oauth2/tokenP" description="Request access token from KIS">
+
+Requests a new OAuth2 access token from the KIS token endpoint. Tokens are valid for approximately 24 hours. Called automatically by `kis_auth.py` when no token exists or the current token is within 5 minutes of expiry.
+
+**KIS Endpoint**
+
+```bash
+curl -X POST "https://openapi.koreainvestment.com:9443/oauth2/tokenP" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "grant_type": "client_credentials",
+    "appkey": "YOUR_APP_KEY",
+    "appsecret": "YOUR_APP_SECRET"
+  }'
+```
+
+**Response -- 200 OK**
+
+```json
+{
+  "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9...",
+  "access_token_token_expired": "2025-03-12 14:30:00",
+  "token_type": "Bearer",
+  "expires_in": 86400
+}
+```
+
+**Token Lifecycle**
+
+| Property | Value | Description |
+|----------|-------|-------------|
+| Token type | `Bearer` | Standard HTTP Bearer token |
+| Expiry | ~24 hours | Parsed from `access_token_token_expired` field |
+| Auto-refresh | 5 min before expiry | Backend auto-refreshes proactively |
+| Concurrency | Thread-safe | Uses `asyncio.Lock` to prevent duplicate requests |
+
+</ApiEndpoint>
+
+### Using the Token in API Requests
+
+Every KIS REST API call includes the access token and credentials in HTTP headers. This is handled by the `kis_client.py` module:
+
+```python
+async def kis_get(path: str, tr_id: str, params: dict | None = None) -> dict:
+    """Perform an authenticated GET request to KIS API."""
+    token = await get_access_token()  # Auto-refreshes if near expiry
+
+    headers = {
+        "Content-Type": "application/json; charset=utf-8",
+        "authorization": f"Bearer {token}",
+        "appkey": get_app_key(),
+        "appsecret": get_app_secret(),
+        "tr_id": tr_id,          # Transaction ID (e.g. "FHKST01010100")
+        "custtype": "P",         # Customer type: P=personal, B=corporate
+    }
+
+    url = f"{KIS_BASE_URL}{path}"
+
+    async with _rate_semaphore:  # Rate limit: 15 concurrent requests
+        async with httpx.AsyncClient(verify=True) as client:
+            resp = await client.get(url, params=params, headers=headers, timeout=15.0)
+
+    # KIS returns rt_cd="0" on success
+    data = resp.json()
+    if data.get("rt_cd") != "0":
+        raise RuntimeError(f"KIS API error: {data.get('msg1')}")
+
+    return data
+```
+
+### KIS REST API Headers
+
+| Header | Value | Description |
+|--------|-------|-------------|
+| `Content-Type` | `application/json; charset=utf-8` | Required for all requests |
+| `authorization` | `Bearer {access_token}` | OAuth2 access token |
+| `appkey` | `{KIS_APP_KEY}` | Application key from KIS developer portal |
+| `appsecret` | `{KIS_APP_SECRET}` | Application secret from KIS developer portal |
+| `tr_id` | e.g. `FHKST01010100` | Transaction ID (varies by API endpoint) |
+| `custtype` | `P` or `B` | Customer type: Personal or Corporate |
+
+</Tab>
+<Tab label="WebSocket Key" icon="🔌">
+
+### WebSocket Approval Key
+
+WebSocket connections to KIS use a separate `approval_key` (not the REST access token). This key is obtained via a different endpoint and does not expire like REST tokens, but may become invalid after WebSocket disconnections.
+
+<ApiEndpoint method="POST" path="/oauth2/Approval" description="Get WebSocket approval key from KIS">
+
+Requests an approval key for establishing WebSocket connections to the KIS real-time feed. The key is cached and reused until a reconnection failure forces a refresh.
+
+**KIS Endpoint**
+
+```bash
+curl -X POST "https://openapi.koreainvestment.com:9443/oauth2/Approval" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "grant_type": "client_credentials",
+    "appkey": "YOUR_APP_KEY",
+    "secretkey": "YOUR_APP_SECRET"
+  }'
+```
+
+**Response -- 200 OK**
+
+```json
+{
+  "approval_key": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+}
+```
+
+**Approval Key vs. Access Token**
+
+| Property | Access Token (REST) | Approval Key (WebSocket) |
+|----------|-------------------|--------------------------|
+| Endpoint | `/oauth2/tokenP` | `/oauth2/Approval` |
+| Expiry | ~24 hours (explicit) | No explicit expiry |
+| Invalidation | Time-based | May invalidate on WS disconnect |
+| Usage | HTTP `Authorization` header | JSON message `approval_key` field |
+| Refresh strategy | 5 min before expiry | Cleared on reconnect failure, re-requested |
+| Request field name | `appsecret` | `secretkey` |
+
+</ApiEndpoint>
+
+### Approval Key Usage in WebSocket Subscriptions
+
+The approval key is included in every subscribe/unsubscribe message sent to the KIS WebSocket:
+
+```python
+async def _send_subscription(self, tr_id: str, tr_key: str, subscribe: bool = True):
+    """Send subscribe/unsubscribe message to KIS."""
+    approval_key = await get_ws_approval_key()
+
+    msg = {
+        "header": {
+            "approval_key": approval_key,
+            "custtype": "P",
+            "tr_type": "1" if subscribe else "2",  # 1=sub, 2=unsub
+            "content-type": "utf-8",
+        },
+        "body": {
+            "input": {
+                "tr_id": tr_id,     # e.g. "H0STCNT0"
+                "tr_key": tr_key,   # e.g. "005930"
+            },
+        },
+    }
+    await self._ws.send(json.dumps(msg))
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Token Caching & Refresh
+
+<Diagram title="Token Refresh Timeline">
+  <DiagramRow>
+    <DiagramNode type="default" icon="🟢" label="Token Obtained" sublabel="T+0h" />
+  </DiagramRow>
+  <DiagramArrow direction="right" label="Valid and cached" />
+  <DiagramRow>
+    <DiagramNode type="default" icon="🟡" label="Refresh Window" sublabel="T+23h55m" />
+  </DiagramRow>
+  <DiagramArrow direction="right" label="Auto-refresh" />
+  <DiagramRow>
+    <DiagramNode type="default" icon="🔴" label="Expired" sublabel="T+24h" />
+  </DiagramRow>
+</Diagram>
+
+<InfoBox type="tip" title="Why refresh early?">
+The 5-minute buffer means the backend gets a fresh token before the old one expires. This way, no API calls ever fail because of an expired token.
+</InfoBox>
+
+### Auto-Refresh Logic
+
+```python
+_token_cache: dict = {
+    "access_token": None,
+    "expires_at": None,
+}
+_token_lock = asyncio.Lock()
+
+async def get_access_token() -> str:
+    """Get a valid KIS access token. Thread-safe with auto-refresh."""
+    async with _token_lock:
+        now = datetime.now()
+        token = _token_cache["access_token"]
+        expires_at = _token_cache["expires_at"]
+
+        # Refresh if no token or within 5 minutes of expiry
+        if (
+            token is None
+            or expires_at is None
+            or now >= expires_at - timedelta(minutes=5)
+        ):
+            token, expires_at = await _request_new_token()
+            _token_cache["access_token"] = token
+            _token_cache["expires_at"] = expires_at
+
+        return token
+```
+
+---
+
+## Environment Variables
+
+<InfoBox type="warning" title="Keep these secret!">
+Never commit your `.env` file to version control. These are like passwords to the stock market data system.
+</InfoBox>
+
+### Required .env Configuration
+
+Create a `.env` file in the backend root directory. The `load_dotenv()` call in `main.py` reads these values at startup.
+
+```bash
+# KIS Open API Credentials
+# Obtain from https://apiportal.koreainvestment.com
+KIS_APP_KEY=your_app_key_here
+KIS_APP_SECRET=your_app_secret_here
+```
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `KIS_APP_KEY` | Required | Application key from the KIS developer portal. Used in REST headers and OAuth token requests. |
+| `KIS_APP_SECRET` | Required | Application secret from the KIS developer portal. Used in REST headers and OAuth token requests. |
+
+### Missing Credentials Error
+
+If `KIS_APP_KEY` or `KIS_APP_SECRET` are not set, the backend raises a `RuntimeError` on the first API call:
+
+```python
+RuntimeError: KIS_APP_KEY and KIS_APP_SECRET must be set in .env
+```
+
+---
+
+## KIS API Endpoints
+
+### Base URLs
+
+| Service | URL | Protocol |
+|---------|-----|----------|
+| REST API | `https://openapi.koreainvestment.com:9443` | HTTPS (TLS) |
+| WebSocket Feed | `ws://ops.koreainvestment.com:21000` | WS (unencrypted) |
+
+<InfoBox type="warning" title="Unencrypted WebSocket">
+KIS WebSocket uses unencrypted `ws://` (port 21000), not `wss://`. This is the official KIS endpoint configuration.
+</InfoBox>
+
+---
+
+## Security Considerations
+
+<Accordion>
+<AccordionItem title="Current Measures" icon="🛡️" badge="Active" defaultOpen={true}>
+
+- Credentials stored in `.env` file (not in source code)
+- `.env` excluded from version control via `.gitignore`
+- Token caching prevents unnecessary token requests
+- `asyncio.Lock` prevents race conditions in token refresh
+- HTTPS for all KIS REST API calls (`verify=True`)
+- iOS clients never handle KIS credentials
+- Rate limiting via semaphore (15 concurrent requests)
+
+</AccordionItem>
+<AccordionItem title="Production Recommendations" icon="🚀" badge="Future">
+
+- Use a secrets manager (AWS Secrets Manager, Vault) instead of `.env`
+- Restrict CORS origins (currently `allow_origins=["*"]`)
+- Add API key authentication for iOS -> backend requests
+- Implement request signing or JWT for client authentication
+- Use TLS (wss://) for WebSocket connections if possible
+- Add IP allowlisting for the backend server
+- Monitor and alert on token refresh failures
+- Rotate KIS credentials periodically
+
+</AccordionItem>
+</Accordion>
+
+---
+
+## Troubleshooting
+
+<Accordion>
+<AccordionItem title="Token request fails with 401" icon="🔒" badge="Auth Error">
+
+**Cause:** Incorrect `KIS_APP_KEY` or `KIS_APP_SECRET`
+
+**Solution:** Verify credentials at the [KIS Developer Portal](https://apiportal.koreainvestment.com). Ensure you are using the correct environment (production vs. mock/paper trading).
+
+</AccordionItem>
+<AccordionItem title="WebSocket approval key rejected" icon="🔌" badge="WS Error">
+
+**Cause:** The approval key may become invalid after a WebSocket disconnection.
+
+**Solution:** The backend automatically clears the cached key on reconnect failure via `clear_ws_approval_key()` and requests a new one. If issues persist, restart the backend server.
+
+</AccordionItem>
+<AccordionItem title="RuntimeError: KIS_APP_KEY and KIS_APP_SECRET must be set" icon="⚠️" badge="Config Error">
+
+**Cause:** The `.env` file is missing or does not contain the required variables.
+
+**Solution:** Create a `.env` file in `/backend/` with `KIS_APP_KEY` and `KIS_APP_SECRET`. Ensure `load_dotenv()` runs before any API calls (it is called in `main.py` at module level).
+
+</AccordionItem>
+<AccordionItem title="Rate limit exceeded (HTTP 429)" icon="🚦" badge="Rate Limit">
+
+**Cause:** KIS allows approximately 20 requests per second. The backend limits to 15 concurrent requests via `asyncio.Semaphore`, but burst traffic can still exceed limits.
+
+**Solution:** Reduce concurrent requests or implement request queuing. Consider caching frequently-accessed data (indices, currency rates) with a short TTL.
+
+</AccordionItem>
+</Accordion>

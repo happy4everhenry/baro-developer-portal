@@ -1,0 +1,95 @@
+<PageMeta status="live" layer="shared" />
+
+# What is BARO?
+
+<InfoBox type="fun" title="Think of it like this...">
+Imagine you have a super-smart piggy bank app on your phone. But instead of just saving coins, it uses AI to help you invest wisely — picking stocks, tracking your portfolio, and guiding you with smart recommendations. That's BARO!
+</InfoBox>
+
+BARO is a **Korean AI robo-advisor** that helps people invest in stocks, ETFs, and currencies — all from their iPhone, guided by intelligent recommendations. It's built with **SwiftUI**, Apple's newest way to make beautiful apps. Development is organized into three phases: **Phase 1** (core screens and market data) and **Phase 2** (stock detail, search, authentication) are complete. **Phase 3** (AI-powered insights and recommendations) is currently in progress.
+
+---
+
+## BARO at a Glance
+
+<StatGrid columns={4}>
+  <StatCard value="14" label="Screens" />
+  <StatCard value="100%" label="SwiftUI" />
+  <StatCard value="3" label="Asset Types" />
+  <StatCard value="1" label="App, Many Powers" />
+</StatGrid>
+
+---
+
+## How the App is Built
+
+Think of BARO like a layered cake. Each layer has a special job:
+
+<Diagram title="How BARO Works (Layer Cake!)">
+  <DiagramRow>
+    <DiagramNode type="view" icon="📱" label="Screen" sublabel="What you see and tap" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="talks to" />
+  <DiagramRow>
+    <DiagramNode type="vm" icon="🧠" label="ViewModel" sublabel="The brain that thinks" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="asks for data" />
+  <DiagramRow>
+    <DiagramNode type="repo" icon="📦" label="Repository" sublabel="The storage room" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="fetches from" />
+  <DiagramRow>
+    <DiagramNode type="service" icon="🌐" label="API" sublabel="The internet connection" />
+  </DiagramRow>
+</Diagram>
+
+<InfoBox type="info" title="What does each layer do?">
+- **Screen** — The pretty part you see! Buttons, charts, colors.
+- **ViewModel** — The brain. It takes data and decides what to show you.
+- **Repository** — Like a librarian. It knows where to find all the information.
+- **API** — The messenger that talks to servers on the internet to get live prices.
+</InfoBox>
+
+---
+
+## Who is This Portal For?
+
+<FeatureGrid columns={3}>
+  <FeatureCard icon="🎨" title="For Designers" description="Explore every color, font, spacing rule, and animation in BARO's design system. See all the visual building blocks that make up every screen." href="/design-system" color="purple" />
+  <FeatureCard icon="💻" title="For Developers" description="Dive into the architecture, Swift source code, API reference, and component patterns. Everything is SwiftUI with MVVM + Repository pattern." href="/ios-source" color="jade" />
+  <FeatureCard icon="🌟" title="For Everyone" description="You don't need to be a designer or developer! Every page has diagrams, examples, and simple explanations. Click around — you can't break anything!" href="/screens" color="blue" />
+</FeatureGrid>
+
+### Recommended Starting Points
+
+<FeatureGrid columns={2}>
+  <FeatureCard icon="🎨" title="Design System" description="Colors, fonts, spacing, and all the visual rules" href="/design-system" color="purple" />
+  <FeatureCard icon="📱" title="All Screens" description="See every screen in the app and how they look" href="/screens" color="blue" />
+  <FeatureCard icon="🏗️" title="Architecture" description="Learn how the app layers fit together" href="/getting-started/architecture" color="jade" />
+  <FeatureCard icon="🧩" title="Components" description="Reusable building blocks you can snap together" href="/components" color="teal" />
+</FeatureGrid>
+
+---
+
+## Quick Start
+
+<FeatureGrid columns={2}>
+  <FeatureCard icon="🚀" title="Quick Start Guide" description="Get up and running in 5 minutes" href="/getting-started/quick-start" color="jade" />
+  <FeatureCard icon="🗺️" title="Architecture Overview" description="See the big picture of how BARO is built" href="/architecture" color="blue" />
+  <FeatureCard icon="📱" title="Explore Screens" description="Browse all 14 screens in the app" href="/screens" color="amber" />
+  <FeatureCard icon="🧩" title="Component Library" description="Discover the LEGO pieces that build every screen" href="/components" color="purple" />
+</FeatureGrid>
+
+---
+
+## What Can You Invest in with BARO?
+
+<FeatureGrid columns={3}>
+  <FeatureCard icon="📈" title="Stocks" description="Buy tiny pieces of big companies like Samsung" href="/screens/stock-detail" color="jade" />
+  <FeatureCard icon="📊" title="ETFs" description="Baskets of many stocks bundled together" href="/screens/market-overview" color="blue" />
+  <FeatureCard icon="💱" title="Currencies" description="Trade Korean Won for US Dollars and more" href="/screens/market-overview" color="amber" />
+</FeatureGrid>
+
+<InfoBox type="note" title="Good to know">
+BARO is designed for the Korean market, so prices show up in Korean Won and the app follows Korean stock exchange rules.
+</InfoBox>

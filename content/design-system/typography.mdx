@@ -1,0 +1,224 @@
+# Typography <KoreanLabel>타이포그래피</KoreanLabel>
+
+<PageMeta status="live" layer="frontend" />
+
+The BARO type system uses system fonts with 12 carefully defined tokens spanning 11pt to 20pt. Each token maps to a specific UI role so text always looks consistent across every screen.
+
+<StatGrid columns={4}>
+  <StatCard value="12" label="Font Tokens" />
+  <StatCard value="4" label="Weight Levels" />
+  <StatCard value="11--20" label="Size Range (pt)" />
+  <StatCard value="SF Pro" label="System Font" />
+</StatGrid>
+
+<InfoBox type="tip" title="Think of fonts like a team">
+Each font token has a specific job. **Titles** are the team captains (big and bold). **Body text** does the everyday work (medium size). **Captions** handle the small details (compact and quiet). Just like a team, they work best when everyone stays in their role.
+</InfoBox>
+
+<Tabs>
+<Tab label="Font Scale" icon="type">
+
+## Font Stack
+
+BARO uses system fonts for fast rendering and a native feel. No custom font files are bundled.
+
+| Platform | Latin / Numbers | Korean | Fallback |
+|----------|----------------|--------|----------|
+| **iOS / iPadOS** | `SF Pro Text` / `SF Pro Display` | Apple SD Gothic Neo | system-ui |
+| **Android** | `Roboto` | Noto Sans KR | sans-serif |
+| **Web (dev-docs)** | `Inter` | Noto Sans KR | system-ui, -apple-system |
+
+<InfoBox type="note" title="SF Pro Licensing">
+SF Pro is available only on Apple platforms. `Font.system()` in SwiftUI automatically resolves to SF Pro. Never embed SF Pro font files in the app bundle.
+</InfoBox>
+
+## Complete Type Scale
+
+All 12 tokens from largest to smallest. Weights range from Regular (400) through Medium (500), Semibold (600), to Bold (700).
+
+| Token | Size | Weight | Line Height | Usage |
+|-------|------|--------|-------------|-------|
+| `klTitle` | `20pt` | Bold (700) | ~24pt | Section titles, date headers |
+| `klBannerTitle` | `18pt` | Bold (700) | ~22pt | Banner card headlines |
+| `klHeadline` | `17pt` | Bold (700) | ~22pt | Stock section headers, index values |
+| `klPrice` | `16pt` | Bold (700) | ~20pt | Stock prices, primary numeric data |
+| `klSubheadline` | `15pt` | Semibold (600) | ~20pt | Company names, row titles |
+| `klBody` | `14pt` | Semibold (600) | ~18pt | Filter tabs, active body text |
+| `klBodyRegular` | `14pt` | Regular (400) | ~18pt | Banner subtitles, news titles |
+| `klIndexName` | `13pt` | Semibold (600) | ~18pt | Market index names |
+| `klCaption` | `12pt` | Regular (400) | ~16pt | Market cap, tags, captions |
+| `klCaptionBold` | `12pt` | Semibold (600) | ~16pt | Price change values |
+| `klSmall` | `11pt` | Semibold (600) | ~14pt | Index changes, market status |
+| `klNavLabel` | `11pt` | Medium (500) | ~14pt | Bottom navigation labels |
+
+## Weight System
+
+<StatGrid columns={4}>
+  <StatCard value="Bold" label="Weight 700 -- Titles, prices, headlines" />
+  <StatCard value="Semibold" label="Weight 600 -- Names, tabs, labels" />
+  <StatCard value="Medium" label="Weight 500 -- Navigation labels only" />
+  <StatCard value="Regular" label="Weight 400 -- Subtitles, captions" />
+</StatGrid>
+
+</Tab>
+<Tab label="Usage Examples" icon="eye">
+
+## Display Sizes (17--20pt)
+
+Large, prominent tokens that anchor visual hierarchy at the top of screens and sections.
+
+<Accordion>
+<AccordionItem title="klTitle -- 20pt Bold" icon="heading" defaultOpen={true}>
+
+<KoreanLabel>3월 11일 화요일</KoreanLabel>
+
+Section titles, date display on home screen. Maximum visual weight across the app.
+</AccordionItem>
+<AccordionItem title="klBannerTitle -- 18pt Bold" icon="image" defaultOpen={false}>
+
+<KoreanLabel>AI 시장 인사이트</KoreanLabel>
+
+Banner card headlines on carousel. Prominent but slightly smaller than section titles.
+</AccordionItem>
+<AccordionItem title="klHeadline -- 17pt Bold" icon="hash" defaultOpen={false}>
+
+2,723.06
+
+Stock section headers, market index values. Key numeric anchors in data-dense views.
+</AccordionItem>
+</Accordion>
+
+## Body Sizes (14--16pt)
+
+The workhorse tier -- prices, company names, tabs, and body text.
+
+<Accordion>
+<AccordionItem title="klPrice -- 16pt Bold" icon="dollar-sign" defaultOpen={false}>
+
+72,400
+
+Stock prices in list rows and detail views. Bold for rapid scanning in watchlists.
+</AccordionItem>
+<AccordionItem title="klSubheadline -- 15pt Semibold" icon="tag" defaultOpen={false}>
+
+<KoreanLabel>삼성전자</KoreanLabel>
+
+Company names in stock rows. Semibold pairs with klPrice for clear row hierarchy.
+</AccordionItem>
+<AccordionItem title="klBody & klBodyRegular -- 14pt" icon="align-left" defaultOpen={false}>
+
+**klBody** (Semibold): <KoreanLabel>전체 종목</KoreanLabel> -- Filter tabs, interactive body text. Semibold signals tappability.
+
+**klBodyRegular** (Regular): <KoreanLabel>맞춤형 일일 시장 분석</KoreanLabel> -- Banner subtitles, news titles. Regular weight for longer reading.
+</AccordionItem>
+</Accordion>
+
+## Small Sizes (11--13pt)
+
+Compact tokens for metadata, captions, navigation labels, and supplementary information.
+
+<Accordion>
+<AccordionItem title="klIndexName -- 13pt Semibold" icon="trending-up" defaultOpen={false}>
+
+KOSPI
+
+Market index labels. Semibold at small size for legibility in dense data areas.
+</AccordionItem>
+<AccordionItem title="klCaption & klCaptionBold -- 12pt" icon="file-text" defaultOpen={false}>
+
+**klCaption** (Regular): <KoreanLabel>시가총액: 432.1조</KoreanLabel> -- Market cap, tags, general captions.
+
+**klCaptionBold** (Semibold): +2.34% -- Price change percentages, emphasized on financial deltas.
+</AccordionItem>
+<AccordionItem title="klSmall & klNavLabel -- 11pt" icon="minimize" defaultOpen={false}>
+
+**klSmall** (Semibold): +12.50 (+0.46%) -- Index change values, market status. Smallest body text.
+
+**klNavLabel** (Medium): <KoreanLabel>홈</KoreanLabel> -- Bottom navigation bar labels. Reduced visual emphasis.
+</AccordionItem>
+</Accordion>
+
+## Contextual Pairings
+
+Tokens work in pairs within UI components. These are the standard pairings used across BARO.
+
+### Stock List Row
+- Company name: `klSubheadline` (15pt Semibold) + ticker: `klCaption` (12pt Regular)
+- Price: `klPrice` (16pt Bold) + change: `klCaptionBold` (12pt Semibold)
+
+### Market Index Card
+- Index name: `klIndexName` (13pt Semibold) + value: `klHeadline` (17pt Bold) + change: `klSmall` (11pt Semibold)
+
+</Tab>
+<Tab label="Code" icon="code">
+
+## Swift Implementation
+
+All font tokens are static properties on `Font`. No custom font files needed -- system font is used throughout.
+
+```swift filename="KLINEFonts.swift"
+import SwiftUI
+
+extension Font {
+    /// 20pt bold -- Section titles, date display
+    static let klTitle = Font.system(size: 20, weight: .bold)
+
+    /// 18pt bold -- Banner title
+    static let klBannerTitle = Font.system(size: 18, weight: .bold)
+
+    /// 17pt bold -- Stock section header, index values
+    static let klHeadline = Font.system(size: 17, weight: .bold)
+
+    /// 16pt bold -- Stock prices
+    static let klPrice = Font.system(size: 16, weight: .bold)
+
+    /// 15pt semibold -- Company names
+    static let klSubheadline = Font.system(size: 15, weight: .semibold)
+
+    /// 14pt semibold -- Filter tabs, body text
+    static let klBody = Font.system(size: 14, weight: .semibold)
+
+    /// 14pt regular -- Banner subtitle, news title
+    static let klBodyRegular = Font.system(size: 14, weight: .regular)
+
+    /// 13pt semibold -- Index names
+    static let klIndexName = Font.system(size: 13, weight: .semibold)
+
+    /// 12pt regular -- Market cap, tags, captions
+    static let klCaption = Font.system(size: 12, weight: .regular)
+
+    /// 12pt semibold -- Price change values
+    static let klCaptionBold = Font.system(size: 12, weight: .semibold)
+
+    /// 11pt semibold -- Index change, market status
+    static let klSmall = Font.system(size: 11, weight: .semibold)
+
+    /// 11pt medium -- Navigation labels
+    static let klNavLabel = Font.system(size: 11, weight: .medium)
+}
+```
+
+```swift filename="Usage Example"
+// Stock row view
+Text(stock.name)
+    .font(.klSubheadline)
+    .foregroundColor(.klText)
+
+Text(stock.formattedPrice)
+    .font(.klPrice)
+    .foregroundColor(.klText)
+
+Text(stock.changePercent)
+    .font(.klCaptionBold)
+    .foregroundColor(stock.isUp ? .klPriceUp : .klPriceDown)
+```
+
+## Typography Guidelines
+
+<FeatureGrid columns={2}>
+  <FeatureCard icon="check" title="Do" description="Always use predefined font tokens. Pair klSubheadline with klCaption in list rows. Use klBodyRegular for longer text. Keep at least 2pt between hierarchy levels. Test Korean text at every size tier." />
+  <FeatureCard icon="x" title="Don't" description="Don't use custom sizes outside the token scale. Don't use Bold below 16pt for body text. Don't go below 11pt for any visible text (accessibility). Don't mix font families. Don't embed SF Pro files in the bundle." />
+</FeatureGrid>
+
+</Tab>
+</Tabs>

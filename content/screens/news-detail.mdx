@@ -1,0 +1,38 @@
+# News Detail <KoreanLabel>뉴스 상세</KoreanLabel>
+
+<PageMeta status="live" layer="frontend" since="2025" />
+
+<InfoBox type="fun" title="What is the news detail screen?">
+When you tap a news article on the home screen, you see its **full story** here — like opening a newspaper article to read the whole thing.
+</InfoBox>
+
+## What You See
+
+```
+┌─────────────────────────────┐
+│  KLDetailNavBar             │  ← Back button + title
+│  Article Title              │  ← Headline text
+│  Source + Date              │  ← "한국경제 · 30분 전"
+│  AI Summary                 │  ← AI-generated 3-line summary
+│  Full Content               │  ← Article body text
+│  Tags                       │  ← #삼성전자 #HBM
+│  Related Stocks             │  ← Tappable stock chips
+└─────────────────────────────┘
+```
+
+## Features
+
+- **AI-generated summary** — 3-line digest at the top for quick reading
+- **Source attribution** — Publisher name and relative time
+- **Category & region badges** — Market, stocks, themes, economy, etc.
+- **Content type** — News, analyst reports, or regulatory disclosures
+- **Related stock links** — Tap to navigate to stock detail
+- **Hashtag tags** — Topic tags for the article
+
+## Source Files
+
+| File | Purpose |
+|------|---------|
+| `Features/NewsDetail/NewsDetailView.swift` | News article list with category tabs |
+| `Features/NewsDetail/NewsArticleDetailView.swift` | Full article content view |
+| `Features/NewsDetail/NewsDetailViewModel.swift` | Article data loading and filtering |

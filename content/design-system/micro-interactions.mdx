@@ -1,0 +1,217 @@
+# Micro-interactions <KoreanLabel>마이크로 인터랙션</KoreanLabel>
+
+<PageMeta status="live" layer="frontend" />
+
+These are the tiny, delightful animations that make BARO feel alive. From stock prices ticking like a scoreboard to bubbles popping into view, every little movement has a purpose!
+
+<InfoBox type="fun" title="What are micro-interactions?">
+Micro-interactions are the small animations you might not notice at first, but you would definitely miss if they were gone. They are like the satisfying "click" of a light switch -- tiny details that make everything feel polished and real.
+</InfoBox>
+
+## Summary
+
+| Interaction | Animation Type | Duration | Trigger |
+|---|---|---|---|
+| Price ticking | `.numericText()` | 0.3s snappy | WebSocket price update |
+| News card focal scaling | `.scrollTransition` | Implicit | Horizontal scroll position |
+| Bubble spiral entrance | Spring + stagger | 0.5s + 50ms/item | View appears |
+| Tab bar collapse | `.easeInOut` | 0.3s | scrollOffset threshold |
+| Banner auto-scroll | `.easeInOut` | 0.5s every 5s | Timer |
+| Session pulsing dot | `.easeInOut.repeat` | 0.8s loop | Market session = .open |
+| Shimmer gradient | `.linear.repeat` | 1.5s loop | Loading state active |
+
+<Accordion>
+<AccordionItem title=".numericText() Price Ticking" icon="🔢" badge="Real-time" defaultOpen={true}>
+
+<InfoBox type="fun" title="Like a scoreboard at a sports game!">
+When stock prices update in real time, each digit rolls to its new value one by one -- just like the score displays at a stadium. It is powered by WebSocket connections that push new prices the instant they change.
+</InfoBox>
+
+Real-time stock prices animate digit-by-digit when WebSocket updates arrive, using SwiftUI's `.contentTransition(.numericText())`. This creates a "ticking" effect similar to Bloomberg terminals.
+
+```swift filename="StockRowView.swift"
+// In StockRowView — live price display
+Text(displayPrice)
+    .font(.klPrice)
+    .fontWeight(.bold)
+    .foregroundStyle(priceColor)
+    .contentTransition(.numericText(value: Double(displayPrice) ?? 0))
+    .animation(.snappy(duration: 0.3), value: displayPrice)
+
+// Price resolution: WebSocket > REST
+var displayPrice: String {
+    if let livePrice = webSocketManager.latestPrices[stock.code] {
+        return livePrice.currentPrice  // Real-time from WebSocket
+    }
+    return stock.price  // Snapshot from REST API
+}
+```
+
+<InfoBox type="tip" title="Zero cost when static">
+The `.numericText()` transition only animates when the value actually changes. If there is no WebSocket connection, static prices have zero animation cost.
+</InfoBox>
+
+</AccordionItem>
+
+<AccordionItem title="Focal Scaling -- News Cards" icon="🔍" badge="Scroll">
+
+<InfoBox type="fun" title="Like a spotlight on a stage!">
+As you scroll through news cards, the one in the center gets bigger and brighter while the others shrink back. It is like a spotlight following the star of the show!
+</InfoBox>
+
+News cards in the horizontal carousel use a scale effect to create depth. The centered card appears at full size while off-center cards shrink to 92% and fade to 70% opacity.
+
+```swift filename="NewsSectionView.swift"
+ScrollView(.horizontal, showsIndicators: false) {
+    LazyHStack(spacing: 12) {
+        ForEach(news) { item in
+            NewsCardView(news: item)
+                .containerRelativeFrame(.horizontal, count: 1, spacing: 12)
+                .scrollTransition { content, phase in
+                    content
+                        .scaleEffect(phase.isIdentity ? 1.0 : 0.92)
+                        .opacity(phase.isIdentity ? 1.0 : 0.7)
+                }
+        }
+    }
+}
+.scrollTargetBehavior(.viewAligned)
+```
+
+</AccordionItem>
+
+<AccordionItem title="Bubble Chart Spiral Animation" icon="🫧" badge="Entrance">
+
+<InfoBox type="fun" title="Like popcorn popping!">
+When the market themes bubble chart appears, each bubble pops into view one after another in a spiral pattern. The biggest bubbles appear first, then smaller ones pop in around them -- like popcorn kernels popping in a pan!
+</InfoBox>
+
+The AI Market Themes bubble chart uses a spiral layout algorithm with staggered entrance animations. Each bubble enters 50ms after the previous one.
+
+```swift filename="MarketThemeBubbleChartView.swift"
+// Spiral placement using golden angle approximation
+func spiralLayout(themes: [MarketTheme], containerSize: CGSize)
+    -> [(theme: MarketTheme, position: CGPoint, radius: CGFloat)] {
+    var result: [(MarketTheme, CGPoint, CGFloat)] = []
+    let center = CGPoint(x: containerSize.width / 2, y: containerSize.height / 2)
+
+    for (index, theme) in themes.enumerated() {
+        let angle = Double(index) * 2.4  // Golden angle approximation
+        let distance = 20.0 + Double(index) * 8.0
+        let x = center.x + CGFloat(cos(angle) * distance)
+        let y = center.y + CGFloat(sin(angle) * distance)
+        let radius = max(28, CGFloat(theme.changeRate.magnitude) * 4)
+        result.append((theme, CGPoint(x: x, y: y), radius))
+    }
+    return result
+}
+
+// Staggered entrance animation
+ForEach(Array(layouts.enumerated()), id: \.offset) { index, item in
+    BubbleView(theme: item.theme, radius: item.radius)
+        .position(item.position)
+        .scaleEffect(appeared ? 1.0 : 0.0)
+        .animation(
+            .spring(response: 0.5, dampingFraction: 0.6)
+            .delay(Double(index) * 0.05),  // 50ms stagger
+            value: appeared
+        )
+}
+```
+
+</AccordionItem>
+
+<AccordionItem title="Floating Tab Bar Collapse" icon="📱" badge="Scroll">
+
+<InfoBox type="fun" title="A shape-shifting menu!">
+The tab bar at the bottom is like a friendly creature that curls up when you are busy reading (scrolling down) and stretches back out when you look for it (scroll up). It gets out of your way but is always ready when you need it!
+</InfoBox>
+
+The floating tab bar transitions between expanded (2-row with all tabs) and collapsed (single search pill) states based on scroll offset. The threshold is -50 pixels.
+
+```swift filename="FloatingTabBar.swift"
+// Scroll offset tracking via GeometryReader
+GeometryReader { geo in
+    Color.clear.preference(
+        key: ScrollOffsetPreferenceKey.self,
+        value: geo.frame(in: .named("homeScroll")).minY
+    )
+}
+.frame(height: 0)
+
+// Collapse logic
+private var isCollapsed: Bool {
+    scrollOffset < -50 && !forceExpanded
+}
+
+// Smooth transition between states
+FloatingTabBar(
+    selectedTab: $selectedTab,
+    isCollapsed: isCollapsed,
+    forceExpanded: $forceExpanded,
+    onSearchTap: { showSearch = true }
+)
+.animation(.easeInOut(duration: 0.3), value: isCollapsed)
+```
+
+</AccordionItem>
+
+<AccordionItem title="Banner Auto-scroll" icon="🎠" badge="Timer">
+
+<InfoBox type="fun" title="A lazy river of banners!">
+The banner carousel gently drifts forward every 5 seconds, like a lazy river at a water park. You can also swipe to jump ahead or go back whenever you want!
+</InfoBox>
+
+The home screen banner carousel auto-advances every 5 seconds with a smooth paging animation. The dot indicators grow and shrink to show which page you are on.
+
+```swift filename="BannerCarouselView.swift"
+.onReceive(timer) { _ in
+    withAnimation(.easeInOut(duration: 0.5)) {
+        currentPage = (currentPage + 1) % banners.count
+    }
+}
+
+// Page indicator dots
+HStack(spacing: 6) {
+    ForEach(0..<banners.count, id: \.self) { index in
+        Circle()
+            .fill(index == currentPage ? Color.white : Color.white.opacity(0.4))
+            .frame(width: index == currentPage ? 8 : 6,
+                   height: index == currentPage ? 8 : 6)
+            .animation(.easeInOut(duration: 0.2), value: currentPage)
+    }
+}
+```
+
+</AccordionItem>
+
+<AccordionItem title="Market Session Pulsing Dot" icon="💚" badge="Status">
+
+<InfoBox type="fun" title="A heartbeat for the market!">
+When the Korean stock market is open, a tiny green dot next to the date gently pulses like a heartbeat. It is a subtle way of saying "the market is alive and trading right now!"
+</InfoBox>
+
+The market session status indicator pulses to show that the market is live. It scales between 1.0x and 1.3x with fading opacity.
+
+```swift filename="DateDisplayView.swift"
+HStack(spacing: 4) {
+    Circle()
+        .fill(session.color)  // Green for open, gray for closed
+        .frame(width: 6, height: 6)
+        .scaleEffect(isPulsing ? 1.3 : 1.0)
+        .opacity(isPulsing ? 0.6 : 1.0)
+        .animation(
+            session == .open
+                ? .easeInOut(duration: 0.8).repeatForever(autoreverses: true)
+                : .default,
+            value: isPulsing
+        )
+
+    Text(session.label)  // "장중", "장전", "장후", "휴장"
+        .font(.klSmall)
+}
+.onAppear { isPulsing = session == .open }
+```
+
+</AccordionItem>
+</Accordion>

@@ -1,0 +1,132 @@
+# Data Flow
+
+<PageMeta status="live" layer="frontend" />
+
+<InfoBox type="info" title="What is data flow?">
+Data flow is the journey your data takes from the internet to the screen. Think of it like a relay race: the **repository** fetches the data, passes it to the **view model** (which organizes it), and the **view** displays it to the user. Each runner has one job, and they pass the baton smoothly.
+</InfoBox>
+
+<StatGrid columns={3}>
+  <StatCard value="2" label="Main flows" />
+  <StatCard value="6" label="Parallel fetches (Home)" />
+  <StatCard value="REST + WS" label="Dual data sources" />
+</StatGrid>
+
+---
+
+<Tabs>
+<Tab label="Home Screen Flow" icon="🏠">
+
+## Home Screen Data Flow
+
+The home screen loads everything at once using 6 parallel async fetches, then layers on real-time WebSocket updates for live prices.
+
+<Diagram title="Home Screen Data Flow">
+  <DiagramRow>
+    <DiagramNode type="view" icon="📱" label="HomeView" sublabel=".task { loadHomeData(); startLiveUpdates() }" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="Triggers loading" />
+  <DiagramRow>
+    <DiagramNode type="vm" icon="🧠" label="HomeViewModel" sublabel="6 parallel async fetches + WebSocket subscription" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="Calls repositories" />
+  <DiagramRow>
+    <DiagramNode type="repo" icon="📊" label="fetchIndices()" sublabel="Market indices" />
+    <DiagramNode type="repo" icon="💹" label="fetchStocks()" sublabel="Stock rankings" />
+    <DiagramNode type="repo" icon="💱" label="fetchRates()" sublabel="Currency rates" />
+  </DiagramRow>
+  <DiagramArrow direction="down" />
+  <DiagramRow>
+    <DiagramNode type="repo" icon="🎯" label="fetchBanners()" sublabel="Promo banners" />
+    <DiagramNode type="repo" icon="📰" label="fetchNews()" sublabel="Latest news" />
+    <DiagramNode type="repo" icon="🔥" label="fetchThemes()" sublabel="Market themes" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="REST (initial) + WebSocket (streaming)" />
+  <DiagramRow>
+    <DiagramNode type="model" icon="✨" label="@Observable properties" sublabel="livePrices dict -> Views re-render with .numericText() animation" />
+  </DiagramRow>
+</Diagram>
+
+<InfoBox type="tip" title="How live updates work">
+After the initial REST data loads, the WebSocket connection streams price updates in real time. The `HomeViewModel` stores these in a `livePrices` dictionary. SwiftUI views automatically re-render with smooth number animations whenever a price changes.
+</InfoBox>
+
+<StepGuide>
+<Step number={1} title="View appears">
+`HomeView` triggers `.task { loadHomeData(); startLiveUpdates() }` when it appears on screen.
+</Step>
+<Step number={2} title="ViewModel fetches data in parallel">
+`HomeViewModel` fires off 6 repository calls at the same time using Swift's structured concurrency (`async let`).
+</Step>
+<Step number={3} title="REST data arrives">
+Each repository method calls the backend REST API (or falls back to mock data). Results are stored in `@Observable` properties.
+</Step>
+<Step number={4} title="WebSocket connects">
+`WebSocketManager` connects and subscribes to stock codes shown on the home screen.
+</Step>
+<Step number={5} title="Live prices stream in">
+Trade ticks update the `livePrices` dictionary. SwiftUI views re-render with `.numericText()` animation for smooth price transitions.
+</Step>
+</StepGuide>
+
+</Tab>
+<Tab label="Stock Detail Flow" icon="📈">
+
+## Stock Detail Data Flow
+
+The stock detail page combines REST data (for the full detail snapshot) with a per-stock WebSocket stream for live price overlay.
+
+<Diagram title="Stock Detail Data Flow">
+  <DiagramRow>
+    <DiagramNode type="view" icon="📱" label="StockDetailPageView" sublabel=".task { loadDetail(); startLiveUpdates() }" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="Triggers loading" />
+  <DiagramRow>
+    <DiagramNode type="vm" icon="🧠" label="StockDetailPageViewModel" sublabel="livePrice ?? stock.price overlay" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="REST (initial) + WebSocket (live ticks)" />
+  <DiagramRow>
+    <DiagramNode type="repo" icon="📦" label="fetchStockDetail(id)" sublabel="KIS REST API" />
+    <DiagramNode type="service" icon="🔌" label="WebSocketManager" sublabel="AsyncStream<PriceUpdate>" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="Data arrives" />
+  <DiagramRow>
+    <DiagramNode type="model" icon="📋" label="StockDetailInfo" sublabel="Full detail model" />
+    <DiagramNode type="vm" icon="📉" label="rebuildChartCache()" sublabel="LTTB downsample to 300pts" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="Renders in child views" />
+  <DiagramRow>
+    <DiagramNode type="view" icon="💰" label="PriceHeader" sublabel=".numericText() animation" />
+    <DiagramNode type="view" icon="📊" label="ChartView" sublabel="Candlestick/Line" />
+    <DiagramNode type="view" icon="📖" label="OrderBookView" sublabel="Ask/Bid levels" />
+    <DiagramNode type="view" icon="📅" label="DailyPriceView" sublabel="Historical prices" />
+  </DiagramRow>
+</Diagram>
+
+<InfoBox type="note" title="Live price overlay">
+The ViewModel uses a simple pattern: `livePrice ?? stock.price`. When a WebSocket trade tick arrives, it overrides the REST price. If no live data is available yet, the REST price is shown instead.
+</InfoBox>
+
+<StepGuide>
+<Step number={1} title="User taps a stock">
+Navigation pushes `StockDetailPageView`, which triggers `.task { loadDetail(); startLiveUpdates() }`.
+</Step>
+<Step number={2} title="REST detail fetched">
+`fetchStockDetail(id)` calls the backend, which returns the full stock snapshot including chart data, order book, and fundamentals.
+</Step>
+<Step number={3} title="Chart data downsampled">
+`rebuildChartCache()` uses the LTTB algorithm to downsample chart data to 300 points for smooth rendering.
+</Step>
+<Step number={4} title="WebSocket subscribes">
+`WebSocketManager` subscribes to the stock's code. An `AsyncStream` delivers each trade tick to the ViewModel.
+</Step>
+<Step number={5} title="Views render and update">
+Child views (PriceHeader, ChartView, OrderBookView, DailyPriceView) display the data. Prices animate smoothly on each WebSocket tick.
+</Step>
+<Step number={6} title="Cleanup on leave">
+`.onDisappear` calls `stopLiveUpdates()`, which cancels the async stream and unsubscribes after a 5-second grace period.
+</Step>
+</StepGuide>
+
+</Tab>
+</Tabs>

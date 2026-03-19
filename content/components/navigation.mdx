@@ -1,0 +1,240 @@
+# Navigation <KoreanLabel>내비게이션</KoreanLabel>
+
+<PageMeta status="live" layer="frontend" />
+
+BARO uses a floating tab bar that can shrink and grow, smooth sliding tab indicators, and a flat navigation model. No deep stacks -- just full-screen covers and sheets!
+
+<StatGrid columns={4}>
+  <StatCard value="5" label="Tab Items" />
+  <StatCard value="2" label="Tab States" />
+  <StatCard value="7" label="Navigation Patterns" />
+  <StatCard value="1" label="AI Quick-Access" />
+</StatGrid>
+
+<InfoBox type="fun" title="How does navigation work?">
+Think of a popup book. When you tap a stock, a new page slides up and covers the whole screen. When you tap back, it slides away. That is how BARO's navigation works -- flat pages that stack on top of each other!
+</InfoBox>
+
+## Navigation Architecture <KoreanLabel>내비게이션 구조</KoreanLabel>
+
+BARO uses a flat navigation model with `fullScreenCover` for drill-in screens and `sheet` for configuration panels. No nested `NavigationStack` is used on the home screen.
+
+<Diagram title="Navigation Flow">
+  <DiagramRow>
+    <DiagramNode type="view" icon="🏠" label="MainTabView" sublabel="Root container" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="ZStack" />
+  <DiagramRow>
+    <DiagramNode type="view" icon="📱" label="5 Tab Screens" sublabel="Home, Products, Assets, Stocks, Menu" />
+    <DiagramNode type="service" icon="🎯" label="FloatingTabBar" sublabel="Collapses on scroll" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label=".fullScreenCover" />
+  <DiagramRow>
+    <DiagramNode type="view" icon="📊" label="StockDetailPageView" sublabel="Drill-in stock page" />
+    <DiagramNode type="view" icon="🔍" label="SearchView" sublabel="Full-screen search" />
+    <DiagramNode type="view" icon="🌍" label="MarketOverviewDetail" sublabel="Index/FX detail" />
+  </DiagramRow>
+</Diagram>
+
+<Accordion>
+<AccordionItem title="FloatingTabBar" icon="🎛️" badge="Core" defaultOpen={true}>
+
+## FloatingTabBar <KoreanLabel>플로팅 탭 바</KoreanLabel>
+
+A two-state floating navigation bar anchored to the bottom of the screen. It collapses into a compact search-focused mode when you scroll down, and expands back to show all tabs when you scroll up or tap the menu button.
+
+**Expanded State** -- Full-width search bar on Line 1; Home circle + 4-tab pill + AI circle on Line 2. Triggered when `scrollOffset >= -50`.
+
+**Collapsed State** -- Single line with Ellipsis circle + Search pill + AI circle. Triggered when `scrollOffset < -50`.
+
+<PropsTable>
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `selectedTab` | `Binding<Int>` | Currently active tab index (0=Home, 1=Products, 2=Assets, 3=Stocks, 4=Menu) |
+| `isCollapsed` | `Bool` | Derived from `scrollOffset < -50 && !forceExpanded` |
+| `forceExpanded` | `Binding<Bool>` | Override to keep expanded (set when user taps ellipsis in collapsed state) |
+| `onSearchTap` | `() -> Void` | Opens search view as `fullScreenCover` |
+</PropsTable>
+
+```swift filename="MainTabView.swift"
+// Collapse threshold
+private var isCollapsed: Bool { scrollOffset < -50 && !forceExpanded }
+
+// Auto-reset forceExpanded on scroll
+.onChange(of: scrollOffset) { oldValue, newValue in
+    if newValue >= -50 { forceExpanded = false }
+    if forceExpanded && abs(newValue - oldValue) > 5 {
+        forceExpanded = false
+    }
+}
+
+// Animate collapse/expand transition
+FloatingTabBar(selectedTab: $selectedTab, isCollapsed: isCollapsed, ...)
+    .animation(.easeInOut(duration: 0.3), value: isCollapsed)
+```
+
+</AccordionItem>
+
+<AccordionItem title="TabBarButton" icon="🔘" badge="UI">
+
+## TabBarButton <KoreanLabel>탭 바 버튼</KoreanLabel>
+
+Individual tab button inside the floating tab bar pill. Uses `matchedGeometryEffect` to create a smooth sliding indicator capsule that follows the selected tab.
+
+<PropsTable>
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `icon` | `String` | SF Symbol name (e.g., `"star"`, `"wonsign.circle"`) |
+| `label` | `String` | Korean label for the tab (e.g., `"상품"`, `"자산"`) |
+| `tag` | `Int` | Unique tab index (1-4 for pill tabs, 0 for Home) |
+| `selectedTab` | `Binding<Int>` | Currently selected tab binding |
+| `namespace` | `Namespace.ID` | Shared namespace for `matchedGeometryEffect` |
+</PropsTable>
+
+### Tab Items
+
+| Tag | Icon | Label | Screen |
+|-----|------|-------|--------|
+| 0 | `house.fill` | Home (separate circle) | HomeView |
+| 1 | `star` | <KoreanLabel>상품</KoreanLabel> (Products) | ProductsPlaceholderView |
+| 2 | `wonsign.circle` | <KoreanLabel>자산</KoreanLabel> (Assets) | AssetsPlaceholderView |
+| 3 | `chart.line.uptrend.xyaxis` | <KoreanLabel>주식</KoreanLabel> (Stocks) | StocksPlaceholderView |
+| 4 | `chart.pie.fill` | <KoreanLabel>자산현황</KoreanLabel> (Portfolio) | MenuPlaceholderView |
+
+```swift filename="TabBarButton.swift"
+ZStack {
+    // Sliding selection indicator — shared across all tabs
+    if isSelected {
+        Capsule()
+            .fill(Color.klNavAccent.opacity(0.15))
+            .matchedGeometryEffect(id: "tabIndicator", in: namespace)
+    }
+
+    Image(systemName: icon)
+        .font(.system(size: 18, weight: isSelected ? .semibold : .regular))
+        .foregroundStyle(isSelected ? Color.klNavAccent : Color.klNavInactive)
+        .scaleEffect(isSelected ? 1.1 : 1.0)  // Subtle emphasis
+}
+.frame(maxWidth: .infinity)
+.frame(height: 44)
+```
+
+</AccordionItem>
+
+<AccordionItem title="AI Quick-Access Button" icon="✨" badge="AI">
+
+The AI assistant button (sparkles icon) is always visible in both expanded and collapsed states. It uses a purple gradient background (`#7C3AED` to `#A78BFA`) with a matching glow shadow.
+
+```swift filename="FloatingTabBar.swift"
+Button(action: { /* AI assistant */ }) {
+    Image(systemName: "sparkles")
+        .font(.system(size: 18, weight: .semibold))
+        .foregroundStyle(.white)
+        .frame(width: 48, height: 48)
+        .background(
+            LinearGradient(
+                colors: [Color(hex: "7C3AED"), Color(hex: "A78BFA")],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .clipShape(Circle())
+        .shadow(color: Color(hex: "7C3AED").opacity(0.4), radius: 12, x: 0, y: 4)
+}
+```
+
+</AccordionItem>
+
+<AccordionItem title="Navigation Patterns" icon="🗺️" badge="Architecture">
+
+### Navigation Patterns
+
+| Pattern | SwiftUI API | Used For | Dismiss |
+|---------|------------|----------|---------|
+| **Full-screen drill-in** | `.fullScreenCover` | StockDetailPage, SearchView, StockDetailView, MarketOverviewDetail | `chevron.left` back button via `KLDetailNavBar` |
+| **Bottom sheet** | `.sheet` | StockFilterSheet, NewsFilterSheet, ExchangeSelectionSheet, ChartSettingsSheet | Drag-to-dismiss + `presentationDetents` |
+| **Alert** | `.alert` | Data loading errors (<KoreanLabel>데이터 로딩 실패</KoreanLabel>) | <KoreanLabel>확인</KoreanLabel> (OK) or <KoreanLabel>재시도</KoreanLabel> (Retry) |
+
+### Deep Navigation Reset
+
+When you tap the home button inside a detail screen, a notification (`.navigateToHome`) is broadcast. All fullScreenCover presentations hear this and dismiss themselves, bringing you back to the home tab.
+
+```swift filename="NavigateToHome.swift"
+// In StockDetailPageView — home button
+Button {
+    NotificationCenter.default.post(name: .navigateToHome, object: nil)
+    dismiss()
+} label: {
+    Image(systemName: "house")
+}
+
+// In MainTabView — global listener
+.onReceive(NotificationCenter.default.publisher(for: .navigateToHome)) { _ in
+    showSearch = false
+    selectedTab = 0
+}
+
+// Each fullScreenCover also subscribes:
+.onReceive(NotificationCenter.default.publisher(for: .navigateToHome)) { _ in
+    showStockPage = false
+    showStockDetail = false
+}
+```
+
+</AccordionItem>
+
+<AccordionItem title="Drill-In Feature Views" icon="📋" badge="Screens">
+
+## Drill-In Feature Views <KoreanLabel>상세 화면</KoreanLabel>
+
+Full-screen views presented via `.fullScreenCover` from the home screen. Each uses `KLScrollableTabHeader` or `KLDetailNavBar` for navigation with category-based tab filtering.
+
+### StockDetailView <KoreanLabel>종목 상세 리스트</KoreanLabel>
+
+Scrollable list of stocks filtered by category tabs and exchange. Presented from "더보기" (More) button on the home stock list.
+
+**Key features:**
+- `KLScrollableTabHeader` with `StockFilter.allCases` (시가총액, 거래량, 거래대금, 상승, 하락, 배당)
+- Floating exchange pill (KOSPI/KOSDAQ/NASDAQ/NYSE/AMEX with flag + status)
+- Tapping a row opens `StockDetailPageView` as another `fullScreenCover`
+- Skeleton loading with `.shimmer()` for initial data fetch
+- Custom `KLScrollIndicator` replaces native scroll bar
+- Subscribes to `.navigateToHome` notification for deep dismiss
+
+### NewsDetailView <KoreanLabel>뉴스 상세</KoreanLabel>
+
+Full-screen news listing with category tab filtering. **Category tabs:** 전체 (All), 경제 (Economy), 정치 (Politics), 산업 (Industry), 테크 (Tech), 부동산 (Real Estate)
+
+**Row layout:**
+- Left: Colored gradient accent bar (4pt wide, unique per article)
+- Center: Title (`.klBody`, 2-line max) + source + timeAgo (`.klCaption`, tertiary)
+- Tags row below: Hashtag labels in tertiary color
+
+### ThemeDetailView <KoreanLabel>테마 상세</KoreanLabel>
+
+Full-screen market themes listing. **Category tabs:** 전체, 기술 (Tech), 산업 (Industry), 에너지 (Energy), 금융 (Finance), 바이오 (Bio)
+
+**Row layout:** Rank number + hashtag name in bold + description text + colored change percentage
+
+### MarketOverviewDetailView <KoreanLabel>시장 개요 상세</KoreanLabel>
+
+Full-screen market data view with indices/currency tabs via `KLSegmentedControl`. **Tabs:** 지수 (Indices) / 환율 (Currency Rates)
+
+**Features:**
+- Error alert with retry button (`재시도`)
+- Async parallel data loading (indices + rates)
+- Skeleton loading states with shimmer
+
+### Placeholder Views <KoreanLabel>플레이스홀더</KoreanLabel>
+
+Temporary placeholder screens for tabs 1-4 (상품, 자산, 주식, 자산현황). Each shows a centered icon, title, and "Coming soon" message with a loading overlay that fades out after 600ms.
+
+| Tab | Icon | Title |
+|-----|------|-------|
+| Products (1) | `star` | Products |
+| Assets (2) | `wonsign.circle` | Assets |
+| Stocks (3) | `chart.line.uptrend.xyaxis` | Stocks |
+| Menu (4) | `ellipsis` | Menu |
+
+</AccordionItem>
+</Accordion>

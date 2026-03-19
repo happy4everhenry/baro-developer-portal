@@ -1,0 +1,247 @@
+# Loading States <KoreanLabel>로딩 상태</KoreanLabel>
+
+<PageMeta status="live" layer="frontend" />
+
+While data is on its way, BARO shows skeleton placeholders that match the exact shape of the real content. When data arrives, the skeletons swap out instantly with zero layout jump!
+
+<StatGrid columns={4}>
+  <StatCard value="6" label="Skeleton Views" />
+  <StatCard value="2" label="Animation Layers" />
+  <StatCard value="1.2s" label="Sweep Duration" />
+  <StatCard value="0" label="Layout Shift" />
+</StatGrid>
+
+<InfoBox type="fun" title="What are skeleton screens?">
+Skeletons are like gray outlines that show where content will appear -- like a coloring book page before you fill it in! They shimmer gently to let you know the app is working on loading the real stuff.
+</InfoBox>
+
+## How Loading Works
+
+Each data section on the home screen has a paired skeleton view. Skeletons are built from `SkeletonBlock` primitives with the `.shimmer()` modifier applied at the container level.
+
+<FlowDiagram>
+  <FlowRow>
+    <FlowNode type="service">Skeleton visible</FlowNode>
+    <FlowArrow />
+    <FlowNode type="vm">Data arrives (async)</FlowNode>
+    <FlowArrow />
+    <FlowNode type="view">Real component swaps in</FlowNode>
+  </FlowRow>
+</FlowDiagram>
+
+### Conditional Rendering Tree
+
+```
+HomeView — Conditional rendering per section
+  ├── banners.isEmpty ? BannerSkeletonView : BannerCarouselView
+  ├── indices.isEmpty ? MarketOverviewRowSkeletonView : MarketOverviewRowView
+  ├── stocks.isEmpty  ? StockListSkeletonView : StockListView
+  └── news.isEmpty    ? NewsSectionSkeletonView : NewsSectionView
+```
+
+### SkeletonBlock Primitive
+
+The basic building block for all skeletons. It is just a rounded gray rectangle.
+
+<PropsTable>
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `width` | `CGFloat?` | `nil` | Fixed width (nil = flexible/fill) |
+| `height` | `CGFloat` | `14` | Fixed height in points |
+| `cornerRadius` | `CGFloat` | `6` | Corner radius (use 50% of height for circles) |
+</PropsTable>
+
+```swift filename="SkeletonBlock.swift"
+struct SkeletonBlock: View {
+    var width: CGFloat? = nil
+    var height: CGFloat = 14
+    var cornerRadius: CGFloat = 6
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: cornerRadius)
+            .fill(Color(hex: "DFE2E8"))
+            .frame(width: width, height: height)
+    }
+}
+```
+
+## Skeleton Views
+
+<Accordion>
+<AccordionItem title="BannerSkeletonView" icon="🖼️" badge="Banner" defaultOpen={true}>
+
+Placeholder for the `BannerCarouselView`. Shows a single rounded rectangle with shimmer and static dot indicators below.
+
+| Element | Size | Details |
+|---------|------|---------|
+| Banner placeholder | Full width x 110pt | Rounded rectangle, `radiusXLarge` (24pt), fill: `#E5E7EB` |
+| Dot indicators | 3 x 6pt circles | Static gray dots (`#D1D5DB`) |
+
+```swift filename="BannerSkeletonView.swift"
+struct BannerSkeletonView: View {
+    var body: some View {
+        VStack(spacing: 0) {
+            RoundedRectangle(cornerRadius: KLINESpacing.radiusXLarge)
+                .fill(Color(hex: "E5E7EB"))
+                .frame(height: 110)
+                .padding(.horizontal, KLINESpacing.xl)
+                .shimmer()
+
+            HStack(spacing: KLINESpacing.xsm) {
+                ForEach(0..<3, id: \.self) { _ in
+                    Circle()
+                        .fill(Color(hex: "D1D5DB"))
+                        .frame(width: 6, height: 6)
+                }
+            }
+            .padding(.vertical, KLINESpacing.mld)
+        }
+    }
+}
+```
+
+</AccordionItem>
+
+<AccordionItem title="MarketOverviewRowSkeletonView" icon="📊" badge="Market">
+
+Horizontal scroll of 4 skeleton cards that mirror the layout of `MarketIndexCardView`.
+
+### Skeleton Layout per Card
+
+| Row | Blocks | Dimensions |
+|-----|--------|------------|
+| Flag + name | Circle + rectangle | 20x20 (r=10) + 50x14 |
+| Value | Rectangle | 90x18 |
+| Change | Rectangle | 70x12 |
+| Status | Rectangle | 40x12 |
+
+```swift filename="MarketOverviewRowSkeletonView.swift"
+struct MarketOverviewRowSkeletonView: View {
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: KLINESpacing.smd) {
+                ForEach(0..<4, id: \.self) { _ in
+                    MarketIndexCardSkeletonView()
+                }
+            }
+            .padding(.horizontal, KLINESpacing.xl)
+        }
+        .padding(.bottom, KLINESpacing.lg)
+    }
+}
+```
+
+</AccordionItem>
+
+<AccordionItem title="StockListSkeletonView" icon="📈" badge="Stocks">
+
+Full skeleton for the stock list section: header skeleton (logo circle + title blocks), 5 stock row skeletons, and a "more" button placeholder. The entire card has shimmer applied.
+
+### Row Structure
+
+| Element | Skeleton Block | Dimensions |
+|---------|---------------|------------|
+| Rank number | Rectangle | 12x14 |
+| Company logo | Circle | 40x40 (`#E5E7EB`) |
+| Company name | Rectangle | 80x14 |
+| Subtitle | Rectangle | 100x11 |
+| Price | Rectangle | 70x14 |
+| Change | Rectangle | 60x11 |
+
+```swift filename="StockListSkeletonView.swift"
+private struct StockRowSkeletonView: View {
+    var body: some View {
+        HStack(spacing: 0) {
+            SkeletonBlock(width: 12, height: 14)
+                .padding(.trailing, KLINESpacing.smd)
+
+            Circle()
+                .fill(Color(hex: "E5E7EB"))
+                .frame(width: 40, height: 40)
+                .padding(.trailing, KLINESpacing.smd)
+
+            VStack(alignment: .leading, spacing: 4) {
+                SkeletonBlock(width: 80, height: 14)
+                SkeletonBlock(width: 100, height: 11)
+            }
+
+            Spacer()
+
+            VStack(alignment: .trailing, spacing: 4) {
+                SkeletonBlock(width: 70, height: 14)
+                SkeletonBlock(width: 60, height: 11)
+            }
+        }
+        .padding(.vertical, KLINESpacing.mld)
+    }
+}
+```
+
+</AccordionItem>
+
+<AccordionItem title="NewsSectionSkeletonView" icon="📰" badge="News">
+
+Skeleton for the news section: a header placeholder and 5 news row skeletons inside a card. Each row shows a vertical accent bar placeholder and text blocks.
+
+### Row Layout
+
+| Element | Dimensions |
+|---------|------------|
+| Accent bar | 4pt wide x 36pt tall |
+| Title line | Full width x 14pt |
+| Meta line | 140pt x 11pt |
+
+```swift filename="NewsSectionSkeletonView.swift"
+private struct NewsRowSkeletonView: View {
+    var body: some View {
+        HStack(spacing: KLINESpacing.md) {
+            SkeletonBlock(width: 4, height: 36)
+
+            VStack(alignment: .leading, spacing: KLINESpacing.xxs) {
+                SkeletonBlock(height: 14)          // Full-width title
+                SkeletonBlock(width: 140, height: 11) // Source + time
+            }
+        }
+        .padding(.vertical, KLINESpacing.md)
+    }
+}
+```
+
+</AccordionItem>
+</Accordion>
+
+## Shimmer Animation Details <KoreanLabel>시머 애니메이션 상세</KoreanLabel>
+
+The shimmer effect uses two animations running at the same time: a diagonal gradient sweep and an opacity pulse.
+
+### Animation Layers
+
+| Layer | Animation | Duration | Behavior |
+|-------|-----------|----------|----------|
+| **Gradient sweep** | `.linear` | 1.2s | Repeats forever, no reverse. Phase: `-0.5` to `1.5` |
+| **Opacity pulse** | `.easeInOut` | 0.8s | Repeats forever, autoreverses. Range: `0.4` to `1.0` |
+
+### Gradient Configuration
+
+```swift filename="ShimmerModifier.swift"
+LinearGradient(
+    stops: [
+        .init(color: .clear, location: max(0, phase - 0.2)),
+        .init(color: .white.opacity(0.6), location: phase),
+        .init(color: .clear, location: min(1, phase + 0.2)),
+    ],
+    startPoint: .topLeading,
+    endPoint: .bottomTrailing
+)
+.blendMode(.sourceAtop)  // Composited over skeleton content
+```
+
+## Best Practices <KoreanLabel>모범 사례</KoreanLabel>
+
+<InfoBox type="tip" title="Golden rules for loading states">
+1. **Match dimensions exactly** -- Skeleton blocks should mirror the loaded component's frame to prevent layout shift.
+2. **Apply shimmer at the container level** -- Use `.shimmer()` on the outermost skeleton view, not individual blocks.
+3. **Conditional rendering** -- Use `if data.isEmpty { Skeleton() } else { RealView(data) }` for instant swap.
+4. **Skeleton color** -- All blocks use `#DFE2E8` for consistency. Circles use `#E5E7EB`.
+5. **Inline skeletons** -- `MarketOverviewRowView` renders its own skeletons inline for per-section loading.
+</InfoBox>

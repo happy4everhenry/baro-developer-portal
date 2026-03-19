@@ -1,0 +1,550 @@
+<PageMeta status="live" layer="frontend" />
+
+# Stock Detail Screen
+
+This is the big, detailed page you see when you tap on any stock. It shows you everything about that stock: a live-updating price, an interactive chart you can pinch to zoom, and tabs full of information like order books, financials, dividends, and analyst opinions. Think of it as a stock's personal profile page.
+
+<StatGrid columns={4}>
+  <StatCard value="15" label="Elements" />
+  <StatCard value="5" label="Chart Types" />
+  <StatCard value="3" label="Content Tabs" />
+  <StatCard value="3" label="Market Venues" />
+</StatGrid>
+
+<Tabs>
+  <Tab label="Overview" icon="📱">
+
+    <InfoBox type="info" title="How is this screen built?">
+      The screen splits into two layout zones. The top part (price header + chart + controls) lives in a regular `VStack` that is always in memory -- this prevents the chart from flickering when you switch tabs. The bottom part (content tabs) lives in a `LazyVStack` with pinned section headers so the tab bar sticks to the top while scrolling.
+    </InfoBox>
+
+    ### Screen Zones
+
+    <ScreenMap title="Stock Detail Layout">
+      <ScreenRegion label="SD1 -- Price Header" file="StockPriceHeaderView.swift" description="Stock name, code, venue pill, live price, change" color="jade">
+        Samsung Electronics | 005930 | [KRX] | 72,400 | +1.2%
+      </ScreenRegion>
+      <ScreenRegion label="SD2 -- Chart" file="StockChartView.swift" description="Multi-type chart: area, candle, OHLC, step, line. 200pt height." color="blue">
+        Interactive chart with pinch-to-zoom, drag-to-scrub, and double-tap-to-reset
+      </ScreenRegion>
+      <ScreenRegion label="SD4 + SD3 -- Indicators & Zoom" file="IndicatorPillsView.swift" description="Indicator pills (left) + zoom buttons (right)" color="amber">
+        [MA] [BB] | [-] [+] [Reset]
+      </ScreenRegion>
+      <ScreenRegion label="SD5 -- Period Tabs" file="StockDetailPeriodTabsView.swift" description="1일, 1개월, 3개월, 1년, 3년 + gear settings" color="purple">
+        1D | 1M | 3M | 1Y | 3Y | Settings
+      </ScreenRegion>
+      <ScreenRegion label="SD6 -- Content Tabs (pinned)" file="KLSegmentedControl" description="종목정보 / 호가 / 일자별시세" color="red">
+        Pinned tab bar that sticks to top during scroll
+      </ScreenRegion>
+      <ScreenRegion label="SD7-SD14 -- Tab Content" file="Multiple files" description="Info grid, investor flow, analyst, reports, dividends, financials, order book, daily prices" color="jade">
+        Content changes based on which tab is selected
+      </ScreenRegion>
+    </ScreenMap>
+
+    ### Data Flow
+
+    <Diagram title="Stock Detail Data Pipeline">
+      <DiagramRow>
+        <DiagramNode type="view" icon="📱" label="StockDetailPageView" sublabel=".task { }" />
+      </DiagramRow>
+      <DiagramArrow direction="down" label="calls loadDetail()" />
+      <DiagramRow>
+        <DiagramNode type="vm" icon="🧠" label="StockDetailPageViewModel" sublabel="async let parallel fetch" />
+      </DiagramRow>
+      <DiagramArrow direction="down" label="parallel" />
+      <DiagramRow>
+        <DiagramGroup label="REST APIs" color="blue">
+          <DiagramRow>
+            <DiagramNode type="repo" icon="📊" label="fetchStockDetail" sublabel="GET /api/stocks/{code}/detail" />
+            <DiagramNode type="repo" icon="📈" label="fetchChartData" sublabel="GET /api/stocks/{code}/chart" />
+          </DiagramRow>
+        </DiagramGroup>
+      </DiagramRow>
+      <DiagramArrow direction="down" label="after REST completes" />
+      <DiagramRow>
+        <DiagramNode type="service" icon="🔌" label="WebSocketManager" sublabel="live price streaming" />
+      </DiagramRow>
+    </Diagram>
+
+    <InfoBox type="tip" title="Why two VStacks?">
+      The chart area is in a non-lazy `VStack` so it stays in memory even when you scroll down. This stops the chart from being deallocated and re-created (which would cause a flash) when you switch content tabs. The content below uses a `LazyVStack` for performance.
+    </InfoBox>
+
+  </Tab>
+
+  <Tab label="Elements" icon="🧩">
+
+    <InfoBox type="note" title="15 Elements">
+      This screen has the most elements of any screen in BARO. Each accordion below covers one element with its component, data, interactions, and states.
+    </InfoBox>
+
+    <Accordion>
+      <AccordionItem title="SD1 -- Price Header" icon="💰" badge="Live" defaultOpen={true}>
+
+        **Component:** `StockPriceHeaderView`
+
+        Shows the stock name, ticker code, venue selector pill, and the big price number. The price animates smoothly when WebSocket updates come in. When you drag on the chart (scrubbing), the header temporarily shows the historical price at that point instead.
+
+        **Data:** `displayPrice`, `displayChange`, `displayChangePercent` from ViewModel. Live values via `WebSocketManager`; falls back to `Stock.price`. Scrubbing values override when active.
+
+        **Interactions:** Venue pill tap opens `MarketVenueSheet` (`.sheet`, detent: 280pt). Price animates via `.contentTransition(.numericText())`.
+
+        **States:** Default (REST snapshot), Live (WS overlay), Scrubbing (historical price + date label shown)
+
+      </AccordionItem>
+
+      <AccordionItem title="SD2 -- Chart" icon="📈" badge="Canvas">
+
+        **Component:** `StockChartView` (200pt height)
+
+        The big interactive chart. It supports 5 different chart types and renders using SwiftUI Canvas for smooth 60fps performance. Data is downsampled using LTTB (Largest-Triangle-Three-Buckets) to max 300 points.
+
+        **Chart Types:** Area+Line (default), Candle, OHLC Bar, Step, Line-only
+
+        **Gestures:**
+        | Gesture | Action |
+        |---|---|
+        | Drag | Scrub price along timeline. Edge-pan auto-scrolls when zoomed |
+        | Pinch | Zoom 1x to 5x |
+        | Double-tap | Reset zoom |
+        | Drag End | Clear scrubbing, revert header to live/REST price |
+
+        **States:** Empty, Area+Line, Candle, OHLC, Step, Line, Scrubbing overlay, Zoomed
+
+      </AccordionItem>
+
+      <AccordionItem title="SD3 -- Zoom Controls" icon="🔍">
+
+        **Component:** Inline HStack (right side)
+
+        Three buttons for controlling chart zoom: Zoom Out (divide by 1.5, min 1.0), Zoom In (multiply by 1.5, max 5.0), and Reset (only visible when zoomed).
+
+        **Data:** `chartSettings.effectiveZoom` (1.0 - 5.0)
+
+        **States:** Default, Zoomed, Disabled at min/max
+
+      </AccordionItem>
+
+      <AccordionItem title="SD4 -- Indicator Pills" icon="💊">
+
+        **Component:** `IndicatorPillsView` (left side)
+
+        Horizontal scroll of capsule pills showing which chart overlays and sub-indicators are active (like Moving Average, Bollinger Bands, etc.). These are read-only -- you change them from the Chart Settings Sheet.
+
+        **Data:** `chartSettings.selectedOverlays`, `chartSettings.selectedSubIndicators`
+
+        **States:** Hidden (no indicators), Visible (capsule pills)
+
+      </AccordionItem>
+
+      <AccordionItem title="SD5 -- Period Tabs" icon="📅">
+
+        **Component:** `StockDetailPeriodTabsView`
+
+        Five time period tabs plus a gear icon for chart settings.
+
+        | Label | API Value | Calendar Days |
+        |---|---|---|
+        | 1일 | `1d` | 1 (intraday minutes) |
+        | 1개월 | `1m` | 30 |
+        | 3개월 | `3m` | 90 |
+        | 1년 | `1y` | 365 |
+        | 3년 | `3y` | 1095 |
+
+        **Interactions:** Tab tap triggers async `loadChartForPeriod()` (cancels prior fetch). Gear icon opens `ChartSettingsSheet` via `.sheet`.
+
+      </AccordionItem>
+
+      <AccordionItem title="SD6 -- Content Tabs" icon="📑" badge="Pinned">
+
+        **Component:** `KLSegmentedControl` (pinned section header)
+
+        Three-way tab that switches the content below. It pins to the top of the scroll view so it is always reachable.
+
+        | Label | Case | Content |
+        |---|---|---|
+        | 종목정보 | `.info` | `StockInfoGridView` + `StockDetailSectionsView` |
+        | 호가 | `.orderBook` | `StockOrderBookView` |
+        | 일자별시세 | `.dailyPrice` | `StockDailyPriceView` |
+
+        **Interaction:** Tab tap auto-scrolls to `"contentTabs"` anchor with `withAnimation(nil)` to prevent flash.
+
+      </AccordionItem>
+
+      <AccordionItem title="SD7 -- Info Grid" icon="📋" badge="Customizable">
+
+        **Component:** `StockInfoGridView`
+
+        A 2-column grid of stock statistics that users can customize. Available stats: 전일종가, 시가, 고가, 저가, 거래량, 거래대금, 시가총액, 외인소진율, 52주 최고/최저, PER, EPS, PBR, BPS, 배당수익률, 주당배당금.
+
+        **Interactions:** Info icon opens explanation sheet. Edit icon opens drag-to-reorder sheet.
+
+        **States:** Loading (shimmer), Loaded (2-column grid), Empty ("항목을 추가해 주세요")
+
+      </AccordionItem>
+
+      <AccordionItem title="SD8 -- Investor Flow" icon="🏦">
+
+        **Component:** `StockDetailSectionsView`
+
+        Diverging bar chart showing net buying/selling by foreign investors, institutions, and individuals.
+
+        **Data:** `detailInfo.investorFlow`: foreignNet, institutionNet, individualNet
+
+        **Navigation:** "전체보기" opens `InvestorFlowDetailView` (`.sheet`) with 30-day daily table.
+
+      </AccordionItem>
+
+      <AccordionItem title="SD9 -- Analyst Opinion" icon="🎯">
+
+        **Component:** `StockDetailSectionsView`
+
+        Shows the consensus rating, target price, and buy/hold/sell distribution from securities firms.
+
+        **Data:** `detailInfo.analystOpinion`: consensus, targetPrice, buy/hold/sell counts
+
+        **Navigation:** "전체보기" opens `AnalystOpinionDetailView` (`.sheet`).
+
+      </AccordionItem>
+
+      <AccordionItem title="SD10 -- Reports" icon="📄">
+
+        **Component:** `StockDetailSectionsView`
+
+        Preview of analyst reports with dotted dividers. The detail sheet shows 18 Korean broker icons with a color map.
+
+        **Navigation:** "전체보기" opens `ReportDetailView` (`.sheet`).
+
+      </AccordionItem>
+
+      <AccordionItem title="SD11 -- Dividends" icon="💵">
+
+        **Component:** `StockDetailSectionsView`
+
+        Summary of dividend history with bar charts grouped by year.
+
+        **Data:** `detailInfo.dividends[]`, `dividendYearGroups[]`
+
+        **Navigation:** "전체보기" opens `DividendDetailView` (`.sheet`) with summary + trend + quarterly breakdown.
+
+      </AccordionItem>
+
+      <AccordionItem title="SD12 -- Financials" icon="📊">
+
+        **Component:** `StockDetailSectionsView`
+
+        Preview with grouped bar chart and 4-row summary. The detail view shows 15 financial metrics with a quarterly/annual toggle.
+
+        **Metrics:** 총매출, 영업이익, 순이익, ROE, 총자산, 총부채, 총자본, 부채비율, 영업현금흐름, 투자현금흐름, 재무현금흐름, EPS, PER, BPS, PBR
+
+        **Navigation:** "전체보기" opens `FinancialDetailView` (`.sheet`) with 분기/연간 toggle.
+
+      </AccordionItem>
+
+      <AccordionItem title="SD13 -- Order Book" icon="📕" badge="호가 Tab">
+
+        **Component:** `StockOrderBookView`
+
+        Traditional Korean-style order book: 10 ask levels (매도, blue) above, current price in the middle, and 10 bid levels (매수, red) below.
+
+        | Zone | Layout | Color |
+        |---|---|---|
+        | Header | 팔려는 수량 / 가격 / 사려는 수량 | klTextTertiary, 12pt |
+        | Ask Rows (10) | Left: quantity + blue bar, Center: price | klPriceDown 3% opacity bg |
+        | Current Price | Centered badge: price + change + change% | Colored vs prevClose |
+        | Bid Rows (10) | Center: price, Right: bar + quantity | klPriceUp 3% opacity bg |
+        | Summary Bar | Total ask qty / proportion bar / Total bid qty | 6pt bar height |
+
+        **States:** Loading (ProgressView spinner), Loaded
+
+      </AccordionItem>
+
+      <AccordionItem title="SD14 -- Daily Prices" icon="📅" badge="일자별시세 Tab">
+
+        **Component:** `StockDailyPriceView`
+
+        A table showing the last 60 days of price data, sortable by date.
+
+        **Data:** `detailInfo.chartData: [ChartPoint]` sorted desc, max 60 rows
+
+        **States:** Loading (ProgressView spinner), Loaded
+
+      </AccordionItem>
+
+      <AccordionItem title="SD15 -- Venue Selector" icon="🏢">
+
+        **Component:** `MarketVenueSheet`
+
+        A capsule pill that lets you switch between market venues. Only active for NXT-enabled stocks.
+
+        | Label | Case | API Value | KIS Code | Description |
+        |---|---|---|---|---|
+        | 통합 | `.combined` | `combined` | `UN` | KRX + NXT combined |
+        | KRX | `.krx` | `krx` | `J` | Korea Exchange |
+        | NXT | `.nxt` | `nxt` | `NX` | Nextrade ATS |
+
+        **States:** NXT-enabled (tappable pill), KRX-only (static label), Overseas (hidden)
+
+      </AccordionItem>
+    </Accordion>
+
+  </Tab>
+
+  <Tab label="Data & API" icon="🔗">
+
+    ### API Endpoint Mapping
+
+    | Component | Repository Method | REST Endpoint | Response Model | Fallback |
+    |---|---|---|---|---|
+    | SD1, SD7-SD12 Detail | `marketRepo.fetchStockDetail(id:exchange:name:venue:)` | `GET /api/stocks/{code}/detail?venue={}` | `StockDetailInfo` | Print error, detailInfo remains nil |
+    | SD2 Chart (initial) | `marketRepo.fetchChartData(code:exchange:period:venue:)` | `GET /api/stocks/{code}/chart?period=1d&venue={}` | `[ChartPoint]` | Local fallback: filter `detailInfo.chartData` |
+    | SD2 Chart (period) | `marketRepo.fetchChartData(code:exchange:period:venue:)` | `GET /api/stocks/{code}/chart?period={}&venue={}` | `[ChartPoint]` | Local fallback + cancellable |
+    | SD1 Live Price | `WebSocketManager.shared` | WebSocket subscribe(codes:, venue:) | `PriceUpdate` | REST snapshot only (domestic only) |
+    | SD13 Order Book | Included in `fetchStockDetail` | orderBook field | `OrderBook` | ProgressView spinner |
+    | SD14 Daily Prices | Included in `fetchStockDetail` | chartData field | `[ChartPoint]` | ProgressView spinner |
+
+    ### Chart Rendering Pipeline
+
+    <StepGuide>
+      <Step number={1} title="Fetch">
+        On period change or initial load, call `fetchChartData()` from backend. Output: `periodChartData: [ChartPoint]` (raw API response).
+      </Step>
+      <Step number={2} title="Fallback">
+        If API is empty or errors, run `useLocalChartFallback()`: calendar-based filter of cached data.
+      </Step>
+      <Step number={3} title="Cache Rebuild">
+        `rebuildChartCache()`: resetZoom, compute min/max/range, detect trend direction. Output: `chartPoints`, `chartMinPrice`, `chartMaxPrice`, `chartIsPositive`.
+      </Step>
+      <Step number={4} title="Downsample">
+        LTTB (Largest-Triangle-Three-Buckets) when count > 300. Output: `displayChartPoints` (max 300 pts).
+      </Step>
+      <Step number={5} title="Zoom Slice">
+        Per render frame (when zoomed): `visibleDisplayPoints(zoom, panOffset)` + `zoomedPriceStats()`.
+      </Step>
+      <Step number={6} title="Render">
+        Canvas rendering: multi-color segments, gradient fill, candlestick/OHLC/step. 200pt chart with annotations and price badge.
+      </Step>
+    </StepGuide>
+
+    ### ViewModel Properties
+
+    <Accordion>
+      <AccordionItem title="Core Properties" icon="📋" defaultOpen={true}>
+
+        | Property | Type | Default | Description |
+        |---|---|---|---|
+        | `stock` | `Stock` | (injected) | Immutable stock entity passed from parent list |
+        | `detailInfo` | `StockDetailInfo?` | `nil` | Full detail payload |
+        | `isLoading` | `Bool` | `false` | Detail REST fetch in progress |
+        | `isLoadingChart` | `Bool` | `false` | Chart data fetch in progress |
+        | `selectedPeriod` | `ChartPeriod` | `.oneDay` | Active chart period. didSet triggers async `loadChartForPeriod()` |
+        | `selectedContentTab` | `DetailContentTab` | `.info` | Active content tab |
+        | `selectedVenue` | `MarketVenue` | `.combined` | Market venue. didSet re-fetches detail + switches WS |
+        | `isFavorite` | `Bool` | `false` | Star toggle state (local only) |
+
+      </AccordionItem>
+
+      <AccordionItem title="Chart Properties" icon="📈">
+
+        | Property | Type | Default | Description |
+        |---|---|---|---|
+        | `chartSettings` | `ChartSettings` | (defaults) | Chart type (candle default), overlays, sub-indicators, zoom (1.0), pan (0.5) |
+        | `chartPoints` | `[ChartPoint]` | `[]` | Full resolution points for scrubbing hit-test |
+        | `displayChartPoints` | `[ChartPoint]` | `[]` | LTTB downsampled to max 300 points for Canvas rendering |
+        | `chartMinPrice` | `Double` | `0` | Pre-computed from chartPoints for Y-axis scaling |
+        | `chartMaxPrice` | `Double` | `1` | Pre-computed from chartPoints for Y-axis scaling |
+        | `chartIsPositive` | `Bool` | `true` | Trend direction (first vs last point) |
+        | `scrubbingPrice` | `Double?` | `nil` | Price at touch location during chart scrub |
+        | `scrubbingDate` | `Date?` | `nil` | Date at touch location during chart scrub |
+
+      </AccordionItem>
+
+      <AccordionItem title="Live Price Properties" icon="🔴">
+
+        | Property | Type | Default | Description |
+        |---|---|---|---|
+        | `livePrice` | `Int?` | `nil` | Real-time WebSocket price |
+        | `liveChange` | `Int?` | `nil` | Real-time WebSocket price change |
+        | `liveChangePercent` | `Double?` | `nil` | Real-time WebSocket change percentage |
+        | `referencePrice` | `Double` | (computed) | prevClose from detailInfo, falls back to stock.price |
+
+      </AccordionItem>
+    </Accordion>
+
+    ### State Machine
+
+    <InfoBox type="info" title="Two Independent Loading States">
+      The screen manages `isLoading` for detail and `isLoadingChart` for chart data. Both resolve in parallel. WebSocket streaming starts only after the initial REST load finishes.
+    </InfoBox>
+
+    **Primary Flow:** onAppear -> loadDetail() (async let parallel) -> Detail + Chart Loaded -> rebuildChartCache() -> startLiveUpdates()
+
+    **Chart Period Change:** Loaded -> selectedPeriod didSet (cancel prior) -> loadChartForPeriod() -> rebuildChartCache() + resetZoom()
+
+    **Venue Change:** Loaded -> selectedVenue didSet (cancel prior) -> switchLiveUpdatesVenue() + loadDetail() -> New venue data + WS re-subscribed
+
+    **Chart Fallback:** fetchChartData() -> API Empty/Error -> useLocalChartFallback() + rebuildChartCache()
+
+    | Section | Skeleton / Placeholder | Error Behavior | Empty Behavior |
+    |---|---|---|---|
+    | SD1 Price Header | None (uses stock.price immediately) | N/A | Always rendered |
+    | SD2 Chart | Empty rectangle (klBackground, 200pt) | Falls back to `useLocalChartFallback()` | Blank chart area |
+    | SD7 Info Grid | `SkeletonBlock` grid with `.shimmer()` | Skeleton remains visible | "항목을 추가해 주세요" |
+    | SD8-SD12 Sections | Part of info grid skeleton | Hidden until detailInfo loads | Rendered with available data |
+    | SD13 Order Book | Centered `ProgressView()` spinner | Spinner remains visible | Spinner until detailInfo loads |
+    | SD14 Daily Prices | Centered `ProgressView()` spinner | Spinner remains visible | Spinner until detailInfo loads |
+
+  </Tab>
+
+  <Tab label="Navigation" icon="🧭">
+
+    ### Interaction Map
+
+    | Element | Gesture | Action | Target / Result |
+    |---|---|---|---|
+    | Nav Bar Back | Tap | Dismiss screen | `dismiss()` |
+    | Nav Bar Home | Tap | Navigate to root home | `NotificationCenter.post(.navigateToHome)` + `dismiss()` |
+    | Nav Bar Star | Tap | Toggle favorite | `isFavorite.toggle()`. star.fill (FFB800) vs star outline |
+    | SD1 Venue Pill | Tap | Open venue selector | `.sheet` -> `MarketVenueSheet` (detent: 280pt) |
+    | SD2 Chart Drag | Drag | Scrub price/date | Vertical crosshair + circle follows finger |
+    | SD2 Chart Pinch | Pinch | Zoom chart 1x-5x | Y-axis auto-scales |
+    | SD2 Chart Double-tap | Double-tap | Reset zoom | `resetZoom()` with `easeOut(0.25s)` |
+    | SD3 Zoom Out | Tap | Decrease zoom | `zoomScale / 1.5` (min 1.0) |
+    | SD3 Zoom In | Tap | Increase zoom | `max(1.5, zoomScale * 1.5)` (max 5.0) |
+    | SD5 Period Tab | Tap | Change chart period | Triggers async load, cancels prior fetch |
+    | SD5 Gear Icon | Tap | Open chart settings | `.sheet` -> `ChartSettingsSheet` (detent: .medium) |
+    | SD6 Content Tab | Tap | Switch content section | Auto-scrolls to "contentTabs" anchor |
+    | SD7 Info Icon | Tap | Open explanation sheet | `.sheet` -> `StockInfoExplanationSheet` |
+    | SD7 Edit Icon | Tap | Open edit sheet | `.sheet` -> `StockInfoEditSheet` (drag-to-reorder) |
+    | SD8 "전체보기" | Tap | Investor flow detail | `.sheet` -> `InvestorFlowDetailView` |
+    | SD9 "전체보기" | Tap | Analyst opinion detail | `.sheet` -> `AnalystOpinionDetailView` |
+    | SD10 "전체보기" | Tap | Reports list | `.sheet` -> `ReportDetailView` |
+    | SD11 "전체보기" | Tap | Dividend detail | `.sheet` -> `DividendDetailView` |
+    | SD12 "전체보기" | Tap | Financial detail | `.sheet` -> `FinancialDetailView` (15 metrics, 분기/연간 toggle) |
+
+    ### Detail Sheets
+
+    | Section | Sheet View | Content |
+    |---|---|---|
+    | 투자자 현황 | `InvestorFlowDetailView` | 30-day daily table: 일자별, 외국인, 개인, 기관 |
+    | 증권사 투자의견 | `AnalystOpinionDetailView` | Consensus summary + target price + broker table |
+    | 리포트 | `ReportDetailView` | AnalystReport rows with 44pt broker icon circles (18 Korean broker color map) |
+    | 배당 | `DividendDetailView` | Summary + trend bar chart + year-by-quarter breakdown |
+    | 재무 | `FinancialDetailView` | 15 metrics with 분기/연간 toggle |
+
+    <Modal triggerLabel="View Layout Architecture Code" title="Split Layout Pattern" size="large">
+
+    ```swift
+    ScrollViewReader { scrollProxy in
+        ScrollView {
+            VStack(spacing: 0) {                       // NON-LAZY: always allocated
+                StockPriceHeaderView(...)              // [SD1, SD15]
+                StockChartView(...)                    // [SD2] height: 200pt
+                HStack { IndicatorPills; zoomControls } // [SD4, SD3]
+                StockDetailPeriodTabsView(...)         // [SD5]
+                Divider()
+            }
+            .background(Color.klSurface)
+
+            LazyVStack(pinnedViews: [.sectionHeaders]) { // LAZY: content tabs
+                Section {
+                    contentForSelectedTab               // [SD7-SD14]
+                        .frame(minHeight: screenHeight)  // ensures scrollability
+                } header: {
+                    KLSegmentedControl(...)             // [SD6] pinned
+                        .id("contentTabs")              // scroll target
+                }
+            }
+        }
+        .onChange(of: selectedContentTab) {
+            withAnimation(nil) {
+                scrollProxy.scrollTo("contentTabs", anchor: .top)
+            }
+        }
+    }
+    ```
+
+    </Modal>
+
+  </Tab>
+
+  <Tab label="Source Files" icon="📁">
+
+    ### File Map
+
+    ```
+    Features/StockDetailPage/
+      StockDetailPageView.swift          // Main view (fullScreenCover root)
+      StockDetailPageViewModel.swift     // @Observable ViewModel + enums
+      Components/
+        StockPriceHeaderView.swift       // SD1: Price header + MarketVenueSheet
+        StockChartView.swift             // SD2: Multi-type Canvas chart + gestures
+        IndicatorPillsView.swift         // SD4: Active indicator capsules
+        StockDetailPeriodTabsView.swift  // SD5: Period tabs + ChartSettingsSheet
+        ChartSettingsSheet.swift         // Chart type / overlay / sub-indicator config
+        StockInfoGridView.swift          // SD7: Customizable 2-column stats grid
+        StockInfoEditSheet.swift         // SD7 sub: Drag-to-reorder stat items
+        StockInfoExplanationSheet.swift  // SD7 sub: Stat definitions
+        StockDetailSectionsView.swift    // SD8-SD12: All section cards
+        InvestorFlowDetailView.swift     // SD8 detail: 30-day investor table
+        AnalystOpinionDetailView.swift   // SD9 detail: Full broker opinions
+        ReportDetailView.swift           // SD10 detail: Reports with broker icons
+        DividendDetailView.swift         // SD11 detail: Dividend trend + groups
+        FinancialDetailView.swift        // SD12 detail: 15-metric financial table
+        StockOrderBookView.swift         // SD13: Order book (10 ask + 10 bid)
+        StockDailyPriceView.swift        // SD14: 60-day daily price table
+
+    Models/
+      ChartSettings.swift                // @Observable: chartType, overlays, zoom, pan
+      ChartSettingsData.swift            // ChartType + OverlayIndicator + SubIndicatorCatalog
+      MarketVenue.swift                  // KRX / NXT / Combined enum
+      StatisticItem.swift                // 16 customizable stat metrics
+
+    Core/
+      WebSocket/WebSocketManager.swift   // Singleton WS: connect, subscribe, AsyncStream
+
+    Repositories/
+      Protocols/MarketRepositoryProtocol.swift  // fetchStockDetail + fetchChartData
+      API/APIMarketRepository.swift             // KIS API implementation
+    ```
+
+    <Modal triggerLabel="View Full Component Tree" title="StockDetailPageView Component Hierarchy" size="large">
+
+    ```
+    StockDetailPageView
+    ├── @State StockDetailPageViewModel
+    │   ├── stock: Stock (immutable, injected)
+    │   ├── marketRepository: MarketRepositoryProtocol
+    │   ├── detailInfo: StockDetailInfo?
+    │   ├── selectedPeriod / selectedContentTab / selectedVenue
+    │   ├── chartSettings / chartPoints / displayChartPoints
+    │   ├── livePrice / liveChange / liveChangePercent
+    │   └── scrubbingPrice / scrubbingDate
+    │
+    ├── KLDetailNavBar (title: stock.name, back + home + star)
+    ├── priceStatusLine (compact header bar)
+    │
+    ├── ScrollViewReader
+    │   ├── ScrollView
+    │   │   ├── VStack (NON-LAZY: always allocated)
+    │   │   │   ├── StockPriceHeaderView [SD1, SD15]
+    │   │   │   ├── StockChartView [SD2] (200pt)
+    │   │   │   ├── HStack: IndicatorPills [SD4] + zoomControls [SD3]
+    │   │   │   ├── StockDetailPeriodTabsView [SD5]
+    │   │   │   └── Divider
+    │   │   │
+    │   │   └── LazyVStack (pinnedViews: [.sectionHeaders])
+    │   │       ├── Section header: KLSegmentedControl [SD6]
+    │   │       └── contentForSelectedTab
+    │   │           ├── .info: SD7 + SD8-SD12
+    │   │           ├── .orderBook: SD13
+    │   │           └── .dailyPrice: SD14
+    │
+    ├── .task { await loadDetail(); startLiveUpdates() }
+    └── .onDisappear { stopLiveUpdates() }
+    ```
+
+    </Modal>
+
+  </Tab>
+</Tabs>

@@ -1,0 +1,339 @@
+# Stock Detail Components <KoreanLabel>종목 상세 컴포넌트</KoreanLabel>
+
+<PageMeta status="live" layer="frontend" />
+
+These components make up the `StockDetailPageView` -- the big drill-in screen where you can see everything about one stock. It is like a mini dashboard for each company!
+
+<StatGrid columns={4}>
+  <StatCard value="13" label="Components" />
+  <StatCard value="8" label="Detail Sections" />
+  <StatCard value="3" label="Sheet Panels" />
+  <StatCard value="2" label="Venue Modes" />
+</StatGrid>
+
+<InfoBox type="fun" title="What is the stock detail page?">
+When you tap on a stock in the list, a whole new screen slides up with everything you could want to know: live price, interactive chart, order book, financial data, analyst opinions, and more. It is like opening a detailed report card for a company!
+</InfoBox>
+
+<Tabs>
+<Tab label="Main Components" icon="🏗️">
+
+## Main Components
+
+These are the big building blocks that make up the stock detail page from top to bottom.
+
+<Accordion>
+<AccordionItem title="StockDetailPageView (Root Container)" icon="📱" badge="Root" defaultOpen={true}>
+
+The root container for the stock detail screen. Presented as a `fullScreenCover` from stock list rows. It manages tab-based content switching, real-time WebSocket price updates, and chart data caching.
+
+### Architecture
+
+```
+StockDetailPageView
+  ├── KLDetailNavBar (title: stock name, trailing: home + star buttons)
+  ├── StockPriceHeaderView (live price, change, market/NXT venue tabs)
+  ├── StockChartView (interactive chart with zoom/scrub)
+  ├── IndicatorPillsView (active overlay/sub-indicator badges)
+  ├── StockDetailPeriodTabsView (1D/1W/1M/3M/1Y/5Y + settings gear)
+  ├── KLSegmentedControl (section tabs)
+  └── StockDetailSectionsView (content panes)
+      ├── Order Book (StockOrderBookView)
+      ├── Daily Price (StockDailyPriceView)
+      ├── Stock Info (StockInfoGridView)
+      ├── Financials (FinancialDetailView)
+      ├── Dividends (DividendDetailView)
+      ├── Investor Flow (InvestorFlowDetailView)
+      ├── Analyst Opinions (AnalystOpinionDetailView)
+      └── Reports (ReportDetailView)
+```
+
+### ViewModel: StockDetailPageViewModel
+
+<PropsTable>
+| Property | Type | Description |
+|----------|------|-------------|
+| `stock` | `Stock` | Initial stock from list row |
+| `detail` | `StockDetailInfo?` | Full detail data from API/mock |
+| `livePrice` | `PriceUpdate?` | Real-time WebSocket price overlay |
+| `selectedPeriod` | `ChartPeriod` | Active chart time range (1D-5Y) |
+| `selectedSection` | `DetailSection` | Active content tab |
+| `selectedVenue` | `MarketVenue` | KRX / NXT / Combined venue filter |
+| `chartSettings` | `ChartSettings` | Chart type, overlays, zoom/pan state |
+| `displayPoints` | `[ChartPoint]` | LTTB-downsampled chart data (~300 points) |
+| `isLoading` | `Bool` | Initial data loading state |
+</PropsTable>
+
+### MarketVenue <KoreanLabel>시장 구분</KoreanLabel>
+
+| Case | Korean | Description |
+|------|--------|-------------|
+| `.krx` | 정규장 | Korea Exchange regular session |
+| `.nxt` | NXT | Korea New Exchange (alternative venue) |
+| `.combined` | 통합 | Combined KRX + NXT volume/prices |
+
+```swift filename="StockDetailPageViewModel.swift"
+// Live price overlay: prefer WebSocket data
+var displayPrice: Int { livePrice?.price ?? detail?.stock.price ?? stock.price }
+var displayChange: Int { livePrice?.change ?? detail?.stock.change ?? stock.change }
+
+// LTTB downsampling for chart performance
+func rebuildChartCache() {
+    let raw = detail?.chartData ?? []
+    displayPoints = raw.count > 300 ? lttbDownsample(raw, targetCount: 300) : raw
+}
+```
+
+</AccordionItem>
+
+<AccordionItem title="StockPriceHeaderView" icon="💰" badge="Price">
+
+Large price display with current price, absolute change, percentage change, and venue selector tabs (정규장/NXT/통합). The price numbers animate digit-by-digit when they update!
+
+| Element | Spec |
+|---------|------|
+| Price | `.system(size: 32, weight: .bold)`, `klText` color, `.numericText()` transition |
+| Change | `PriceChangeLabel` with `.system(size: 14, weight: .semibold)` |
+| Venue tabs | 3 capsule pills (정규장 / NXT / 통합), active: `klText` on `klSurface`, inactive: `klTextTertiary` |
+| NXT badge | Green "NXT" label, shown only for NXT-eligible stocks (`stock.isNXT`) |
+| Fractional badge | "소수점" label, shown for fractional-share eligible stocks (`stock.isFractional`) |
+
+```swift filename="StockPriceHeaderView.swift"
+Text(displayPrice.formattedWon)
+    .font(.system(size: 32, weight: .bold))
+    .foregroundStyle(Color.klText)
+    .contentTransition(.numericText())
+    .animation(.easeInOut(duration: 0.3), value: displayPrice)
+```
+
+</AccordionItem>
+
+<AccordionItem title="StockOrderBookView" icon="📊" badge="Order Book">
+
+10-level order book with ask (sell) prices on top and bid (buy) prices on bottom. Each level shows price, change from previous close, quantity, and a proportional bar.
+
+<InfoBox type="info" title="What is an order book?">
+An order book is like a scoreboard showing how many people want to buy vs sell at each price. The top half (blue) shows sellers, and the bottom half (red) shows buyers. The wider the bar, the more people are waiting at that price!
+</InfoBox>
+
+| Element | Spec |
+|---------|------|
+| Ask rows | 10 levels, blue text (`klPriceDown`), right-aligned quantity bars |
+| Bid rows | 10 levels, red text (`klPriceUp`), right-aligned quantity bars |
+| Center divider | Current price with change indicator |
+| Bar width | Proportional to `quantity / maxQuantity`, max 60% of row width |
+| Price format | `.formattedWon` (comma-separated, no decimals) |
+
+```swift filename="StockOrderBookView.swift"
+// Ask side (sellers) — blue, sorted high to low
+ForEach(orderBook.asks.reversed(), id: \.price) { level in
+    OrderBookRow(level: level, side: .ask, maxQty: maxQuantity, prevClose: prevClose)
+}
+
+// Bid side (buyers) — red, sorted high to low
+ForEach(orderBook.bids, id: \.price) { level in
+    OrderBookRow(level: level, side: .bid, maxQty: maxQuantity, prevClose: prevClose)
+}
+```
+
+</AccordionItem>
+
+<AccordionItem title="StockDailyPriceView" icon="📅" badge="Daily">
+
+Scrollable table of daily historical prices. Each row shows date, close price, change (colored red/blue), change percentage, and trading volume.
+
+| Column | Format | Font |
+|--------|--------|------|
+| Date | `MM.dd` | `.klCaption` |
+| Close | `.formattedWon` | `.klCaptionBold` |
+| Change | Signed, colored | `.klCaptionBold`, `klPriceUp`/`klPriceDown` |
+| Change % | `+/-X.XX%` | `.klCaption` |
+| Volume | `.formattedVolume` | `.klCaption` |
+
+</AccordionItem>
+
+<AccordionItem title="StockInfoGridView" icon="📋" badge="Info">
+
+2-column grid showing key stock statistics. Includes edit (pencil) and info (questionmark) buttons for customization and explanations.
+
+### Default Statistics
+
+| Statistic | Korean | Format |
+|-----------|--------|--------|
+| Previous Close | 전일 | `.formattedWon` |
+| Open | 시가 | `.formattedWon` |
+| High | 고가 | `.formattedWon`, `klPriceUp` color |
+| Low | 저가 | `.formattedWon`, `klPriceDown` color |
+| Volume | 거래량 | `.formattedVolume` |
+| Trading Value | 거래대금 | `.formattedTradingValue` |
+| Market Cap | 시가총액 | Korean unit format |
+| Foreign Ownership | 외국인비율 | `XX.X%` |
+| 52-Week High | 52주 최고 | `.formattedWon` |
+| 52-Week Low | 52주 최저 | `.formattedWon` |
+| PER | PER | `XX.Xx` |
+| EPS | EPS | `.formattedWon` |
+| PBR | PBR | `XX.Xx` |
+| BPS | BPS | `.formattedWon` |
+| Dividend/Share | 주당배당금 | `.formattedWon` |
+
+</AccordionItem>
+
+<AccordionItem title="StockDetailSectionsView" icon="🗂️" badge="Tabs">
+
+Tab-based content switcher below the chart. Uses `KLSegmentedControl` to toggle between 8 content panes.
+
+| Tab | Korean | Component | Description |
+|-----|--------|-----------|-------------|
+| Order Book | 호가 | `StockOrderBookView` | 10-level bid/ask order book |
+| Daily Price | 일별시세 | `StockDailyPriceView` | Historical daily OHLCV |
+| Stock Info | 종목정보 | `StockInfoGridView` | Key statistics grid |
+| Financials | 재무 | `FinancialDetailView` | Revenue, profit, ratios |
+| Dividends | 배당 | `DividendDetailView` | Dividend history + chart |
+| Investor Flow | 투자자 | `InvestorFlowDetailView` | Foreign/individual/institutional |
+| Analyst | 투자의견 | `AnalystOpinionDetailView` | Buy/hold/sell consensus |
+| Reports | 리포트 | `ReportDetailView` | Broker research reports |
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+
+<Tab label="Detail Sheets" icon="📑">
+
+## Detail Section Views
+
+These views appear inside the section tabs and show deeper financial data.
+
+<Accordion>
+<AccordionItem title="FinancialDetailView" icon="💵" badge="Financials" defaultOpen={true}>
+
+Financial data view with quarterly/annual toggle using `KLSegmentedControl`. Displays a scrollable table of 15 financial metrics.
+
+### Metrics
+
+| Metric | Korean | Format |
+|--------|--------|--------|
+| Revenue | 매출액 | 조/억 units |
+| Operating Profit | 영업이익 | 조/억 units |
+| Net Profit | 당기순이익 | 조/억 units |
+| ROE | ROE | `XX.X%` |
+| Total Assets | 총자산 | 조/억 units |
+| Total Liabilities | 총부채 | 조/억 units |
+| Total Equity | 총자본 | 조/억 units |
+| Debt Ratio | 부채비율 | `XX.X%` |
+| Operating Cash Flow | 영업CF | 조/억 units |
+| Investment Cash Flow | 투자CF | 조/억 units |
+| Financing Cash Flow | 재무CF | 조/억 units |
+| EPS | EPS | `.formattedWon` |
+| PER | PER | `XX.Xx` |
+| BPS | BPS | `.formattedWon` |
+| PBR | PBR | `XX.Xx` |
+
+</AccordionItem>
+
+<AccordionItem title="DividendDetailView" icon="🎁" badge="Dividends">
+
+Dividend information with three sections: summary stats, annual bar chart trend, and detailed quarterly records grouped by year.
+
+| Section | Content |
+|---------|---------|
+| Summary | Dividend per share (`.formattedWon`), yield (`X.XX%`), payment cycle |
+| Bar chart | Annual dividend totals, bars scaled proportionally, jade color |
+| Records table | Ex-dividend date, payment date, per-share amount, grouped by year with collapsible sections |
+
+</AccordionItem>
+
+<AccordionItem title="AnalystOpinionDetailView" icon="🎯" badge="Analyst">
+
+Analyst consensus view showing overall buy/hold/sell distribution and individual broker opinions.
+
+| Section | Content |
+|---------|---------|
+| Consensus | Label (매수/중립/매도), target price (`.formattedWon`) |
+| Distribution bar | Proportional color bar: green (buy), amber (hold), red (sell) + legend dots |
+| Broker list | Broker name, opinion label, target price, date -- scrollable rows |
+
+</AccordionItem>
+
+<AccordionItem title="InvestorFlowDetailView" icon="📊" badge="Investors">
+
+Daily investor flow data showing net buying/selling by foreign, individual, and institutional investors.
+
+| Column | Format | Color |
+|--------|--------|-------|
+| Date | `MM.dd` | `klText` |
+| Foreign | Signed number | Green (positive) / Red (negative) |
+| Individual | Signed number | Green / Red |
+| Institutional | Signed number | Green / Red |
+
+</AccordionItem>
+
+<AccordionItem title="ReportDetailView" icon="📄" badge="Reports">
+
+List of analyst research reports from Korean brokerages. Each row shows a branded broker icon circle (abbreviation + brand color), report title (2-line max), broker name, and date.
+
+### Broker Brand Colors (18 brokerages)
+
+| Broker | Abbreviation | Color |
+|--------|-------------|-------|
+| 삼성증권 | 삼성 | `#1428A0` |
+| 미래에셋 | 미래 | `#1565C0` |
+| KB증권 | KB | `#FFBC00` |
+| NH투자 | NH | `#00A651` |
+| 한국투자 | 한투 | `#003366` |
+| 대신증권 | 대신 | `#E44332` |
+| 키움증권 | 키움 | `#FF6600` |
+| 신한투자 | 신한 | `#0046FF` |
+| 하나증권 | 하나 | `#009688` |
+| 메리츠 | 메리 | `#7B1FA2` |
+| 유안타 | 유안 | `#D32F2F` |
+| 이베스트 | EB | `#1E88E5` |
+| 교보증권 | 교보 | `#4CAF50` |
+| DB금융 | DB | `#795548` |
+| BNK증권 | BNK | `#0277BD` |
+| 한화투자 | 한화 | `#E8573A` |
+| IBK투자 | IBK | `#0D47A1` |
+| SK증권 | SK | `#E44332` |
+
+</AccordionItem>
+
+<AccordionItem title="StockInfoEditSheet & ExplanationSheet" icon="✏️" badge="Sheets">
+
+### StockInfoEditSheet <KoreanLabel>통계 편집 시트</KoreanLabel>
+
+Bottom sheet for customizing which statistics appear in the grid. Two sections: "선택 항목" (selected, with remove buttons and drag handles) and "미선택 항목" (unselected, with add buttons). Persisted via `StatisticPreferences`.
+
+### StockInfoExplanationSheet <KoreanLabel>통계 설명 시트</KoreanLabel>
+
+Bottom sheet showing the definition and current value of each statistic. Has horizontally scrollable pill tabs with `matchedGeometryEffect` for selecting statistics. Shows label, formatted value, and Korean explanation text.
+
+</AccordionItem>
+</Accordion>
+
+## File Map <KoreanLabel>파일 구조</KoreanLabel>
+
+```
+Features/StockDetailPage/
+  ├── StockDetailPageView.swift
+  ├── StockDetailPageViewModel.swift
+  └── Components/
+      ├── StockPriceHeaderView.swift
+      ├── StockChartView.swift
+      ├── StockOrderBookView.swift
+      ├── StockDailyPriceView.swift
+      ├── StockInfoGridView.swift
+      ├── StockDetailSectionsView.swift
+      ├── StockDetailPeriodTabsView.swift
+      ├── IndicatorPillsView.swift
+      ├── ChartSettingsSheet.swift
+      ├── StockInfoEditSheet.swift
+      ├── StockInfoExplanationSheet.swift
+      ├── FinancialDetailView.swift
+      ├── DividendDetailView.swift
+      ├── AnalystOpinionDetailView.swift
+      ├── InvestorFlowDetailView.swift
+      └── ReportDetailView.swift
+```
+
+</Tab>
+</Tabs>

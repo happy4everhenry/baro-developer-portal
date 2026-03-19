@@ -1,0 +1,94 @@
+# Login / Register <KoreanLabel>로그인 / 회원가입</KoreanLabel>
+
+<PageMeta status="live" layer="frontend" since="2025" />
+
+<InfoBox type="fun" title="What is the login screen?">
+The **Login** screen is where you sign in to BARO. You can use your email and password, or sign in quickly with your Apple ID. New users can create an account from here too!
+</InfoBox>
+
+## How Login Works
+
+<StepGuide>
+  <Step number={1} title="App Launch">
+    The splash screen checks for a stored JWT token in Keychain.
+  </Step>
+  <Step number={2} title="Login Screen">
+    If no valid token is found, the login screen appears with two options.
+  </Step>
+  <Step number={3} title="Email / Password">
+    Enter your email and password. The app sends `POST /api/auth/login` to the backend.
+  </Step>
+  <Step number={4} title="Apple Sign In (Alternative)">
+    Tap "Sign in with Apple" for one-tap authentication via Apple ID.
+  </Step>
+  <Step number={5} title="Token Storage">
+    On success, JWT access and refresh tokens are stored in Keychain.
+  </Step>
+  <Step number={6} title="Navigate to Home">
+    The app fetches user profile (`GET /api/auth/me`) and transitions to MainTabView.
+  </Step>
+</StepGuide>
+
+## Login Screen
+
+```
+┌─────────────────────────────┐
+│  BARO Logo                  │
+│                             │
+│  Email TextField            │  ← AuthTextField component
+│  Password SecureField       │  ← Toggle visibility
+│                             │
+│  [Sign In]                  │  ← Primary button
+│                             │
+│  ── or ──                   │
+│                             │
+│  [Sign in with Apple]       │  ← Apple Sign In button
+│                             │
+│  Don't have an account?     │
+│  → Register                 │  ← Navigate to RegisterView
+└─────────────────────────────┘
+```
+
+## Register Screen
+
+```
+┌─────────────────────────────┐
+│  BARO Logo                  │
+│                             │
+│  Name TextField             │  ← Min 2 characters
+│  Email TextField            │  ← Valid email format
+│  Password SecureField       │  ← Min 8 characters
+│                             │
+│  [Create Account]           │  ← Primary button
+│                             │
+│  Already have an account?   │
+│  → Sign In                  │  ← Back to LoginView
+└─────────────────────────────┘
+```
+
+## Authentication Methods
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| Email/Password | `POST /api/auth/login` | Standard email login |
+| Registration | `POST /api/auth/register` | New account with name, email, password |
+| Apple Sign In | `POST /api/auth/apple` | Apple ID with identity token |
+| Token Refresh | `POST /api/auth/refresh` | Silent refresh using stored refresh token |
+
+## Token Management
+
+| Key | Storage | Purpose |
+|-----|---------|---------|
+| `com.baro.accessToken` | Keychain | JWT access token for API authorization |
+| `com.baro.refreshToken` | Keychain | JWT refresh token for silent re-authentication |
+
+## Source Files
+
+| File | Purpose |
+|------|---------|
+| `Features/Auth/LoginView.swift` | Login form + Apple Sign In |
+| `Features/Auth/RegisterView.swift` | Registration form with validation |
+| `Core/Auth/AuthManager.swift` | JWT token lifecycle management |
+| `Core/Auth/KeychainHelper.swift` | Secure credential storage |
+| `Models/AuthModels.swift` | Request/response types |
+| `Models/User.swift` | User profile model |

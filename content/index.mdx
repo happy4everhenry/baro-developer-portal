@@ -1,0 +1,168 @@
+<Hero
+  subtitle="Developer Portal"
+  title="BARO Investing App"
+  description="Everything you need to understand, build, and extend Korea's next-generation AI robo-advisor. Written so simply, even a beginner can follow along."
+>
+  <a href="/getting-started"><HeroBadge color="jade">Get Started →</HeroBadge></a>
+  <a href="/screens"><HeroBadge color="outline">Explore Screens</HeroBadge></a>
+</Hero>
+
+<StatGrid columns={4}>
+  <StatCard value="14" label="App Screens" />
+  <StatCard value="52" label="Color Tokens" />
+  <StatCard value="155+" label="Chart Indicators" />
+  <StatCard value="29" label="Data Models" />
+</StatGrid>
+
+## Explore the Portal
+
+<QuickNav>
+  <QuickNavCard
+    icon="🚀"
+    title="Getting Started"
+    description="What is BARO? How to set it up and understand the big picture."
+    href="/getting-started"
+    badge="Start Here"
+  />
+  <QuickNavCard
+    icon="📱"
+    title="App Screens"
+    description="Visual walkthroughs of every screen — Home, Stock Detail, Search, and more."
+    href="/screens"
+  />
+  <QuickNavCard
+    icon="🎨"
+    title="Design System"
+    description="Colors, fonts, spacing, shadows, and motion — the visual DNA of BARO."
+    href="/design-system"
+  />
+  <QuickNavCard
+    icon="🧩"
+    title="Components"
+    description="Reusable building blocks — charts, nav bars, loading skeletons, and more."
+    href="/components"
+  />
+  <QuickNavCard
+    icon="🔌"
+    title="API Reference"
+    description="REST endpoints, WebSocket streams, authentication, and error handling."
+    href="/api"
+  />
+  <QuickNavCard
+    icon="📊"
+    title="Data Layer"
+    description="How data flows through the app — models, repositories, and the MVVM pattern."
+    href="/data"
+  />
+  <QuickNavCard
+    icon="🤖"
+    title="AI Platform"
+    description="12 AI agents, 7-layer stack, RAG pipeline, security, and governance framework."
+    href="/ai-platform"
+    badge="New"
+  />
+  <QuickNavCard
+    icon="💻"
+    title="iOS Codebase"
+    description="Deep dive into Swift source code — project structure, conventions, and guides."
+    href="/ios-source"
+  />
+  <QuickNavCard
+    icon="🗺️"
+    title="Roadmap"
+    description="What's coming next — AI services, trading features, and the timeline."
+    href="/roadmap"
+  />
+  <QuickNavCard
+    icon="📖"
+    title="Glossary"
+    description="Financial terms explained simply — stocks, order books, dividends, and more."
+    href="/glossary"
+  />
+</QuickNav>
+
+---
+
+## How the App is Built
+
+<InfoBox type="tip" title="Think of it like building blocks!">
+  BARO is built in **layers**, like stacking LEGO blocks. Each layer has a specific job. The screen you see talks to a "brain" (ViewModel), which asks a "helper" (Repository) to get data from the internet (API).
+</InfoBox>
+
+<Diagram title="Architecture Overview" caption="Data flows from the server through layers to what you see on screen">
+  <DiagramRow>
+    <DiagramNode type="view" icon="📱" label="Screen" sublabel="What you see" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="updates" />
+  <DiagramRow>
+    <DiagramNode type="vm" icon="🧠" label="ViewModel" sublabel="The brain" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="asks for data" />
+  <DiagramRow>
+    <DiagramNode type="repo" icon="📦" label="Repository" sublabel="Data helper" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="fetches" />
+  <DiagramRow>
+    <DiagramNode type="service" icon="🌐" label="REST API" sublabel="Server" />
+    <DiagramNode type="data" icon="⚡" label="WebSocket" sublabel="Live prices" />
+  </DiagramRow>
+</Diagram>
+
+---
+
+## Tech Stack at a Glance
+
+<Tabs>
+  <Tab label="📱 iOS App" icon="📱">
+    | Technology | What it does |
+    |---|---|
+    | **SwiftUI** | Builds the visual interface — buttons, lists, charts |
+    | **@Observable** | Automatically updates the screen when data changes |
+    | **async/await** | Fetches data from the internet without freezing the app |
+    | **Canvas** | Draws high-performance stock charts |
+    | **Combine** | Handles real-time price streams via WebSocket |
+  </Tab>
+  <Tab label="🖥️ Backend" icon="🖥️">
+    | Technology | What it does |
+    |---|---|
+    | **Python + FastAPI** | Runs the server that the app talks to |
+    | **WebSocket** | Sends live stock prices instantly |
+    | **KIS API** | Connects to Korea Investment & Securities for real data |
+    | **REST** | Standard request/response API pattern |
+  </Tab>
+  <Tab label="🏗️ Patterns" icon="🏗️">
+    | Pattern | What it means |
+    |---|---|
+    | **MVVM** | Separates what you see (View) from the logic (ViewModel) and data (Model) |
+    | **Repository Pattern** | One central place to get data — can switch between fake and real data easily |
+    | **Dependency Injection** | Lets you swap parts in and out, like changing batteries |
+    | **Protocol-based** | Defines "contracts" so different parts know how to talk to each other |
+  </Tab>
+</Tabs>
+
+---
+
+## Project Status
+
+<div className="kl-grid-3">
+  <div className="kl-card">
+    <ProgressBar value={100} label="Home Screen" color="jade" />
+    <ProgressBar value={100} label="Stock Detail" color="jade" />
+    <ProgressBar value={100} label="Market Overview" color="jade" />
+    <ProgressBar value={100} label="Search" color="jade" />
+  </div>
+  <div className="kl-card">
+    <ProgressBar value={80} label="Intelligence Hub" color="amber" />
+    <ProgressBar value={20} label="Trading Floor" color="amber" />
+    <ProgressBar value={90} label="My Page / Settings" color="jade" />
+    <ProgressBar value={100} label="Login / Register" color="jade" />
+    <ProgressBar value={100} label="Events" color="jade" />
+    <ProgressBar value={90} label="Notifications" color="jade" />
+  </div>
+  <div className="kl-card">
+    <ProgressBar value={80} label="Design System" color="blue" />
+    <ProgressBar value={60} label="Backend API" color="blue" />
+    <ProgressBar value={40} label="AI Services" color="purple" />
+    <ProgressBar value={90} label="Documentation" color="jade" />
+  </div>
+</div>

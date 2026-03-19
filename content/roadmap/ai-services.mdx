@@ -1,0 +1,133 @@
+# AI Services <StatusBadge status="in-progress">IN PROGRESS</StatusBadge>
+
+<PageMeta status="in-progress" layer="shared" />
+
+AI-powered features including 12 agent roles, RAG pipeline, and market intelligence services. Architecture defined — implementation beginning.
+
+<InfoBox type="tip" title="Detailed AI Architecture Available">
+For full technical specifications, see the **AI Platform** section:
+- [AI Stack](/ai-platform/ai-stack) — Agent workflows, LangGraph orchestration, and MCP tool integration
+- [Intelligence Layer](/ai-platform/intelligence-layer) — RAG pipeline, embeddings, CAG, QLoRA fine-tuning, and vector search
+- [AI Security](/ai-platform/ai-security) — Prompt injection defense, data poisoning prevention, and security hardening
+- [AI Governance](/ai-platform/ai-governance) — FSC compliance, HITL policies, and ethical AI guidelines
+- [Operations & Audit](/ai-platform/operations-audit) — Canary tests, audit trails, monitoring, and incident response
+</InfoBox>
+
+## 12 AI Agents
+
+### Phase 1 — In Development (Q2 2026)
+
+<InfoBox type="info" title="Implementation Starting">
+These four agents form the foundation of the AI platform. Architecture defined, development beginning.
+</InfoBox>
+
+#### Risk Guard <StatusBadge status="in-progress">In Development</StatusBadge>
+
+Real-time position risk monitoring, portfolio stress testing, regulatory compliance checks (FSC), and anomaly detection. Protects users from excessive risk exposure.
+
+#### Smart Notification <StatusBadge status="in-progress">In Development</StatusBadge>
+
+Intelligent alert system that prioritizes and personalizes notifications based on user behavior, portfolio holdings, and market conditions. Reduces noise, surfaces what matters.
+
+#### Security Monitor <StatusBadge status="in-progress">In Development</StatusBadge>
+
+Continuous security surveillance across the platform — detects prompt injection attempts, data poisoning, anomalous API patterns, and unauthorized access. The AI platform's immune system.
+
+#### Control Tower <StatusBadge status="in-progress">In Development</StatusBadge>
+
+Orchestration agent that coordinates all other agents, manages task routing, handles fallbacks, and ensures system-wide consistency. The brain that keeps the 12-agent team working together.
+
+### Phase 2 — Specified (Q3 2026)
+
+<InfoBox type="info" title="Fully Specified">
+These agents have complete specifications and will enter development after Phase 1 agents are operational.
+</InfoBox>
+
+#### Market Analyst <StatusBadge status="planned">Specified</StatusBadge>
+
+AI-powered market analysis combining technical indicators (155+), sector rotation detection, and macro trend identification. Provides daily market briefs and real-time commentary.
+
+#### Portfolio Advisor <StatusBadge status="planned">Specified</StatusBadge>
+
+Personalized investment advisor with chat interface, portfolio analysis, rebalancing suggestions, and trade recommendations based on user risk profile and goals.
+
+#### News Analyst <StatusBadge status="planned">Specified</StatusBadge>
+
+Real-time financial news processing — summarizes articles, extracts key events, identifies affected stocks, and assesses sentiment impact on holdings.
+
+#### Sentiment Tracker <StatusBadge status="planned">Specified</StatusBadge>
+
+Real-time market sentiment analysis from news, social media, and financial reports using NLP and local LLM inference. Tracks crowd mood shifts before they hit prices.
+
+### Phase 3 — Planned (Q4 2026)
+
+<InfoBox type="info" title="Planned">
+These agents are designed and will be built after Phase 2 agents are operational.
+</InfoBox>
+
+#### Trading Strategist <StatusBadge status="planned">Planned</StatusBadge>
+
+Technical analysis signal generation with buy/sell/hold recommendations, backtested strategy templates, and automated execution planning.
+
+#### Compliance Auditor <StatusBadge status="planned">Planned</StatusBadge>
+
+Regulatory compliance automation — FSC rule checking, KYC verification support, trade surveillance, and audit report generation.
+
+#### Voice Assistant <StatusBadge status="planned">Planned</StatusBadge>
+
+Natural language voice interface for BARO. Ask questions about stocks, get portfolio updates, and execute commands using spoken Korean and English.
+
+#### Document Analyst <StatusBadge status="planned">Planned</StatusBadge>
+
+RAG-powered financial document Q&A — reads and understands earnings calls, annual reports, regulatory filings, and research papers to answer complex questions.
+
+## Planned AI Architecture
+
+<FlowDiagram>
+  <FlowRow>
+    <FlowNode type="view">AI Chat UI</FlowNode>
+    <FlowNode type="view">Signal Dashboard</FlowNode>
+    <FlowNode type="view">Copy Trading UI</FlowNode>
+  </FlowRow>
+
+  <FlowArrow direction="down" />
+
+  <FlowRow>
+    <FlowNode type="vm">Control Tower (Orchestrator)</FlowNode>
+  </FlowRow>
+
+  <FlowArrow direction="down" />
+
+  <FlowRow>
+    <FlowNode type="service">Risk Guard</FlowNode>
+    <FlowNode type="service">Market Analyst</FlowNode>
+    <FlowNode type="service">Portfolio Advisor</FlowNode>
+    <FlowNode type="service">Sentiment Tracker</FlowNode>
+  </FlowRow>
+
+  <FlowArrow direction="down" />
+
+  <FlowRow>
+    <FlowNode type="service">News Analyst</FlowNode>
+    <FlowNode type="service">Trading Strategist</FlowNode>
+    <FlowNode type="service">Document Analyst</FlowNode>
+    <FlowNode type="service">Compliance Auditor</FlowNode>
+  </FlowRow>
+
+  <FlowArrow direction="down" />
+
+  <FlowRow>
+    <FlowNode type="service">Smart Notification</FlowNode>
+    <FlowNode type="service">Security Monitor</FlowNode>
+    <FlowNode type="service">Voice Assistant</FlowNode>
+  </FlowRow>
+
+  <FlowArrow direction="down" />
+
+  <FlowRow>
+    <FlowNode type="repo">Vector DB</FlowNode>
+    <FlowNode type="repo">Local LLM</FlowNode>
+    <FlowNode type="repo">Market Data API</FlowNode>
+    <FlowNode type="repo">News Feeds</FlowNode>
+  </FlowRow>
+</FlowDiagram>

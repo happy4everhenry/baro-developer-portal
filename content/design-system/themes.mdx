@@ -1,0 +1,285 @@
+# Themes <KoreanLabel>테마</KoreanLabel>
+
+<PageMeta status="live" layer="frontend" />
+
+BARO supports a light theme (currently shipping) with a dark theme planned for Phase 2. The dark theme will use the "Liquid Glass" design system from the web prototype (v10), featuring glass-morphism surfaces and mesh gradient backgrounds.
+
+<StatGrid columns={4}>
+  <StatCard value="2" label="Theme Modes" />
+  <StatCard value="Light" label="Implemented" />
+  <StatCard value="Dark" label="Planned" />
+  <StatCard value="37" label="Tokens to Remap" />
+</StatGrid>
+
+<Tabs>
+<Tab label="Light Theme" icon="sun">
+
+## Light Theme <StatusBadge status="live">IMPLEMENTED</StatusBadge>
+
+The default and currently shipping theme. Clean white surfaces on a light gray canvas with subtle borders and minimal shadows. Follows iOS HIG light appearance conventions.
+
+- Full color token coverage (37 tokens)
+- All components styled and tested
+- Chart themes aligned with color system
+- Navigation and tab bar themed
+- Production ready
+
+### What It Looks Like
+
+- Background: `klBackground` (#F2F3F5)
+- Card surface: `klSurface` (#FFFFFF) with 1px `klBorder` (#F0F0F0) and Level 1 shadow
+- Text: `klText` (#1A1A1A) for names, `klTextTertiary` (#AAAAAA) for ticker codes
+- Prices: `klText` (#1A1A1A), changes: `klPriceUp` (#E04848) or `klPriceDown` (#3478F6)
+
+### Color Contrast & Accessibility
+
+All combinations must meet WCAG 2.1 AA contrast ratios.
+
+| Pairing | Light Contrast | Dark Contrast (Est.) | WCAG AA |
+|---------|---------------|---------------------|---------|
+| `klText` on `klSurface` | #1A1A1A on #FFF -- 17.4:1 | #F0F0F0 on #0A0A0F -- 16.8:1 | <StatusBadge status="live">Pass</StatusBadge> |
+| `klTextSecondary` on `klSurface` | #555 on #FFF -- 7.5:1 | #A0A0A0 on #0A0A0F -- 8.2:1 | <StatusBadge status="live">Pass</StatusBadge> |
+| `klTextTertiary` on `klSurface` | #AAA on #FFF -- 2.3:1 | #666 on #0A0A0F -- 3.1:1 | <StatusBadge status="wip">Decorative</StatusBadge> |
+| `klPriceUp` on `klSurface` | #E04848 on #FFF -- 4.0:1 | #E04848 on #0A0A0F -- 4.4:1 | <StatusBadge status="live">Pass (large)</StatusBadge> |
+| `klPriceDown` on `klSurface` | #3478F6 on #FFF -- 4.6:1 | #3478F6 on #0A0A0F -- 4.9:1 | <StatusBadge status="live">Pass (large)</StatusBadge> |
+
+<InfoBox type="warning" title="Tertiary Text Note">
+`klTextTertiary` and `klTextQuaternary` do not meet WCAG AA contrast minimums. These tokens are for decorative or supplementary metadata only (timestamps, ticker codes) that always appear alongside primary-contrast labels. Never use them for essential information.
+</InfoBox>
+
+</Tab>
+<Tab label="Dark Theme (Planned)" icon="moon">
+
+## Dark Theme <StatusBadge status="planned">PLANNED</StatusBadge>
+
+The planned dark appearance mode uses the Liquid Glass design system with glass-morphism effects, mesh gradients, and specular highlights.
+
+<ProgressBar value={15} label="Dark Theme Completion" color="blue" />
+
+### What Is Planned
+
+- Token remapping required (37 tokens)
+- Glass-morphism surface effects
+- Animated mesh gradient backgrounds
+- Specular overlay system
+- Estimated: Phase 2
+
+### What It Will Look Like
+
+- Background: `klBackground` (#0A0A0F) with mesh gradient orbs (jade, violet)
+- Card surface: glass `white/0.06` with 1px `white/0.08` border and backdrop-filter blur
+- Text: `klText` (#F0F0F0) for names, `klTextTertiary` (#666666) for ticker codes
+- Prices: unchanged -- `klPriceUp` (#E04848) and `klPriceDown` (#3478F6) are invariant
+
+### Liquid Glass Surface Tiers
+
+| Tier | Background | Blur |
+|------|-----------|------|
+| `--glass` (Level 1) | `rgba(255,255,255,0.04)` | `backdrop-filter: blur(20px)` |
+| `--glass-2` (Level 2) | `rgba(255,255,255,0.06)` | `backdrop-filter: blur(24px)` |
+| `--glass-3` (Level 3) | `rgba(255,255,255,0.09)` | `backdrop-filter: blur(30px)` |
+
+### Mesh Gradient Orbs
+
+Animated gradient orbs provide ambient background color in dark mode: jade, amber, violet, and red radial gradients positioned across the canvas.
+
+### Specular Highlights
+
+Glass surfaces include a specular gradient overlay that simulates light reflecting off glass edges -- a subtle top-to-bottom gradient creating the illusion of a light source above the UI.
+
+```css filename="Specular Gradient"
+--lq-specular: linear-gradient(
+  180deg,
+  rgba(255, 255, 255, 0.15) 0%,
+  rgba(255, 255, 255, 0.02) 40%,
+  transparent 100%
+);
+```
+
+### Theme Switching Behavior
+
+| Behavior | Specification |
+|----------|---------------|
+| **System Follow** | Default. Matches iOS system appearance via `@Environment(\.colorScheme)`. |
+| **Manual Override** | Force light or dark via Settings > Appearance. Stored in `UserDefaults`. |
+| **Transition** | Cross-fade with 0.3s ease-in-out animation. No jarring snap. |
+| **Chart Adaptation** | Chart backgrounds, grid lines, tooltips, and axis labels adapt to active theme. |
+| **Glass Effects** | Backdrop blur and specular highlights active only in dark mode. |
+| **Persistence** | Theme preference persisted via `@AppStorage("kl_theme")`. |
+
+</Tab>
+<Tab label="Token Mapping" icon="map">
+
+## Token Mapping Table
+
+Complete semantic token mapping between light and dark themes. Dark values are preliminary and subject to change.
+
+### Backgrounds
+
+| Semantic Token | Light Value | Dark Value (Planned) | Category |
+|---------------|-------------|---------------------|----------|
+| `klBackground` | `#F2F3F5` | `#0A0A0F` | App canvas |
+| `klSurface` | `#FFFFFF` | `white/0.06` | Cards, containers |
+| `klMoreButtonBg` | `#F6F7F9` | `white/0.08` | Button backgrounds |
+
+### Text
+
+| Semantic Token | Light Value | Dark Value (Planned) | Category |
+|---------------|-------------|---------------------|----------|
+| `klText` | `#1A1A1A` | `#F0F0F0` | Primary text |
+| `klTextSecondary` | `#555555` | `#A0A0A0` | Secondary text |
+| `klTextTertiary` | `#AAAAAA` | `#666666` | Tertiary / placeholders |
+| `klTextQuaternary` | `#BCBCBC` | `#444444` | Disabled / timestamps |
+
+### Borders & Dividers
+
+| Semantic Token | Light Value | Dark Value (Planned) | Category |
+|---------------|-------------|---------------------|----------|
+| `klBorder` | `#F0F0F0` | `white/0.08` | Card borders |
+| `klDivider` | `#F5F5F5` | `white/0.05` | List separators |
+| `klNavBorder` | `#EFEFEF` | `white/0.06` | Nav bar border |
+
+### Interactive
+
+| Semantic Token | Light Value | Dark Value (Planned) | Category |
+|---------------|-------------|---------------------|----------|
+| `klTabActive` | `#1A1A1A` | `#FFFFFF` | Active tab background |
+| `klTabInactive` | `#ECEDF0` | `white/0.06` | Inactive tab background |
+| `klNavInactive` | `#B0B0B0` | `#555555` | Inactive nav icons |
+
+### Invariant Tokens (Same in Both Themes)
+
+| Semantic Token | Value (both themes) | Category |
+|---------------|---------------------|----------|
+| `klPriceUp` | `#E04848` | Price increase |
+| `klPriceDown` | `#3478F6` | Price decrease |
+| `klJade` | `#42C4BA` | Brand primary |
+| `klAmber` | `#F5BE40` | Brand secondary |
+| `klRed` | `#E04848` | Brand alert |
+
+<InfoBox type="warning" title="Invariant Tokens">
+Price semantics (`klPriceUp`, `klPriceDown`), brand colors (`klJade`, `klAmber`, `klRed`), and all 15 company brand colors remain identical across both themes. These are culturally significant and must never be adjusted for theme contrast.
+</InfoBox>
+
+<Accordion>
+<AccordionItem title="CSS Custom Properties -- Light Theme" icon="code" defaultOpen={false}>
+
+```css filename="Light Theme (default)"
+:root {
+  --jade: #22C55E;
+  --amber: #D4A017;
+  --red: #E04848;
+  --blue: #3478F6;
+
+  --bg: #F2F3F5;
+  --bg-elevated: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --surface: #F0F0F0;
+  --surface-2: #E5E7EB;
+
+  --text: #1A1A1A;
+  --text-2: #555555;
+  --text-3: #AAAAAA;
+
+  --border: #F0F0F0;
+  --border-hover: #D1D5DB;
+
+  --glass: #FFFFFF;
+  --glass-blur: 0px;
+  --specular: none;
+}
+```
+
+</AccordionItem>
+<AccordionItem title="CSS Custom Properties -- Dark Theme" icon="code" defaultOpen={false}>
+
+```css filename="Dark Theme (planned)"
+/* @media (prefers-color-scheme: dark) or .theme-dark */
+:root[data-theme="dark"] {
+  --bg: #0A0A0F;
+  --bg-elevated: rgba(255,255,255,0.06);
+  --bg-card: rgba(255,255,255,0.06);
+  --surface: rgba(255,255,255,0.04);
+  --surface-2: rgba(255,255,255,0.08);
+
+  --text: #F0F0F0;
+  --text-2: #A0A0A0;
+  --text-3: #666666;
+
+  --border: rgba(255,255,255,0.08);
+  --border-hover: rgba(255,255,255,0.15);
+
+  --glass: rgba(255,255,255,0.06);
+  --glass-blur: 20px;
+  --specular: linear-gradient(180deg,
+    rgba(255,255,255,0.15) 0%,
+    rgba(255,255,255,0.02) 40%,
+    transparent 100%);
+}
+```
+
+</AccordionItem>
+<AccordionItem title="Swift Theme Architecture" icon="code" defaultOpen={false}>
+
+```swift filename="Planned Theme Architecture"
+// Future: KLINETheme.swift
+enum KLINETheme {
+    case light
+    case dark
+
+    var background: Color {
+        switch self {
+        case .light: return Color(hex: "F2F3F5")
+        case .dark:  return Color(hex: "0A0A0F")
+        }
+    }
+
+    var surface: Color {
+        switch self {
+        case .light: return .white
+        case .dark:  return Color.white.opacity(0.06)
+        }
+    }
+
+    var text: Color {
+        switch self {
+        case .light: return Color(hex: "1A1A1A")
+        case .dark:  return Color(hex: "F0F0F0")
+        }
+    }
+
+    // Price semantics remain constant across themes
+    var priceUp: Color { Color(hex: "E04848") }
+    var priceDown: Color { Color(hex: "3478F6") }
+}
+
+// Usage in views
+struct StockRow: View {
+    @Environment(\.colorScheme) var colorScheme
+
+    var theme: KLINETheme {
+        colorScheme == .dark ? .dark : .light
+    }
+
+    var body: some View {
+        HStack {
+            Text(stock.name)
+                .foregroundColor(theme.text)
+        }
+        .background(theme.surface)
+    }
+}
+```
+
+</AccordionItem>
+</Accordion>
+
+## Theme Guidelines
+
+<FeatureGrid columns={2}>
+  <FeatureCard icon="check" title="Do" description="Always use semantic tokens (e.g. klText) not hardcoded hex. Test all views in both simulators. Maintain WCAG 2.1 AA contrast. Keep price colors constant across themes. Use @Environment for conditional styling. Provide blur fallbacks for older devices." />
+  <FeatureCard icon="x" title="Don't" description="Don't hardcode light-mode hex values. Don't modify price semantics for dark theme. Don't assume white backgrounds. Don't use shadows > 0.12 opacity in dark mode. Don't implement glass effects without blur fallbacks. Don't adjust company brand colors per theme." />
+</FeatureGrid>
+
+</Tab>
+</Tabs>

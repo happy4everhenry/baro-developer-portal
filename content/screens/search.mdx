@@ -1,0 +1,579 @@
+<PageMeta status="live" layer="frontend" />
+
+# Search Screen
+
+The Search screen lets you find any stock, ETF, or market theme in the app. It has five tab categories, a floating search bar at the bottom, and instant autocomplete suggestions. All stock and theme data is pre-loaded when the screen opens so that searching feels instant -- no waiting for the server on every keystroke.
+
+<StatGrid columns={4}>
+  <StatCard value="5" label="Elements" />
+  <StatCard value="5" label="Tab Categories" />
+  <StatCard value="3" label="Data Sources" />
+  <StatCard value="3" label="Max Autocomplete" />
+</StatGrid>
+
+<Tabs>
+  <Tab label="Overview" icon="🔍">
+
+    <InfoBox type="info" title="How does Search work?">
+      The screen has three zones stacked vertically: filter tabs at top, scrollable content in the middle, and a floating search pill pinned to the bottom. When you start typing, the first tab changes its label from "최근검색" to "검색결과" and shows cross-category results from domestic stocks, US stocks, and themes. All filtering happens on the device using pre-loaded data -- no network calls needed during search.
+    </InfoBox>
+
+    ### Screen Layout
+
+    <Diagram title="Search Screen Structure">
+      <DiagramRow>
+        <DiagramNode type="view" icon="📱" label="SearchView" sublabel="Full-screen overlay from Home" />
+      </DiagramRow>
+      <DiagramArrow direction="down" label="ZStack(alignment: .bottom)" />
+      <DiagramRow>
+        <DiagramGroup label="Main Content (VStack)" color="blue">
+          <DiagramRow>
+            <DiagramNode type="view" icon="🔀" label="SR2: Filter Tabs" sublabel="5 category tabs" />
+          </DiagramRow>
+          <DiagramRow>
+            <DiagramNode type="view" icon="💡" label="Autocomplete" sublabel="Top 3 suggestions (conditional)" />
+          </DiagramRow>
+          <DiagramRow>
+            <DiagramNode type="view" icon="📋" label="Content Area" sublabel="SR3 recent / SR4 results / tab lists" />
+          </DiagramRow>
+        </DiagramGroup>
+      </DiagramRow>
+      <DiagramArrow direction="down" label="pinned to bottom" />
+      <DiagramRow>
+        <DiagramNode type="view" icon="🔍" label="SR1: Floating Search Pill" sublabel="Capsule TextField + dismiss button" />
+      </DiagramRow>
+    </Diagram>
+
+    ### How Data Loads
+
+    <StepGuide>
+      <Step number={1} title="View Appears">
+        `.task` fires: search field auto-focuses via `@FocusState`, then calls `loadAllStocksIfNeeded()`.
+      </Step>
+      <Step number={2} title="Parallel Fetch">
+        Three `async let` calls fire at the same time: domestic stocks, US stocks, and market themes.
+      </Step>
+      <Step number={3} title="Cache">
+        Results stored in `allDomesticStocks`, `allUSStocks`, `allThemes`.
+      </Step>
+      <Step number={4} title="Guard">
+        `hasLoadedAllStocks = true` prevents making the same network calls again.
+      </Step>
+      <Step number={5} title="Search Ready">
+        All filtering is instant via computed properties reading the cached arrays. No more network calls needed.
+      </Step>
+    </StepGuide>
+
+    <InfoBox type="tip" title="Prefix Matches First">
+      The autocomplete system shows up to 3 suggestions. It prioritizes names that start with your search text over names that merely contain it. This makes the suggestions feel smarter.
+    </InfoBox>
+
+  </Tab>
+
+  <Tab label="Elements" icon="🧩">
+
+    <Accordion>
+      <AccordionItem title="SR1 -- Search Bar (Floating Pill)" icon="🔍" badge="Always Visible" defaultOpen={true}>
+
+        **Component:** `floatingSearchPill` -- HStack with Capsule TextField + dismiss Circle
+
+        A floating search bar pinned to the bottom of the screen. It auto-focuses when the screen opens. Has a clear button (xmark.circle.fill) that appears when text is entered, and a dismiss circle button to close the whole search screen.
+
+        **Data:** Two-way binding to `viewModel.searchQuery`
+
+        **Interactions:**
+        - Text input (auto-focused on appear via `@FocusState`)
+        - Clear button: sets `viewModel.searchQuery = ""` with `.opacity.combined(with: .scale)` transition
+        - Dismiss button: calls `dismiss()` via `@Environment(\.dismiss)`
+
+        **States:** Empty (placeholder "종목명, 종목코드 입력"), Active (text entered + clear visible), Keyboard dismissed
+
+        **Design:** Capsule shape, `Color.klSurface` fill, shadow: `radius: 12, y: -3, opacity: 0.12`. Dismiss button: 48x48 circle.
+
+      </AccordionItem>
+
+      <AccordionItem title="SR2 -- Filter Tabs" icon="🔀" badge="5 Categories">
+
+        **Component:** `KLSegmentedControl`
+
+        Five tab pills that switch between search categories. The first tab dynamically changes its label based on whether you are typing: "최근검색" when idle, "검색결과" when searching.
+
+        | Tab | Label | Data Source | Filters | Content |
+        |---|---|---|---|---|
+        | `.recent` | 최근검색 / 검색결과 | Local `recentSearches` or cross-category | Query text only | Recent list or search results |
+        | `.domestic` | 국내주식 | `fetchSearchStocks(domestic: true)` | Query + NXT toggle | Stock list with NXT toggle |
+        | `.us` | 미국주식 | `fetchSearchStocks(domestic: false)` | Query text only | Stock list |
+        | `.etf` | ETF | Combined domestic + US stocks | Query + ETF sub-filter | ETF list with sub-filter pills |
+        | `.theme` | 테마 | `fetchMarketThemes()` | Query text only | Theme list |
+
+        **Interaction:** Tap selects tab, triggers `selectTab()` async, resets `etfFilter` on every switch.
+
+        **States:** Selected (filled dark), Unselected (light gray)
+
+      </AccordionItem>
+
+      <AccordionItem title="SR3 -- Recent Searches" icon="🕐">
+
+        **Component:** `recentSearchList` -- ForEach `RecentSearch` rows
+
+        A simple list of recently searched stocks. Currently uses a local static array (hardcoded, not persisted).
+
+        **Data:** `viewModel.recentSearches` -- `[RecentSearch]` with name and code
+
+        **Visibility:** Only shown on the "최근검색" tab when the search query is empty.
+
+      </AccordionItem>
+
+      <AccordionItem title="SR4 -- Search Results" icon="📋" badge="Multi-Category">
+
+        **Component:** `searchResultsList` -- composed of `SearchCategoryBand`, `SearchStockRow`, `SearchThemeRow`
+
+        When you type a search query on the first tab, results appear grouped by category: domestic stocks (top 5), US stocks (top 5), and themes (top 5). Each category has a header band with a count and "더보기" button that jumps to that category's dedicated tab.
+
+        **Data:** `MarketRepositoryProtocol` -- `fetchSearchStocks()` + `fetchMarketThemes()`
+
+        **Cross-Category Result Limits:**
+        | Category | Max Shown | Overflow |
+        |---|---|---|
+        | 국내주식 | `prefix(5)` | "더보기" switches to `.domestic` tab |
+        | 미국주식 | `prefix(5)` | "더보기" switches to `.us` tab |
+        | 테마 | `prefix(5)` | "더보기" switches to `.theme` tab |
+
+        **Interactions:**
+        - Tap stock row -> `StockDetailPageView` via `.fullScreenCover`
+        - Tap star -> toggle favorite (`favoriteIds` Set)
+        - Tap "더보기" -> switch to that category's tab
+
+        **States:** Skeleton (15 shimmer rows), Loaded, Empty ("검색 결과가 없습니다")
+
+      </AccordionItem>
+
+      <AccordionItem title="SR5 -- NXT Toggle" icon="🔘">
+
+        **Component:** `nxtToggle` -- HStack with label + `checkmark.circle.fill`
+
+        A toggle that filters domestic stocks to show only KOSPI exchange stocks (NXT-compatible). Only appears on the 국내주식 tab.
+
+        **Data:** `viewModel.nxtOnly` -- Bool toggle
+
+        **States:**
+        - Off: dimmed text + quaternary icon
+        - On: primary text + filled checkmark, filters to `exchange == .kospi` only
+
+        **Animation:** `withAnimation(.easeInOut(duration: 0.2))` on toggle
+
+      </AccordionItem>
+    </Accordion>
+
+    ### Row Components
+
+    <Accordion>
+      <AccordionItem title="SearchStockRow" icon="📊">
+
+        | Zone | Content | Styling |
+        |---|---|---|
+        | Leading | Stock name | `.klSubheadline`, `Color.klText`, 1 line max |
+        | Leading sub | Exchange name | `.klCaption`, `Color.klTextTertiary` |
+        | Trailing top | Ticker code | `.klCaption`, `Color.klTextTertiary` |
+        | Trailing bottom | Tag pills | "소수점" / "NXT" (green #22C55E) |
+        | Far trailing | Favorite star | 18px, 44x44 hit target, gold #FFB800 when active |
+
+      </AccordionItem>
+
+      <AccordionItem title="SearchThemeRow" icon="🏷️">
+
+        | Zone | Content | Styling |
+        |---|---|---|
+        | Leading | #name (hashtag prefix) | `.klSubheadline`, `Color.klText`, 1 line max |
+        | Leading sub | Theme description | `.klCaption`, `Color.klTextTertiary`, 1 line max |
+        | Trailing | Change percent | 14px semibold, `klPriceUp` / `klPriceDown` |
+
+      </AccordionItem>
+
+      <AccordionItem title="SearchCategoryBand" icon="📑">
+
+        | Zone | Content | Styling |
+        |---|---|---|
+        | Leading | Category title ("국내주식", "미국주식", "테마") | `.klBody`, `Color.klText` |
+        | Adjacent | Result count | `.klBody`, `Color.klJade` |
+        | Trailing | "더보기" + chevron.right | `.klCaption`, `Color.klTextTertiary` |
+
+      </AccordionItem>
+    </Accordion>
+
+  </Tab>
+
+  <Tab label="Data & API" icon="🔗">
+
+    ### API Endpoint Mapping
+
+    | Section | Repository Method | REST Endpoint | Response Model | Fallback |
+    |---|---|---|---|---|
+    | SR3 Recent Searches | Local static array | None (local) | `[RecentSearch]` | Always available (hardcoded) |
+    | SR4 Domestic Stocks | `marketRepo.fetchSearchStocks(domestic: true)` | `GET /api/stocks/search?market=domestic` | `[Stock]` | Silent fail (print only) |
+    | SR4 US Stocks | `marketRepo.fetchSearchStocks(domestic: false)` | `GET /api/stocks/search?market=us` | `[Stock]` | Silent fail (print only) |
+    | SR4 Market Themes | `marketRepo.fetchMarketThemes()` | Mock only | `[MarketTheme]` | Silent fail (print only) |
+
+    ### ViewModel Properties
+
+    <Accordion>
+      <AccordionItem title="Search State" icon="🔍" defaultOpen={true}>
+
+        | Property | Type | Default | Description |
+        |---|---|---|---|
+        | `searchQuery` | `String` | `""` | Bound to TextField, drives all filtering. Non-empty auto-switches to `.recent` tab |
+        | `selectedTab` | `SearchTab` | `.recent` | Active tab: `.recent`, `.domestic`, `.us`, `.etf`, `.theme` |
+        | `etfFilter` | `ETFFilter` | `.all` | ETF sub-filter: `.all`, `.domestic`, `.foreign`. Reset on every tab switch |
+        | `nxtOnly` | `Bool` | `false` | When true, filters domestic stocks to `exchange == .kospi` only |
+        | `isSearching` | `Bool` | computed | `!searchQuery.isEmpty` |
+        | `firstTabLabel` | `String` | computed | "검색결과" when searching, "최근검색" otherwise |
+
+      </AccordionItem>
+
+      <AccordionItem title="Cached Data" icon="💾">
+
+        | Property | Type | Default | Description |
+        |---|---|---|---|
+        | `stocks` | `[Stock]` | `[]` | Per-tab loaded stock data |
+        | `allDomesticStocks` | `[Stock]` | `[]` | Cached domestic stocks for instant search |
+        | `allUSStocks` | `[Stock]` | `[]` | Cached US stocks for instant search |
+        | `allThemes` | `[MarketTheme]` | `[]` | Cached themes for search + theme tab |
+        | `hasLoadedAllStocks` | `Bool` | `false` | Guard flag preventing redundant loads |
+        | `favoriteIds` | `Set<String>` | `[]` | Favorited stock IDs (local, not persisted) |
+        | `isLoading` | `Bool` | `false` | Controls skeleton shimmer during per-tab loading |
+
+      </AccordionItem>
+    </Accordion>
+
+    ### Search Algorithm
+
+    <InfoBox type="info" title="Client-Side Filtering">
+      All search filtering runs on the device against pre-cached arrays. No server-side search API calls happen during typing. The autocomplete prioritizes prefix matches over substring matches, returning max 3 suggestions.
+    </InfoBox>
+
+    <Modal triggerLabel="View Search Algorithm Code" title="SearchViewModel.swift -- Filtering & Autocomplete" size="large">
+
+    ```swift
+    // Client-side filtering -- runs against cached arrays for instant results
+    private func filterByQuery(_ stocks: [Stock]) -> [Stock] {
+        guard !searchQuery.isEmpty else { return [] }
+        let query = searchQuery.lowercased()
+        return stocks.filter {
+            $0.name.lowercased().contains(query) ||
+            $0.code.lowercased().contains(query)
+        }
+    }
+
+    // Computed properties for each category
+    var searchDomesticResults: [Stock] { filterByQuery(allDomesticStocks) }
+    var searchUSResults: [Stock]       { filterByQuery(allUSStocks) }
+
+    var searchThemeResults: [MarketTheme] {
+        guard !searchQuery.isEmpty else { return [] }
+        let query = searchQuery.lowercased()
+        return allThemes.filter {
+            $0.name.lowercased().contains(query) ||
+            $0.description.lowercased().contains(query)
+        }
+    }
+    ```
+
+    ```swift
+    /// Top 3 names matching the current query (stocks + themes)
+    /// Prefix matches are prioritized over substring matches
+    var autocompleteSuggestions: [String] {
+        guard !searchQuery.isEmpty else { return [] }
+        let query = searchQuery.lowercased()
+
+        var seen = Set<String>()
+        var prefixMatches: [String] = []
+        var substringMatches: [String] = []
+
+        for stock in (allDomesticStocks + allUSStocks) {
+            let name = stock.name
+            guard !seen.contains(name) else { continue }
+            let lower = name.lowercased()
+            if lower.hasPrefix(query) {
+                prefixMatches.append(name); seen.insert(name)
+            } else if lower.contains(query) {
+                substringMatches.append(name); seen.insert(name)
+            }
+        }
+
+        for theme in allThemes {
+            let name = theme.name
+            guard !seen.contains(name) else { continue }
+            let lower = name.lowercased()
+            if lower.hasPrefix(query) {
+                prefixMatches.append(name); seen.insert(name)
+            } else if lower.contains(query) {
+                substringMatches.append(name); seen.insert(name)
+            }
+        }
+
+        return Array((prefixMatches + substringMatches).prefix(3))
+    }
+    ```
+
+    </Modal>
+
+    ### ETF & NXT Filters
+
+    <Accordion>
+      <AccordionItem title="ETF Sub-Filters" icon="📦">
+
+        | Label | Value | Behavior |
+        |---|---|---|
+        | 전체 | `.all` | Show all domestic + foreign ETFs combined |
+        | 국내 | `.domestic` | Filter to KOSPI/KOSDAQ exchanges only |
+        | 해외 | `.foreign` | Filter to NASDAQ/NYSE/AMEX exchanges only |
+
+      </AccordionItem>
+
+      <AccordionItem title="NXT Filter Logic" icon="🔘">
+
+        | Property | Effect |
+        |---|---|
+        | `nxtOnly = false` | Show all domestic stocks (KOSPI + KOSDAQ) |
+        | `nxtOnly = true` | Filter to `exchange == .kospi` only |
+
+        NXT is a KOSPI alternative trading venue. The toggle only appears on the 국내주식 tab.
+
+      </AccordionItem>
+    </Accordion>
+
+    ### State Machine
+
+    **Initial Load:** View Appears -> Focus Search Bar -> loadAllStocksIfNeeded() -> All Data Cached
+
+    **Search Query:** Idle (최근검색) -> User Types -> Tab label becomes "검색결과" -> Cross-Category Results
+
+    **Tab Switch:** Tap Tab -> selectTab() -> loadStocks() -> Skeleton (15 rows) -> Data Rendered
+
+    **Empty State:** Query Input -> Filter All Categories -> All Empty + hasLoaded -> "검색 결과가 없습니다"
+
+    | Section | Skeleton View | Error Behavior | Empty Behavior |
+    |---|---|---|---|
+    | SR1 Search Bar | None (always static) | N/A | Always rendered with placeholder |
+    | SR2 Filter Tabs | None (always static) | N/A | First tab label changes dynamically |
+    | SR3 Recent Searches | None | N/A | Hardcoded list (currently 1 item) |
+    | SR4 Search Results | `SearchRowSkeletonView` x15 + `.shimmer()` | Silent fail (print only) | "검색 결과가 없습니다" centered |
+    | SR5 NXT Toggle | None (always static) | N/A | Only on 국내주식 tab |
+
+    <Modal triggerLabel="View Data Loading Code" title="SearchViewModel.swift -- Parallel Pre-Loading & Per-Tab Loading" size="large">
+
+    ```swift
+    /// Load all data sources in parallel for instant cross-category search.
+    func loadAllStocksIfNeeded() async {
+        guard !hasLoadedAllStocks else { return }
+        do {
+            async let domesticTask = marketRepository.fetchSearchStocks(domestic: true)
+            async let usTask = marketRepository.fetchSearchStocks(domestic: false)
+            async let themesTask = marketRepository.fetchMarketThemes()
+            allDomesticStocks = try await domesticTask
+            allUSStocks = try await usTask
+            allThemes = try await themesTask
+            hasLoadedAllStocks = true
+        } catch {
+            print("[Search] Failed to load all stocks: \(error)")
+        }
+    }
+    ```
+
+    ```swift
+    /// Per-tab data loading with skeleton shimmer during fetch.
+    func loadStocks() async {
+        isLoading = true
+        do {
+            switch selectedTab {
+            case .recent:   stocks = []
+            case .domestic: stocks = try await marketRepository.fetchSearchStocks(domestic: true)
+            case .us:       stocks = try await marketRepository.fetchSearchStocks(domestic: false)
+            case .etf:
+                let domestic = try await marketRepository.fetchSearchStocks(domestic: true)
+                let foreign = try await marketRepository.fetchSearchStocks(domestic: false)
+                stocks = domestic + foreign
+            case .theme:
+                stocks = []
+                if allThemes.isEmpty {
+                    allThemes = try await marketRepository.fetchMarketThemes()
+                }
+            }
+        } catch {
+            print("[Search] Failed to load stocks: \(error)")
+        }
+        isLoading = false
+    }
+    ```
+
+    </Modal>
+
+  </Tab>
+
+  <Tab label="Navigation" icon="🧭">
+
+    ### Navigation Map
+
+    | Direction | Source / Target | Presentation | Parameters |
+    |---|---|---|---|
+    | Inbound | Home tab bar (search icon) | Full-screen overlay | `SearchViewModel(marketRepo:)` |
+    | Outbound | Stock Row tap | `.fullScreenCover` | `StockDetailPageViewModel(stock: selectedStock, marketRepo:)` |
+    | Dismiss | Back to Home | `dismiss()` | Floating pill dismiss button or `.navigateToHome` notification |
+
+    ### Interaction Map
+
+    | Element | Gesture | Action | Target / Result |
+    |---|---|---|---|
+    | SR1 TextField | Type | Update search query | Binding -> `onChange` auto-switches to `.recent`, triggers `loadAllStocksIfNeeded()` |
+    | SR1 Clear Button | Tap | Clear search query | `searchQuery = ""` with `.opacity.combined(with: .scale)` transition |
+    | SR1 Dismiss Button | Tap | Close search | `dismiss()` |
+    | SR2 Tab Pill | Tap | Switch category | `selectTab(tab)` async, resets `etfFilter = .all` |
+    | Autocomplete Suggestion | Tap | Fill query | `searchQuery = suggestion`, dismisses keyboard |
+    | SR4 "더보기" | Tap | Go to category tab | `selectTab(.domestic)` / `.us` / `.theme` |
+    | SR4 Stock Row | Tap | Open stock detail | `.fullScreenCover` -> `StockDetailPageView` |
+    | SR4 Star Button | Tap | Toggle favorite | Insert/remove from `favoriteIds` Set |
+    | SR5 NXT Toggle | Tap | Filter KOSPI only | `nxtOnly.toggle()` with `easeInOut(0.2)` |
+    | ETF Sub-Filter | Tap | Select ETF filter | `etfFilter = filter` with `easeInOut(0.2)` |
+    | Background | Tap | Dismiss keyboard | `isSearchFocused = false` |
+
+    <Modal triggerLabel="View Navigation Code" title="SearchView.swift -- Navigation & Dismiss" size="medium">
+
+    ```swift
+    // Stock detail navigation via fullScreenCover
+    .fullScreenCover(isPresented: $showStockPage) {
+        if let stock = selectedStock {
+            StockDetailPageView(
+                viewModel: StockDetailPageViewModel(
+                    stock: stock,
+                    marketRepo: viewModel.marketRepository
+                )
+            )
+        }
+    }
+
+    // Cascade dismiss: notification closes both stock detail and search
+    .onReceive(NotificationCenter.default.publisher(for: .navigateToHome)) { _ in
+        showStockPage = false
+        dismiss()
+    }
+    ```
+
+    </Modal>
+
+    ### Animations
+
+    | Element | Animation | Duration | Description |
+    |---|---|---|---|
+    | SR1 Clear button | `.opacity.combined(with: .scale)` | ~0.2s | Fade + scale on appear/disappear |
+    | SR2 Tab auto-switch | `easeInOut` | 0.2s | Auto-switches to `.recent` when query becomes non-empty |
+    | SR5 NXT toggle | `easeInOut` | 0.2s | Color and weight transition on toggle |
+    | ETF sub-filter pills | `easeInOut` | 0.2s | Fill/stroke swap on selection |
+    | Skeleton rows | `.shimmer()` | Continuous | 15 shimmer rows during per-tab loading |
+
+  </Tab>
+
+  <Tab label="Source Files" icon="📁">
+
+    ### Source Files
+
+    | File | Role | Lines |
+    |---|---|---|
+    | `Features/Search/SearchView.swift` | Root view: ZStack layout, tab switching, content routing, fullScreenCover navigation | ~650 |
+    | `Features/Search/SearchViewModel.swift` | @Observable ViewModel: parallel loading, search filtering, autocomplete, ETF/NXT filters, favorites | ~244 |
+    | `Components/KLSegmentedControl.swift` | Reusable generic segmented pill control with dynamic labels | -- |
+    | `Components/SkeletonViews.swift` | `SearchRowSkeletonView` + `SkeletonBlock` + `.shimmer()` modifier | -- |
+    | `Features/StockDetail/StockDetailPageView.swift` | Destination view for stock row tap navigation | -- |
+    | `Models/Stock.swift` | Stock model: id, name, code, exchange, price, isFractional, isNXT | -- |
+    | `Models/MarketTheme.swift` | MarketTheme model: name, description, changePercent, weight | -- |
+    | `Services/MarketRepositoryProtocol.swift` | Protocol: `fetchSearchStocks(domestic:)`, `fetchMarketThemes()` | -- |
+
+    ### Enum Reference
+
+    <Accordion>
+      <AccordionItem title="SearchTab" icon="🔀">
+
+        ```swift
+        enum SearchTab: String, CaseIterable, Sendable {
+            case recent   = "최근검색"
+            case domestic = "국내주식"
+            case us       = "미국주식"
+            case etf      = "ETF"
+            case theme    = "테마"
+        }
+        ```
+
+      </AccordionItem>
+
+      <AccordionItem title="ETFFilter & RecentSearch" icon="📦">
+
+        ```swift
+        enum ETFFilter: String, CaseIterable, Sendable {
+            case all      = "전체"
+            case domestic = "국내"
+            case foreign  = "해외"
+        }
+
+        struct RecentSearch: Identifiable, Sendable {
+            let id = UUID()
+            let name: String
+            let code: String
+        }
+        ```
+
+      </AccordionItem>
+    </Accordion>
+
+    <Modal triggerLabel="View Full Component Tree" title="SearchView Component Hierarchy" size="large">
+
+    ```
+    SearchView
+    ├── SearchViewModel (@Observable)
+    │   ├── MarketRepositoryProtocol
+    │   ├── searchQuery / selectedTab / etfFilter / nxtOnly
+    │   ├── allDomesticStocks / allUSStocks / allThemes
+    │   └── favoriteIds: Set<String>
+    │
+    ├── @FocusState isSearchFocused: Bool
+    ├── @State selectedStock / showStockPage
+    │
+    ├── ZStack(alignment: .bottom)
+    │   ├── VStack(spacing: 0)
+    │   │   ├── KLSegmentedControl [SR2]
+    │   │   ├── if .etf: etfSubFilters (전체/국내/해외 pills)
+    │   │   ├── if searching + suggestions: autocompleteSuggestionsView
+    │   │   └── contentArea (ScrollView + LazyVStack)
+    │   │       ├── .recent (no query): recentSearchList [SR3]
+    │   │       ├── .recent (query): searchResultsList [SR4]
+    │   │       ├── .domestic / .us: stockList + nxtToggle [SR5]
+    │   │       ├── .etf: etfList
+    │   │       └── .theme: themeList
+    │   │
+    │   └── floatingSearchPill [SR1]
+    │
+    ├── .fullScreenCover → StockDetailPageView
+    ├── .onReceive(.navigateToHome) → dismiss all
+    └── .task { isSearchFocused = true; loadAllStocksIfNeeded() }
+    ```
+
+    </Modal>
+
+    ### Design Specs
+
+    | Aspect | Specification |
+    |---|---|
+    | Floating search pill | Capsule, `Color.klSurface`, shadow: radius 12, y -3, opacity 0.12 |
+    | Dismiss button | 48x48 circle, `Color.klTabInactive`, `xmark` 16px semibold |
+    | Tab pills | `KLSegmentedControl`, padding: .lg horizontal, .xl top, .md bottom |
+    | ETF sub-filters | Capsule: filled `Color.klText` when selected, stroke `Color.klDivider` when not |
+    | Stock tag pills | 9px medium, `RoundedRectangle(cornerRadius: 4)`, 0.5pt stroke at 50% opacity |
+    | NXT tag color | `#22C55E` (green) |
+    | Favorite star | Active: `#FFB800` gold `star.fill`, Inactive: `Color.klTextQuaternary` `star` |
+    | Content bottom padding | 80pt to clear floating pill |
+    | Empty state | "검색 결과가 없습니다" centered, `.klBodyRegular`, `Color.klTextTertiary` |
+    | Autocomplete limit | Max 3 suggestions, prefix matches first |
+    | Category result limit | Top 5 per category in cross-category view |
+    | Skeleton count | 15 shimmer rows per tab |
+    | Background | `Color.klBackground` with `.ignoresSafeArea()` |
+
+  </Tab>
+</Tabs>

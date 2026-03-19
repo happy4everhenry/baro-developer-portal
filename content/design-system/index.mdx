@@ -1,0 +1,97 @@
+<PageMeta status="live" layer="shared" />
+
+# Design System
+
+<InfoBox type="fun" title="What's a design system?">
+Imagine you have a coloring book, but it comes with rules: "Always use *this* shade of blue for the sky" and "Always leave *this much* space between drawings." A **design system** is exactly that — a set of rules that make sure every part of BARO looks beautiful and consistent, no matter who is building it.
+</InfoBox>
+
+A design system is the **single source of truth** for how BARO looks and feels. Every color, font, spacing value, and animation is defined here so the whole app feels like one seamless experience.
+
+---
+
+## By the Numbers
+
+<StatGrid columns={4}>
+  <StatCard value="52" label="Color Tokens" />
+  <StatCard value="12" label="Font Styles" />
+  <StatCard value="12" label="Spacing Values" />
+  <StatCard value="5" label="Corner Sizes" />
+</StatGrid>
+
+---
+
+## Explore the Design System
+
+<FeatureGrid columns={3}>
+  <FeatureCard icon="✨" title="Brand" description="Logo, personality, and the soul of BARO" href="/design-system/brand" color="purple" />
+  <FeatureCard icon="🎨" title="Colors" description="52 color tokens for light and dark themes" href="/design-system/colors" color="jade" />
+  <FeatureCard icon="🔤" title="Typography" description="12 font styles — from tiny labels to big headlines" href="/design-system/typography" color="blue" />
+  <FeatureCard icon="📏" title="Spacing" description="12 spacing values that keep everything neat and tidy" href="/design-system/spacing" color="amber" />
+  <FeatureCard icon="⬜" title="Corners" description="5 corner radius sizes — from sharp to super round" href="/design-system/corners" color="teal" />
+  <FeatureCard icon="🌓" title="Themes" description="Light mode, dark mode, and how they switch" href="/design-system/themes" color="purple" />
+  <FeatureCard icon="🎬" title="Motion" description="How things move — spring, ease, and bounce animations" href="/design-system/motion" color="red" />
+  <FeatureCard icon="🔄" title="Transitions" description="How screens and elements smoothly change" href="/design-system/transitions" color="blue" />
+  <FeatureCard icon="👆" title="Micro-interactions" description="Tiny delightful animations when you tap and swipe" href="/design-system/micro-interactions" color="amber" />
+</FeatureGrid>
+
+---
+
+## Visual Tokens vs. Motion
+
+<Tabs>
+  <Tab label="Visual Tokens" icon="🎨">
+    ### The Look of BARO
+
+    Visual tokens are the **building blocks of appearance**. Think of them like a paint palette and a ruler — they define what things look like when they're sitting still.
+
+    <FeatureGrid columns={2}>
+      <FeatureCard icon="🎨" title="Colors" description="Every shade in BARO's palette — backgrounds, text, accents, and semantic colors like green for 'up' and red for 'down'" href="/design-system/colors" color="jade" />
+      <FeatureCard icon="🔤" title="Typography" description="Font sizes from 11px to 34px, weights from regular to bold, and line heights that make text easy to read" href="/design-system/typography" color="blue" />
+      <FeatureCard icon="📏" title="Spacing" description="A scale from 2px to 48px that keeps padding and margins consistent everywhere" href="/design-system/spacing" color="amber" />
+      <FeatureCard icon="⬜" title="Corners" description="From sharp rectangles to pill-shaped buttons — 5 levels of roundness" href="/design-system/corners" color="purple" />
+    </FeatureGrid>
+
+    <InfoBox type="tip" title="Why tokens?">
+    Instead of typing "color: #1A73E8" over and over, developers use a **token** like `klineBlue`. If we ever change the blue, it updates everywhere at once — like magic!
+    </InfoBox>
+  </Tab>
+  <Tab label="Motion & Animation" icon="🎬">
+    ### The Feel of BARO
+
+    Motion is what makes BARO feel **alive**. When a chart slides in, a button bounces on tap, or a screen fades away — that's motion design at work.
+
+    <FeatureGrid columns={2}>
+      <FeatureCard icon="🎬" title="Motion Curves" description="Spring, easeInOut, and linear — the physics of how things move" href="/design-system/motion" color="red" />
+      <FeatureCard icon="🔄" title="Transitions" description="Full-screen animations when navigating between screens" href="/design-system/transitions" color="blue" />
+      <FeatureCard icon="👆" title="Micro-interactions" description="Small, satisfying animations — button presses, pull-to-refresh, loading shimmers" href="/design-system/micro-interactions" color="amber" />
+      <FeatureCard icon="🌓" title="Theme Switching" description="The smooth crossfade when toggling between light and dark mode" href="/design-system/themes" color="purple" />
+    </FeatureGrid>
+
+    <InfoBox type="info" title="Motion has rules too!">
+    Every animation in BARO uses standard durations: **150ms** for quick feedback, **300ms** for element transitions, and **500ms** for big screen changes. This keeps the app feeling snappy but smooth.
+    </InfoBox>
+  </Tab>
+</Tabs>
+
+---
+
+## How the Design System Works
+
+<Diagram title="From Token to Screen">
+  <DiagramRow>
+    <DiagramNode type="data" icon="🧱" label="Tokens" sublabel="Colors, fonts, spacing values" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="used by" />
+  <DiagramRow>
+    <DiagramNode type="model" icon="🧩" label="Components" sublabel="Buttons, cards, charts" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="assembled into" />
+  <DiagramRow>
+    <DiagramNode type="view" icon="📱" label="Screens" sublabel="Home, Stock Detail, etc." />
+  </DiagramRow>
+</Diagram>
+
+<InfoBox type="note" title="Everything connects">
+The design system is the foundation of everything. Tokens feed into components, and components build screens. Change a token, and the whole app updates. It's like pulling one thread that adjusts the entire tapestry!
+</InfoBox>

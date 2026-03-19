@@ -1,0 +1,335 @@
+# Maintenance Guide 유지보수 가이드
+
+<PageMeta status="live" layer="frontend" />
+
+Step-by-step procedures for common maintenance tasks. Follow these guides to extend the application while maintaining architectural consistency.
+
+---
+
+## Adding a New Screen
+
+### 1. Create the Feature Module
+
+```
+Features/
+  └── NewFeature/
+      ├── NewFeatureView.swift
+      ├── NewFeatureViewModel.swift
+      └── Components/
+          └── (sub-components as needed)
+```
+
+### 2. Create the ViewModel
+
+```swift
+// NewFeatureViewModel.swift
+import SwiftUI
+
+@Observable
+final class NewFeatureViewModel {
+    // MARK: - Dependencies
+    private let marketRepository: any MarketRepositoryProtocol
+
+    // MARK: - State
+    var data: [SomeModel] = []
+    var isLoading = true
+
+    // MARK: - Initialization
+    init(marketRepository: any MarketRepositoryProtocol) {
+        self.marketRepository = marketRepository
+    }
+
+    // MARK: - Data Loading
+    func loadData() async {
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            data = try await marketRepository.fetchSomeData()
+        } catch {
+            print("[NewFeatureViewModel] Load failed: \(error)")
+        }
+    }
+}
+```
+
+### 3. Create the View
+
+```swift
+// NewFeatureView.swift
+import SwiftUI
+
+struct NewFeatureView: View {
+    @Environment(DependencyContainer.self) private var container
+    @State private var viewModel: NewFeatureViewModel
+
+    init(container: DependencyContainer) {
+        _viewModel = State(initialValue: NewFeatureViewModel(
+            marketRepository: container.marketRepository
+        ))
+    }
+
+    var body: some View {
+        ScrollView {
+            if viewModel.isLoading {
+                ProgressView()
+            } else {
+                // Content here
+            }
+        }
+        .task { await viewModel.loadData() }
+    }
+}
+```
+
+### 4. Wire Up Navigation
+
+Add to `MainTabView.swift` or use `NavigationLink`:
+
+```swift
+// In MainTabView - replace placeholder
+case 1: NewFeatureView(container: container)
+
+// Or via navigation link
+NavigationLink(value: someItem) {
+    ItemRow(item: someItem)
+}
+.navigationDestination(for: SomeItem.self) { item in
+    NewFeatureView(item: item, container: container)
+}
+```
+
+---
+
+## Adding a New Data Model
+
+### 1. Create the Model File
+
+```swift
+// Models/NewModel.swift
+import SwiftUI
+
+/// Description of what this model represents.
+struct NewModel: Identifiable, Sendable, Decodable {
+    let id: String
+    let name: String
+    let value: Double
+
+    // Add computed properties as needed
+    var formattedValue: String {
+        value.formattedWon
+    }
+}
+```
+
+### 2. Add to Repository Protocol
+
+```swift
+// Repositories/Protocols/MarketRepositoryProtocol.swift
+protocol MarketRepositoryProtocol: Sendable {
+    // ... existing methods ...
+    func fetchNewData() async throws -> [NewModel]
+}
+```
+
+### 3. Implement in Mock Repository
+
+```swift
+// Repositories/Mock/MockMarketRepository.swift
+func fetchNewData() async throws -> [NewModel] {
+    try await Task.sleep(nanoseconds: 300_000_000) // Simulate delay
+    return [
+        NewModel(id: "1", name: "Item 1", value: 1000),
+        NewModel(id: "2", name: "Item 2", value: 2000),
+    ]
+}
+```
+
+### 4. Implement in API Repository
+
+```swift
+// Repositories/API/APIMarketRepository.swift
+func fetchNewData() async throws -> [NewModel] {
+    do {
+        let response: PaginatedResponse<NewModel> = try await apiClient.get(
+            "/api/new-endpoint"
+        )
+        return response.results
+    } catch {
+        print("[API] NewData failed, using mock: \(error)")
+        return try await MockMarketRepository().fetchNewData()
+    }
+}
+```
+
+---
+
+## Adding a New API Endpoint
+
+### 1. Backend Endpoint (FastAPI)
+
+Ensure the backend has the endpoint. Check `backend/` for the route definition.
+
+### 2. iOS API Call
+
+Add the endpoint to `APIMarketRepository.swift`:
+
+```swift
+func fetchNewEndpoint(param: String) async throws -> [NewModel] {
+    do {
+        let response: PaginatedResponse<NewModel> = try await apiClient.get(
+            "/api/new-endpoint",
+            queryItems: [URLQueryItem(name: "param", value: param)]
+        )
+        return response.results
+    } catch {
+        print("[API] NewEndpoint failed: \(error)")
+        return try await MockMarketRepository().fetchNewEndpoint(param: param)
+    }
+}
+```
+
+### 3. JSON Key Mapping
+
+The `APIClient` uses `.convertFromSnakeCase` key decoding strategy. Backend JSON fields in `snake_case` automatically map to Swift `camelCase` properties:
+
+| Backend JSON | Swift Property |
+|-------------|----------------|
+| `market_cap` | `marketCap` |
+| `change_percent` | `changePercent` |
+| `dividend_yield` | `dividendYield` |
+
+---
+
+## Adding a New Tab
+
+### 1. Update MainTabView.swift
+
+Replace the placeholder view for the target tab:
+
+```swift
+// In MainTabView.swift
+switch selectedTab {
+case 0: HomeView(container: container)
+case 1: NewProductsView(container: container)  // ← Replace placeholder
+case 2: AssetsPlaceholderView()
+// ...
+}
+```
+
+### 2. Update Tab Icons (if changing)
+
+Tab configuration is in `MainTabView.swift` — update the label, icon, and SF Symbol name.
+
+---
+
+## Adding a WebSocket Subscription
+
+### 1. Subscribe in ViewModel
+
+```swift
+func startLiveUpdates() async {
+    let stream = WebSocketManager.shared.subscribe(code: stockCode)
+    for await update in stream {
+        // Handle real-time price update
+        self.latestPrice = update
+    }
+}
+```
+
+### 2. Unsubscribe on Disappear
+
+```swift
+.onDisappear {
+    WebSocketManager.shared.unsubscribe(codes: [stockCode])
+}
+```
+
+### 3. Venue-Aware Subscription
+
+```swift
+WebSocketManager.shared.subscribe(code: stockCode, venue: selectedVenue)
+```
+
+---
+
+## Adding a Design Token
+
+### Color
+
+Add to `Core/DesignSystem/BAROColors.swift`:
+
+```swift
+extension Color {
+    static let klNewColor = Color(hex: "HEXCODE")
+}
+```
+
+### Spacing
+
+Add to `Core/DesignSystem/BAROSpacing.swift`:
+
+```swift
+enum BAROSpacing {
+    // ... existing values ...
+    static let newSize: CGFloat = 28
+}
+```
+
+### Font
+
+Add to `Core/DesignSystem/BAROFonts.swift`:
+
+```swift
+extension Font {
+    static let klNewStyle: Font = .system(size: 18, weight: .semibold)
+}
+```
+
+---
+
+## Debugging Checklist
+
+### API Issues
+
+1. Check console for `[API] ... failed, using mock:` messages
+2. Verify backend is running: `curl http://127.0.0.1:8000/health`
+3. Check `APIClient.swift` base URL matches your environment
+4. For device testing, update the device IP in `APIClient.swift`
+
+### WebSocket Issues
+
+1. Check `WebSocketManager` console logs for connection state
+2. Verify backend WebSocket relay: `wscat -c ws://127.0.0.1:8000/ws/stream`
+3. Check if `disabled` flag is set (mock mode disables WebSocket)
+4. Verify subscription codes are correct
+
+### Mock Data Issues
+
+1. Mock data is deterministic — same seed = same data
+2. Check `MockMarketRepository.swift` for data generation logic
+3. Simulated delays are 200–400ms — adjust if needed for testing
+
+### Build Issues
+
+1. Ensure iOS 16+ deployment target
+2. Check that new files are added to the Xcode target
+3. Verify `Sendable` conformance for any new types passed across async boundaries
+
+---
+
+## File Modification Quick Reference
+
+| Task | Files to Modify |
+|------|----------------|
+| Add new screen | `Features/New/`, `MainTabView.swift` |
+| Add new model | `Models/`, Protocol, Mock repo, API repo |
+| Add API endpoint | `APIMarketRepository.swift`, Protocol, Mock repo |
+| Change colors | `BAROColors.swift` |
+| Change fonts | `BAROFonts.swift` |
+| Change spacing | `BAROSpacing.swift` |
+| Add tab | `MainTabView.swift` |
+| Add chart indicator | `ChartSettings.swift`, `StockChartView.swift`, `SubIndicatorChartView.swift` |
+| Modify stock detail sections | `StockDetailSectionsView.swift`, new component file |
+| Update logo mappings | `Stock.swift` → `LogoStyleMapper` |
+| Change WebSocket URL | `WebSocketManager.swift` |
+| Change API base URL | `APIClient.swift` |

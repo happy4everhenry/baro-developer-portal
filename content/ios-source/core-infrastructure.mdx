@@ -1,0 +1,399 @@
+# Core Infrastructure 핵심 인프라
+
+<PageMeta status="live" layer="frontend" />
+
+Detailed documentation of the shared infrastructure layer: authentication, networking, WebSocket, design system, favorites, and Swift extensions.
+
+## Authentication Layer
+
+### AuthManager.swift
+
+<StatusBadge status="live">Core</StatusBadge>
+
+`@Observable` singleton managing the entire authentication lifecycle.
+
+**Auth States:**
+
+```swift
+enum AuthState {
+    case unknown          // Initial state — checking stored token
+    case loggedOut        // No valid session
+    case loggedIn(User)   // Authenticated with user profile
+}
+```
+
+**Key Methods:**
+
+| Method | Description |
+|--------|-------------|
+| `checkStoredToken()` | Validates JWT from Keychain on app launch, fetches user profile |
+| `login(email:password:)` | Email/password authentication → stores tokens → fetches user |
+| `register(name:email:password:)` | Creates account → stores tokens → fetches user |
+| `signInWithApple(identityToken:authCode:fullName:)` | Apple Sign In → stores tokens → fetches user |
+| `refreshAccessToken()` | Silent token refresh using stored refresh token |
+| `logout()` | Clears Keychain → sets state to `.loggedOut` |
+
+**API Endpoints:**
+
+| Method | Endpoint |
+|--------|----------|
+| Login | `POST /api/auth/login` |
+| Register | `POST /api/auth/register` |
+| Apple Sign In | `POST /api/auth/apple` |
+| Get User | `GET /api/auth/me` |
+| Refresh Token | `POST /api/auth/refresh` |
+
+**Token Refresh Strategy:**
+
+On 401 response, `APIClient` automatically attempts a token refresh. If refresh succeeds, the original request is retried. If refresh fails, user is logged out.
+
+### KeychainHelper.swift
+
+<StatusBadge status="live">Core</StatusBadge>
+
+Generic Keychain Services wrapper for secure credential storage:
+
+```swift
+struct KeychainHelper {
+    static func save(key: String, data: Data) -> Bool
+    static func read(key: String) -> Data?
+    static func delete(key: String) -> Bool
+}
+```
+
+**Storage Keys:**
+- `com.baro.accessToken` — JWT access token
+- `com.baro.refreshToken` — JWT refresh token
+
+---
+
+## Favorites Manager
+
+### FavoritesManager.swift
+
+<StatusBadge status="live">Core</StatusBadge>
+
+`@Observable` shared state manager for user favorites, distributed via SwiftUI environment:
+
+```swift
+@Observable
+final class FavoritesManager {
+    var favoriteStockIds: Set<String>
+    var favoriteThemeIds: Set<String>
+    var bookmarkedArticleIds: Set<String>
+
+    func toggleStockFavorite(_ stockId: String)
+    func isStockFavorite(_ stockId: String) -> Bool
+    // Similar for themes and articles
+}
+```
+
+Persists favorites via `UserDefaults` and provides toggle/query methods used across Search, Home, and StockDetail views.
+
+---
+
+## Network Layer
+
+### APIClient.swift
+
+<StatusBadge status="live">Core</StatusBadge>
+
+Lightweight HTTP client for REST API communication with the FastAPI backend.
+
+```swift
+struct APIClient: Sendable {
+    let baseURL: URL
+    // Simulator: http://127.0.0.1:8000
+    // Device:    http://192.168.68.56:8000
+
+    func get<T: Decodable>(_ path: String,
+                           queryItems: [URLQueryItem]? = nil) async throws -> T
+
+    func post<T: Decodable, U: Encodable>(_ path: String,
+                                           body: U) async throws -> T
+}
+```
+
+**Architecture:**
+- Generic `get<T>()` and `post<T, U>()` methods handle all REST calls
+- Automatic Bearer token injection from Keychain via `Authorization` header
+- Automatic `snake_case` → `camelCase` JSON key conversion (decoding) and `camelCase` → `snake_case` (encoding)
+- Comprehensive request/response logging for debugging
+- Error handling via `APIError` enum with specific status code handling (401 unauthorized, 409 conflict, 422 validation)
+
+**Error Types:**
+
+```swift
+enum APIError: LocalizedError {
+    case invalidURL          // Malformed URL construction
+    case invalidResponse     // Non-HTTPURLResponse
+    case httpError(statusCode: Int)  // Non-2xx status code
+}
+```
+
+**Base URL Detection:**
+
+The client automatically selects the correct base URL based on the runtime environment:
+
+```swift
+#if targetEnvironment(simulator)
+    let baseURL = URL(string: "http://127.0.0.1:8000")!
+#else
+    let baseURL = URL(string: "http://192.168.68.57:8000")!
+#endif
+```
+
+> **Important for maintainers:** Update the device IP address when the development machine's local network address changes.
+
+### PaginatedResponse.swift
+
+<StatusBadge status="live">Core</StatusBadge>
+
+Generic wrapper for paginated API responses:
+
+```swift
+struct PaginatedResponse<T: Decodable>: Decodable {
+    let results: [T]
+    let count: Int
+    let next: String?
+    let previous: String?
+}
+```
+
+Used by `APIMarketRepository` to unwrap paginated endpoints like `/api/stocks` and `/api/market/indices`.
+
+---
+
+## WebSocket Layer
+
+### WebSocketManager.swift
+
+<StatusBadge status="live">Core</StatusBadge> <StatusBadge status="warning">Real-Time</StatusBadge>
+
+Singleton manager for real-time stock price streaming via WebSocket.
+
+**Connection Details:**
+
+| Property | Value |
+|----------|-------|
+| URL | `ws://127.0.0.1:8000/ws/stream` (simulator) |
+| Protocol | WebSocket via `URLSessionWebSocketTask` |
+| Heartbeat | 30-second ping interval |
+| Reconnection | Exponential backoff (1s → 2s → 4s → ... → 30s max) |
+| Pattern | Singleton via `static let shared` |
+
+**Key Properties:**
+
+```swift
+@Observable
+final class WebSocketManager {
+    static let shared = WebSocketManager()
+
+    // Connection state
+    var isConnected: Bool
+    private var subscribedCodes: Set<String>
+
+    // Per-code event streams
+    private var continuations: [String: AsyncStream<PriceUpdate>.Continuation]
+}
+```
+
+**Subscription Protocol:**
+
+```json
+// Subscribe to stock codes
+{"action": "subscribe", "codes": ["005930", "000660"]}
+
+// Unsubscribe
+{"action": "unsubscribe", "codes": ["005930"]}
+
+// Venue-aware subscription
+{"action": "subscribe", "codes": ["005930"], "venue": "nxt"}
+```
+
+**Event Streaming:**
+
+Each stock code gets its own `AsyncStream<PriceUpdate>` that ViewModels consume:
+
+```swift
+// In ViewModel
+func startLiveUpdates() {
+    let stream = WebSocketManager.shared.subscribe(code: stock.code)
+    for await update in stream {
+        latestPrice = update
+    }
+}
+```
+
+**Lifecycle:**
+1. `connect()` — establishes WebSocket connection
+2. `subscribe(codes:)` — sends subscribe message, creates AsyncStream
+3. `receiveMessages()` — continuous loop decoding incoming PriceUpdate JSON
+4. `unsubscribe(codes:)` — sends unsubscribe, cleans up continuations
+5. `disconnect()` — closes connection gracefully
+6. Auto-reconnect on unexpected disconnection
+
+**Mock Mode:** When `useMocks` is true in `DependencyContainer`, the WebSocketManager's `disabled` flag prevents connection attempts.
+
+### PriceUpdate.swift
+
+<StatusBadge status="live">Core</StatusBadge>
+
+Real-time price tick from the WebSocket stream:
+
+```swift
+struct PriceUpdate: Sendable, Decodable {
+    let type: String           // "trade"
+    let code: String           // "005930"
+    let venue: String?         // "krx", "nxt", or nil
+    let price: Int             // 72300
+    let change: Int            // -200
+    let changePercent: Double  // -0.28
+    let volume: Int64          // 150 (single tick volume)
+    let cumulativeVolume: Int64 // 12345678 (total day volume)
+    let tradeTime: String     // "103025" (HHMMSS KST)
+}
+```
+
+---
+
+## Design System
+
+### BAROColors.swift
+
+<StatusBadge status="live">Design</StatusBadge>
+
+Centralized color palette extending SwiftUI `Color`:
+
+**Brand Colors:**
+
+| Token | Hex | Usage |
+|-------|-----|-------|
+| `baroIndigo` | `#4F46E5` | Primary brand color |
+| `baroGold` | `#D4A017` | Secondary/accent |
+| `baroTeal` | `#14B8A6` | Tertiary accent |
+
+**Semantic Colors:**
+
+| Token | Purpose |
+|-------|---------|
+| `klText` / `klTextSecondary` / `klTextTertiary` | Text hierarchy |
+| `klBackground` / `klSurface` / `klSurfaceSecondary` | Background layers |
+| `klBorder` / `klDivider` | Borders and separators |
+| `klPriceUp` (`#E04848` red) | Price increase |
+| `klPriceDown` (`#3478F6` blue) | Price decrease |
+
+> **Important:** Korean market convention uses **RED = Up, BLUE = Down** — the opposite of US markets. This is intentional.
+
+**Company Logo Colors:**
+
+Predefined colors for stock logos (Samsung blue, SK Red, Hyundai blue, etc.) used by `CompanyLogoView`.
+
+### BAROFonts.swift
+
+<StatusBadge status="live">Design</StatusBadge>
+
+Typography scale using system fonts with semantic naming:
+
+```swift
+extension Font {
+    static let klTitle: Font          // Large titles
+    static let klHeadline: Font       // Section headers
+    static let klBody: Font           // Body text
+    static let klCaption: Font        // Small labels
+    static let klMonospaced: Font     // Price/number displays
+}
+```
+
+### BAROSpacing.swift
+
+<StatusBadge status="live">Design</StatusBadge>
+
+Spacing constants for consistent layout:
+
+```swift
+enum BAROSpacing {
+    static let xs: CGFloat = 4
+    static let sm: CGFloat = 8
+    static let md: CGFloat = 12
+    static let lg: CGFloat = 16
+    static let xl: CGFloat = 20
+    static let xxl: CGFloat = 24
+    static let xxxl: CGFloat = 32
+}
+```
+
+### LoadingOverlayView.swift
+
+<StatusBadge status="live">Design</StatusBadge>
+
+Full-screen semi-transparent loading overlay with a centered `ProgressView`. Used during initial data loading.
+
+### ShimmerModifier.swift
+
+<StatusBadge status="live">Design</StatusBadge>
+
+Custom `ViewModifier` that applies a shimmer/skeleton loading animation effect:
+
+```swift
+Text("Loading...")
+    .modifier(ShimmerModifier())
+```
+
+Creates a gradient that animates horizontally across the view, simulating content loading. Used by all `*SkeletonView` components.
+
+### KLScrollIndicator.swift
+
+<StatusBadge status="live">Design</StatusBadge>
+
+Custom scroll position indicator dot that shows the current position within a horizontally scrollable view.
+
+---
+
+## Extensions
+
+### Color+Hex.swift
+
+Adds hex color string initialization to SwiftUI `Color`:
+
+```swift
+Color(hex: "#E04848")    // With hash
+Color(hex: "3478F6")     // Without hash
+Color(hex: "FF3478F6")   // With alpha
+```
+
+### Double+Currency.swift
+
+Number formatting extensions used throughout the app:
+
+```swift
+let price: Double = 188200
+price.formattedWon        // "188,200"       — Korean won format
+price.formattedIndex      // "188,200.00"    — Index value format
+price.formattedPercent    // "0.02%"         — Percentage format
+price.formattedVolume     // "188,200주"     — Volume with 주 suffix
+price.formattedTradingValue // "5.4조" or "1,234억" — Smart unit selection
+```
+
+> **Note:** `formattedTradingValue` automatically selects 조 (trillion) or 억 (billion) units based on magnitude.
+
+### Date+Korean.swift
+
+Korean-locale date formatting:
+
+```swift
+Date().koreanDateString    // "2025년 3월 14일 금요일"
+Date().koreanShortDate     // "3/14"
+```
+
+### Notification+App.swift
+
+Custom notification names for cross-component communication:
+
+```swift
+extension Notification.Name {
+    static let navigateToHome = Notification.Name("NavigateToHome")
+}
+```
+
+Used by `MainTabView` to handle deep navigation back to the Home tab.

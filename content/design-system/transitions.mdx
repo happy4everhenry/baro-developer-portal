@@ -1,0 +1,122 @@
+# Transitions <KoreanLabel>화면전환</KoreanLabel>
+
+<PageMeta status="live" layer="frontend" />
+
+BARO uses a flat navigation model -- no deep stacks, just full-screen covers that slide up and sheets that pop from the bottom. Simple, clean, and easy to follow!
+
+<InfoBox type="fun" title="What is flat navigation?">
+Think of a deck of cards. Instead of going deeper and deeper into folders (like opening a box inside a box inside a box), BARO just puts a new card on top. When you are done, you take the card off and you are right back where you started!
+</InfoBox>
+
+## Navigation Model
+
+<Diagram title="BARO Navigation Architecture">
+  <DiagramRow>
+    <DiagramNode type="view" icon="🏠" label="MainTabView" sublabel="Root (5 tabs)" />
+  </DiagramRow>
+  <DiagramArrow direction="down" label="presents" />
+  <DiagramRow>
+    <DiagramNode type="view" icon="📊" label=".fullScreenCover" sublabel="Immersive drill-in screens" />
+    <DiagramNode type="view" icon="⚙️" label=".sheet" sublabel="Bottom config panels" />
+    <DiagramNode type="default" icon="⚠️" label=".alert" sublabel="Error messages" />
+  </DiagramRow>
+</Diagram>
+
+<Accordion>
+<AccordionItem title="fullScreenCover Transitions" icon="📱" badge="Full Screen" defaultOpen={true}>
+
+Used for immersive drill-in screens that replace the entire view. These are the main way you navigate deeper into content.
+
+| Source | Destination | Trigger | Dismiss |
+|---|---|---|---|
+| HomeView -> StockRowView tap | StockDetailPageView | `showStockPage = true` | Back button / Home button |
+| FloatingTabBar -> Search tap | SearchView | `showSearch = true` | Dismiss circle button |
+| HomeView -> Index card tap | MarketOverviewDetailView | `showMarketDetail = true` | Dismiss button |
+| SearchView -> Stock row tap | StockDetailPageView | `showStockDetail = true` | Back button / Home button |
+
+```swift filename="FullScreenCover.swift"
+.fullScreenCover(isPresented: $showStockPage) {
+    if let stock = selectedStock {
+        StockDetailPageView(
+            stock: stock,
+            marketRepository: marketRepository,
+            initialVenue: viewModel.selectedExchange.defaultVenue
+        )
+    }
+}
+```
+
+</AccordionItem>
+
+<AccordionItem title="Sheet Presentations" icon="📋" badge="Bottom Sheet">
+
+Bottom sheets are used for settings and filter panels. They slide up from the bottom and you can drag them down to close.
+
+| Sheet | Detent | Content |
+|---|---|---|
+| **StockFilterSheet** | `.medium` | Stock ranking filter selection (<KoreanLabel>시가총액</KoreanLabel>, <KoreanLabel>거래량</KoreanLabel>, etc.) |
+| **ExchangeSelectionSheet** | `.medium` | Exchange selector (KOSPI, KOSDAQ, KRX 300, etc.) |
+| **NewsFilterSheet** | `.medium` | News region/category filter |
+| **ChartSettingsSheet** | `.large` | Chart type and indicator configuration |
+| **MarketVenueSheet** | `.medium` | KRX/NXT/Combined venue selection |
+
+```swift filename="SheetPresentation.swift"
+.sheet(isPresented: $showFilterSheet) {
+    StockFilterSheet(selectedFilter: $viewModel.selectedFilter)
+        .presentationDetents([.medium])
+        .presentationDragIndicator(.visible)
+}
+```
+
+</AccordionItem>
+
+<AccordionItem title="matchedGeometryEffect" icon="✨" badge="Animation">
+
+The tab indicator in `FloatingTabBar` uses `matchedGeometryEffect` to create a smooth sliding capsule that follows the selected tab. This is also used in `KLSegmentedControl`.
+
+<InfoBox type="tip" title="How matchedGeometryEffect works">
+It is like magic teleportation for views! SwiftUI automatically animates a shape from one position to another when both share the same ID and namespace. The capsule does not actually move -- SwiftUI just makes it look like it does!
+</InfoBox>
+
+```swift filename="FloatingTabBar.swift"
+@Namespace private var tabNamespace
+
+ZStack {
+    if isSelected {
+        Capsule()
+            .fill(Color.klNavAccent.opacity(0.15))
+            .matchedGeometryEffect(id: "tabIndicator", in: tabNamespace)
+    }
+
+    Image(systemName: icon)
+        .foregroundStyle(isSelected ? Color.klNavAccent : Color.klNavInactive)
+}
+.animation(.spring(response: 0.35, dampingFraction: 0.75), value: selectedTab)
+```
+
+</AccordionItem>
+
+<AccordionItem title="Deep Navigation Reset" icon="🏠" badge="Reset">
+
+When you tap the home button from deep inside the app (like Stock Detail -> sub-detail), a `NotificationCenter` broadcast dismisses ALL presented screens and brings you back home.
+
+```swift filename="NavigationReset.swift"
+// Post notification from any depth
+NotificationCenter.default.post(name: .navigateToHome, object: nil)
+dismiss()
+
+// MainTabView listens globally
+.onReceive(NotificationCenter.default.publisher(for: .navigateToHome)) { _ in
+    showSearch = false
+    selectedTab = 0
+}
+
+// Each fullScreenCover also listens
+.onReceive(NotificationCenter.default.publisher(for: .navigateToHome)) { _ in
+    showStockPage = false
+    showStockDetail = false
+}
+```
+
+</AccordionItem>
+</Accordion>

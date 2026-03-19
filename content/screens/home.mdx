@@ -1,0 +1,552 @@
+<PageMeta status="live" layer="frontend" />
+
+# Home Screen
+
+The Home screen is the first thing you see when you open BARO. It is like a dashboard that shows you everything happening in the stock market right now. It has 7 sections that all load at the same time, each one getting its own data independently. If one section has a problem, the others keep working just fine.
+
+<StatGrid columns={4}>
+  <StatCard value="7" label="Sections" />
+  <StatCard value="6" label="Data Sources" />
+  <StatCard value="3" label="Repositories" />
+  <StatCard value="16" label="ViewModel Props" />
+</StatGrid>
+
+<Tabs>
+  <Tab label="Overview" icon="🏠">
+
+    <InfoBox type="info" title="What does this screen do?">
+      The Home screen is a vertical scroll page built with SwiftUI. All 7 sections (H1 through H7) sit inside a `ScrollView` with a `VStack(spacing: 0)`. A `GeometryReader` tracks scroll position so the header can do parallax effects. Each section loads its own data, shows its own skeleton while loading, and handles its own errors.
+    </InfoBox>
+
+    ### Section Map
+
+    | ID | Section | Korean | Component |
+    |---|---|---|---|
+    | H1 | Header Bar | 헤더 바 | `HomeHeaderView` |
+    | H2 | Banner Carousel | 배너 캐러셀 | `BannerCarouselView` |
+    | H3 | Date & Session | 날짜 및 장 상태 | `DateDisplayView` |
+    | H4 | Market Overview | 시장 개요 | `MarketOverviewRowView` |
+    | H5 | Stock List | 종목 순위 | `StockListView` |
+    | H6 | Theme Trends | 테마 트렌드 | `AIMarketIssuesView` |
+    | H7 | News Section | 경제소식 | `NewsSectionView` |
+
+    ### How Data Loads
+
+    <Diagram title="Home Data Loading Flow">
+      <DiagramRow>
+        <DiagramNode type="view" icon="📱" label="HomeView" sublabel=".task { }" />
+      </DiagramRow>
+      <DiagramArrow direction="down" label="calls" />
+      <DiagramRow>
+        <DiagramNode type="vm" icon="🧠" label="HomeViewModel" sublabel="loadHomeData()" />
+      </DiagramRow>
+      <DiagramArrow direction="down" label="async let (all 6 in parallel)" />
+      <DiagramRow>
+        <DiagramGroup label="Repositories" color="blue">
+          <DiagramRow>
+            <DiagramNode type="repo" icon="📦" label="MarketRepo" sublabel="indices, stocks, FX, themes" />
+            <DiagramNode type="repo" icon="📦" label="BannerRepo" sublabel="banners" />
+            <DiagramNode type="repo" icon="📦" label="NewsRepo" sublabel="news articles" />
+          </DiagramRow>
+        </DiagramGroup>
+      </DiagramRow>
+      <DiagramArrow direction="down" label="after REST loads" />
+      <DiagramRow>
+        <DiagramNode type="service" icon="🔌" label="WebSocketManager" sublabel="live price streaming (KOSPI/KOSDAQ)" />
+      </DiagramRow>
+    </Diagram>
+
+    <InfoBox type="tip" title="Real-Time Prices">
+      Domestic stocks (KOSPI and KOSDAQ) get live price updates through WebSocket. The ViewModel polls `WebSocketManager.shared.latestPrices` every 300ms. Foreign stocks only show REST snapshot prices with a 15-minute delay.
+    </InfoBox>
+
+  </Tab>
+
+  <Tab label="Elements" icon="🧩">
+
+    <InfoBox type="note" title="Element Reference">
+      Every element listed here maps to a real SwiftUI component. Tap each one to see its data source, interactions, and visual states.
+    </InfoBox>
+
+    <Accordion>
+      <AccordionItem title="H1 -- Header Bar" icon="📌" badge="Static" defaultOpen={true}>
+
+        **Component:** `HomeHeaderView`
+
+        The header bar sits at the very top and never changes. It shows the BARO logo on the left, and notification bell + profile icon on the right.
+
+        | Sub-ID | Element | Detail |
+        |---|---|---|
+        | H1a | Logo | `leaf.fill` SF Symbol + "BARO" text in an HStack |
+        | H1b | Notification Bell | `bell` SF Symbol, 44pt touch target. Tap goes to notifications (stub) |
+        | H1c | Profile Icon | `person.circle` SF Symbol, 44pt touch target. Tap goes to account (stub) |
+
+        **States:** Default only (always visible, no loading state).
+
+      </AccordionItem>
+
+      <AccordionItem title="H2 -- Banner Carousel" icon="🎠" badge="Async">
+
+        **Component:** `BannerCarouselView` / `BannerSkeletonView`
+
+        An auto-scrolling horizontal banner that cycles through promotional cards every 3 seconds. Users can swipe manually or tap the play/pause button to stop auto-scroll.
+
+        | Sub-ID | Element | Detail |
+        |---|---|---|
+        | H2a | Banner Card | `BannerCardView` -- gradient background with title, subtitle, and emoji icon |
+        | H2b | Page Indicator | Dots (6pt circles) + play/pause toggle. Active dot: `#6B7280`, inactive: `#D1D5DB` |
+
+        **Data:** `BannerRepositoryProtocol.fetchBanners()` returns `[BannerItem]`
+
+        **States:** Skeleton (shimmer), Loaded
+
+        **Animations:** Auto-scroll `easeInOut` 0.4s every 3s, page dots `easeInOut` 0.3s
+
+      </AccordionItem>
+
+      <AccordionItem title="H3 -- Date & Market Session" icon="📅" badge="Static">
+
+        **Component:** `DateDisplayView`
+
+        Shows today's date in Korean format and a badge indicating whether the market is currently open or closed.
+
+        | Sub-ID | Element | Detail |
+        |---|---|---|
+        | H3a | Session Badge | Capsule with `MarketSessionStatus` label + color. Pulsing dot when `isActive`, countdown text when available |
+
+        **Data:** `Date().koreanDateString`, `MarketSessionStatus.current`
+
+        **Animation:** Pulsing ring `easeInOut repeatForever` 1.5s (scale 1.0 to 2.0, opacity 0.6 to 0)
+
+      </AccordionItem>
+
+      <AccordionItem title="H4 -- Market Overview Row" icon="📊" badge="REST API">
+
+        **Component:** `MarketOverviewRowView` / `MarketOverviewRowSkeletonView`
+
+        A horizontal scroll of market index cards (KOSPI, KOSDAQ, NASDAQ, etc.) followed by currency rate cards (USD, EUR, etc.) and a "more" chevron card.
+
+        | Sub-ID | Element | Detail |
+        |---|---|---|
+        | H4a | Market Index Card | `MarketIndexCardView` -- 140pt wide, shows flag + name + value + change + status |
+        | H4b | Currency Rate Card | `CurrencyRateCardView` -- flag + code + rate + change |
+        | H4c | More Chevron | 44x120pt button with gradient. Tap opens `MarketOverviewDetailView` via `.fullScreenCover` |
+
+        **Data:** `marketRepo.fetchIndices()` -> `GET /api/market/indices/overview` and `marketRepo.fetchCurrencyRates()` -> `GET /api/market/currency-rates`
+
+        **States:** Skeleton, Loaded, Error (alert + retry)
+
+      </AccordionItem>
+
+      <AccordionItem title="H5 -- Stock List" icon="📈" badge="REST + WebSocket">
+
+        **Component:** `StockListView` / `StockListSkeletonView`
+
+        The main stock ranking list showing the top 5 stocks. Users can change the exchange (KOSPI, KOSDAQ, NASDAQ, etc.) and filter (market cap, popular, volume, gainers, losers, dividend).
+
+        | Sub-ID | Element | Detail |
+        |---|---|---|
+        | H5a | Exchange Selector | Button showing current exchange flag + name. Tap opens `StockFilterSheet` via `.sheet` |
+        | H5b | Stock Row | `StockRowView` -- rank + logo + name + price with live WebSocket overlay + `PriceChangeLabel` |
+
+        **Data:** `marketRepo.fetchStocks(filter:exchange:)` -> `GET /api/stocks?exchange={}&filter={}&limit=5`
+
+        **Live Prices:** `WebSocketManager.shared` subscribes to visible stock codes. Prices update with `.numericText()` animation every 300ms.
+
+        **Navigation:**
+        - Stock Row tap -> `StockDetailPageView` (`.fullScreenCover`)
+        - "More" button -> `StockDetailView` (`.fullScreenCover`)
+        - Exchange/Filter change -> re-fetch + WebSocket re-subscribe
+
+      </AccordionItem>
+
+      <AccordionItem title="H6 -- Theme Trends" icon="🔥" badge="Conditional">
+
+        **Component:** `AIMarketIssuesView`
+
+        Shows the top 5 market themes ranked by weight. This entire section hides itself when there are no themes to show.
+
+        | Sub-ID | Element | Detail |
+        |---|---|---|
+        | H6a | Theme Row | Rank + #name + description + changePercent. Green for positive, red for negative |
+
+        **Data:** `marketRepo.fetchMarketThemes()` (mock only)
+
+        **Navigation:** "More" button -> `ThemeDetailView` (`.fullScreenCover`)
+
+        **States:** Loaded (visible), Hidden (when `themes.isEmpty`)
+
+      </AccordionItem>
+
+      <AccordionItem title="H7 -- News Section" icon="📰" badge="Filterable">
+
+        **Component:** `NewsSectionView` / `NewsSectionSkeletonView`
+
+        Latest news articles with region and category filters. Shows the top 5 filtered articles with gradient accent bars.
+
+        | Sub-ID | Element | Detail |
+        |---|---|---|
+        | H7a | News Row | Gradient accent bar (4x36pt) + title + source/timeAgo/tags |
+
+        **Data:** `newsRepo.fetchLatestNews()` (mock only)
+
+        **Filters:**
+        - **Region:** 전체, 국내, 해외
+        - **Category:** 전체, 시장, 종목, 테마, 경제, 국제
+
+        **Navigation:** "More" button -> `NewsDetailView` (`.fullScreenCover`)
+
+        **Empty state:** "해당 필터의 뉴스가 없습니다"
+
+      </AccordionItem>
+    </Accordion>
+
+  </Tab>
+
+  <Tab label="Data & API" icon="🔗">
+
+    ### API Endpoint Mapping
+
+    | Section | Repository Method | REST Endpoint | Response Model | Fallback |
+    |---|---|---|---|---|
+    | H2 Banners | `bannerRepo.fetchBanners()` | Mock only | `[BannerItem]` | Silent fail (empty array) |
+    | H4 Indices | `marketRepo.fetchIndices()` | `GET /api/market/indices/overview` | `[MarketIndex]` | Error alert + retry |
+    | H4 FX Rates | `marketRepo.fetchCurrencyRates()` | `GET /api/market/currency-rates` | `PaginatedResponse<CurrencyRate>` | Error alert + retry |
+    | H5 Stocks | `marketRepo.fetchStocks(filter:exchange:)` | `GET /api/stocks?exchange={}&filter={}&limit=5` | `PaginatedResponse<Stock>` | MockMarketRepository |
+    | H5 Live Prices | `WebSocketManager.shared` | WebSocket subscribe/unsubscribe by stock codes | `[String: PriceUpdate]` | REST snapshot (no live overlay) |
+    | H6 Themes | `marketRepo.fetchMarketThemes()` | Mock only | `[MarketTheme]` | Silent fail (hidden section) |
+    | H7 News | `newsRepo.fetchLatestNews()` | Mock only | `[NewsArticle]` | Silent fail (empty array) |
+
+    ### Dependency Injection
+
+    | Parameter | Protocol | Production | Test |
+    |---|---|---|---|
+    | `marketRepo` | `MarketRepositoryProtocol` | `APIMarketRepository` | `MockMarketRepository` |
+    | `bannerRepo` | `BannerRepositoryProtocol` | `APIBannerRepository` | `MockBannerRepository` |
+    | `newsRepo` | `NewsRepositoryProtocol` | `APINewsRepository` | `MockNewsRepository` |
+
+    ### ViewModel Properties
+
+    <Accordion>
+      <AccordionItem title="Data Properties" icon="📋" defaultOpen={true}>
+
+        | Property | Type | Default | Description |
+        |---|---|---|---|
+        | `indices` | `[MarketIndex]` | `[]` | KOSPI, KOSDAQ, NASDAQ, S&P 500 etc. |
+        | `stocks` | `[Stock]` | `[]` | Top 5 ranked stocks for current filter/exchange |
+        | `banners` | `[BannerItem]` | `[]` | Promotional banner cards |
+        | `news` | `[NewsArticle]` | `[]` | Latest news articles |
+        | `currencyRates` | `[CurrencyRate]` | `[]` | USD, HKD, JPY, EUR exchange rates |
+        | `marketThemes` | `[MarketTheme]` | `[]` | Market sector themes with weight/sentiment |
+        | `selectedFilter` | `StockFilter` | `.marketCap` | Active stock sort criterion |
+        | `selectedExchange` | `StockExchange` | `.kospi` | Active stock exchange |
+        | `livePrices` | `[String: PriceUpdate]` | `[:]` | Real-time WebSocket price overlays keyed by stock code |
+
+      </AccordionItem>
+
+      <AccordionItem title="Loading & Error Flags" icon="⏳">
+
+        | Property | Type | Default | Description |
+        |---|---|---|---|
+        | `isLoadingBanners` | `Bool` | `true` | Per-section loading flag for banners |
+        | `isLoadingIndices` | `Bool` | `true` | Per-section loading flag for market indices |
+        | `isLoadingStocks` | `Bool` | `true` | Per-section loading flag for stock list |
+        | `isLoadingNews` | `Bool` | `true` | Per-section loading flag for news articles |
+        | `isLoadingRates` | `Bool` | `true` | Per-section loading flag for currency rates |
+        | `isLoadingThemes` | `Bool` | `true` | Per-section loading flag for market themes |
+        | `showError` | `Bool` | `false` | Controls global error alert presentation |
+        | `errorMessage` | `String?` | `nil` | Localized Korean error message for alert body |
+
+      </AccordionItem>
+    </Accordion>
+
+    ### WebSocket Live Price Lifecycle
+
+    <StepGuide>
+      <Step number={1} title="Guard">
+        Only domestic exchanges (KOSPI/KOSDAQ) qualify. Foreign exchanges call `stopLiveUpdates()`.
+      </Step>
+      <Step number={2} title="Connect">
+        `WebSocketManager.shared.connect()`
+      </Step>
+      <Step number={3} title="Subscribe">
+        `ws.subscribe(codes:)` with visible stock codes. Unsubscribe old codes first.
+      </Step>
+      <Step number={4} title="Poll">
+        Background Task polls `latestPrices` every 300ms via `Task.sleep(for: .milliseconds(300))`.
+      </Step>
+      <Step number={5} title="Update">
+        Compare `tradeTime`, update `livePrices[code]` if changed.
+      </Step>
+      <Step number={6} title="Re-subscribe">
+        On filter/exchange change: `startLiveUpdates()` diffs old vs new codes.
+      </Step>
+      <Step number={7} title="Disconnect">
+        `stopLiveUpdates()` cancels task, unsubscribes all codes, clears livePrices.
+      </Step>
+    </StepGuide>
+
+    <Modal triggerLabel="View Live Price Code" title="StockRowView.swift -- Live Price Override" size="medium">
+
+    ```swift
+    // Live WebSocket data takes priority over REST snapshot
+    private var displayPrice: Int { livePrice?.price ?? stock.price }
+    private var displayChange: Int { livePrice?.change ?? stock.change }
+    private var displayChangePercent: Double { livePrice?.changePercent ?? stock.changePercent }
+
+    // Animated price transition
+    Text(displayPrice.formattedWon)
+        .contentTransition(.numericText())
+        .animation(.easeInOut(duration: 0.3), value: displayPrice)
+    ```
+
+    </Modal>
+
+    ### Filter & Exchange Configuration
+
+    <Accordion>
+      <AccordionItem title="Stock Filters (StockFilter)" icon="🔽">
+
+        | Label | API Value | Subtitle Row |
+        |---|---|---|
+        | 시가총액 | `marketCap` | 시가총액 (e.g., "1,114.08조") |
+        | 인기거래 | `popular` | 거래대금 formatted |
+        | 거래량 | `volume` | 거래량 formatted |
+        | 상승 | `gainers` | None |
+        | 하락 | `losers` | None |
+        | 배당 | `dividend` | 배당수익률 (e.g., "2.35%") |
+
+      </AccordionItem>
+
+      <AccordionItem title="Exchanges (StockExchange)" icon="🏦">
+
+        | Label | Flag | API Value | Data Latency |
+        |---|---|---|---|
+        | 코스피 | KR | `kospi` | 실시간 (WebSocket) |
+        | 코스닥 | KR | `kosdaq` | 실시간 (WebSocket) |
+        | 나스닥 | US | `nasdaq` | 15분 지연 |
+        | 뉴욕 | US | `nyse` | 15분 지연 |
+        | 아멕스 | US | `amex` | 15분 지연 |
+
+      </AccordionItem>
+
+      <AccordionItem title="News Filters" icon="🗞️">
+
+        **NewsRegion:** 전체 (`all`), 국내 (`domestic`), 해외 (`overseas`)
+
+        **NewsCategory:** 전체 (`all`), 시장 (`market`), 종목 (`stocks`), 테마 (`themes`), 경제 (`economy`), 국제 (`international`)
+
+      </AccordionItem>
+    </Accordion>
+
+    ### State Machine
+
+    <InfoBox type="info" title="Section Loading Behavior">
+      Each of the 7 sections loads independently. The ViewModel tracks 6 boolean loading flags. Sections show their own skeleton while loading and handle errors on their own.
+    </InfoBox>
+
+    | Section | Skeleton View | Error Behavior | Empty Behavior |
+    |---|---|---|---|
+    | H1 Header | None (static) | N/A | Always rendered |
+    | H2 Banners | `BannerSkeletonView` | Silent fail, skeleton hides | Skeleton shown until load completes |
+    | H3 Date | None (static) | N/A | Always rendered |
+    | H4 Market Overview | `MarketOverviewRowSkeletonView` | Global error alert with retry | Skeleton shown when both empty + loading |
+    | H5 Stock List | `StockListSkeletonView` | Silent fail, falls back to MockMarketRepository | Skeleton shown until stocks populated |
+    | H6 Themes | None | Silent fail | Entire section hidden when empty |
+    | H7 News | `NewsSectionSkeletonView` | Silent fail | "해당 필터의 뉴스가 없습니다" placeholder |
+
+    ### Error Handling Strategy
+
+    | Section | Strategy | Error Message (Korean) |
+    |---|---|---|
+    | Banners | Silent catch (print only) | N/A |
+    | Indices | Alert with retry | "시장 지수를 불러올 수 없습니다. 네트워크 연결을 확인해주세요." |
+    | FX Rates | Alert with retry (if no prior error) | "환율 데이터를 불러올 수 없습니다. 네트워크 연결을 확인해주세요." |
+    | Stocks | Silent catch (print only) | N/A (API falls back to mock) |
+    | News | Silent catch (print only) | N/A |
+    | Themes | Silent catch (print only) | N/A |
+
+    <Modal triggerLabel="View Data Loading Code" title="HomeViewModel.swift -- Parallel Data Loading" size="medium">
+
+    ```swift
+    // All 6 data sources load concurrently via async let
+    func loadHomeData() async {
+        async let loadBanners: Void = fetchBanners()
+        async let loadIndices: Void = fetchIndices()
+        async let loadRates: Void = fetchRates()
+        async let loadStocks: Void = fetchStocks()
+        async let loadNews: Void = fetchNews()
+        async let loadThemes: Void = fetchThemes()
+
+        _ = await (loadBanners, loadIndices, loadRates,
+                   loadStocks, loadNews, loadThemes)
+    }
+
+    // Triggered on .task { } -- runs once on view appear
+    .task {
+        await viewModel.loadHomeData()
+        viewModel.startLiveUpdates()
+    }
+    ```
+
+    </Modal>
+
+  </Tab>
+
+  <Tab label="Navigation" icon="🧭">
+
+    ### Navigation Map
+
+    All navigation from the Home screen uses either `.sheet` (partial overlay) or `.fullScreenCover` (modal takeover). The screen also listens for `Notification.Name.navigateToHome` to dismiss any presented covers.
+
+    | Source Element | Presentation | Destination View | Parameters |
+    |---|---|---|---|
+    | H4 More chevron | `.fullScreenCover` | `MarketOverviewDetailView` | Passes indices, currencyRates, repository |
+    | H5 Exchange / Filter | `.sheet` | `StockFilterSheet` | Binds selectedExchange, selectedFilter |
+    | H5 Stock Row | `.fullScreenCover` | `StockDetailPageView` | `StockDetailPageViewModel(stock:marketRepo:)` |
+    | H5 More button | `.fullScreenCover` | `StockDetailView` | `StockDetailViewModel(marketRepo:initialFilter:initialExchange:)` |
+    | H6 More button | `.fullScreenCover` | `ThemeDetailView` | `ThemeDetailViewModel(marketRepo:)` |
+    | H7 Region / Filter | `.sheet` | `NewsFilterSheet` | Binds selectedRegion, selectedCategory |
+    | H7 More button | `.fullScreenCover` | `NewsDetailView` | `NewsDetailViewModel(newsRepo:)` |
+
+    ### Interaction Map
+
+    | Element | Gesture | Action | Target / Result |
+    |---|---|---|---|
+    | H1 Bell Icon | Tap | Open notifications | Not yet implemented (stub) |
+    | H1 Profile Icon | Tap | Open account/profile | Not yet implemented (stub) |
+    | H2 Banner Card | Swipe L/R | Navigate between banners | TabView page change with easeInOut animation (0.4s) |
+    | H2 Auto-scroll | Timer (3s) | Advance to next banner | `(currentPage + 1) % banners.count` with easeInOut |
+    | H2 Play/Pause | Tap | Toggle auto-scroll timer | `isPlaying.toggle()` (3-second interval) |
+    | H4 Index/FX Cards | Scroll H | Browse market indices and FX rates | Horizontal ScrollView, no indicators |
+    | H4 "More" Chevron | Tap | Open market overview detail | `.fullScreenCover` -> `MarketOverviewDetailView` |
+    | H5 Exchange Selector | Tap | Open filter sheet | `.sheet` -> `StockFilterSheet` |
+    | H5 Stock Row | Tap | Navigate to stock detail page | `.fullScreenCover` -> `StockDetailPageView` |
+    | H5 Filter/Exchange Change | Selection | Re-fetch stocks + re-subscribe WebSocket | `selectFilter()` / `selectExchange()` -> `startLiveUpdates()` |
+    | H6 "More" Button | Tap | Open full theme detail | `.fullScreenCover` -> `ThemeDetailView` |
+    | H7 "More" Button | Tap | Open full news list | `.fullScreenCover` -> `NewsDetailView` |
+    | Global Error Alert | Tap "재시도" | Retry all data loading | `viewModel.loadHomeData()` |
+
+  </Tab>
+
+  <Tab label="Source Files" icon="📁">
+
+    ### Component Hierarchy
+
+    <Modal triggerLabel="View Full Component Tree" title="HomeView Component Hierarchy" size="large">
+
+    ```
+    HomeView
+    ├── HomeViewModel (@Observable)
+    │   ├── MarketRepositoryProtocol
+    │   ├── BannerRepositoryProtocol
+    │   ├── NewsRepositoryProtocol
+    │   └── WebSocketManager.shared (live price stream)
+    │
+    ├── ScrollView (.vertical, coordinateSpace: "homeScroll")
+    │   ├── GeometryReader (scroll offset tracker → @Binding scrollOffset)
+    │   ├── HomeHeaderView [H1]
+    │   ├── BannerCarouselView [H2] / BannerSkeletonView
+    │   ├── DateDisplayView [H3]
+    │   ├── MarketOverviewRowView [H4] / MarketOverviewRowSkeletonView
+    │   ├── StockListView [H5] / StockListSkeletonView
+    │   ├── AIMarketIssuesView [H6] (conditional: !themes.isEmpty)
+    │   ├── NewsSectionView [H7] / NewsSectionSkeletonView
+    │   └── Spacer (height: 120, floating tab bar clearance)
+    │
+    └── .alert ("데이터 로딩 실패") → retry loadHomeData()
+    ```
+
+    </Modal>
+
+    ### Source Files
+
+    | File | Role | Lines |
+    |---|---|---|
+    | `Features/Home/HomeView.swift` | Root view: ScrollView composition + scroll tracking + error alert | ~122 |
+    | `Features/Home/HomeViewModel.swift` | @Observable ViewModel: parallel data loading + filter/exchange switching + WebSocket management | ~218 |
+    | `Components/HomeHeaderView.swift` | Static header: logo + notification/profile buttons | ~45 |
+    | `Components/BannerCarouselView.swift` | Auto-scrolling TabView banner with gradient cards + page indicators | ~113 |
+    | `Components/DateDisplayView.swift` | Korean date + market session status badge with pulsing animation | ~77 |
+    | `Components/MarketOverviewRowView.swift` | Horizontal scroll of index + FX cards + "more" navigation | ~88 |
+    | `Components/MarketIndexCardView.swift` | Individual market index card (flag, name, value, change, status) | ~60 |
+    | `Components/CurrencyRatesRowView.swift` | Individual FX rate card (flag, code, rate, change, unit label) | ~53 |
+    | `Components/StockListView.swift` | Stock ranking list with exchange/filter selectors + navigation | ~136 |
+    | `Components/StockRowView.swift` | Individual stock row with live price overlay + filter-dependent subtitle | ~97 |
+    | `Components/StockFilterSheet.swift` | Combined exchange + sort filter bottom sheet | ~103 |
+    | `Components/AIMarketIssuesView.swift` | Ranked theme list (top 5 by weight) with change percentage | ~102 |
+    | `Components/MarketThemeBubbleChartView.swift` | Force-directed packed bubble chart for theme visualization | ~140 |
+    | `Components/NewsSectionView.swift` | News list with region/category filters + gradient accent bars | ~165 |
+    | `Components/NewsFilterSheet.swift` | Region + category filter bottom sheet | ~98 |
+    | `Components/SkeletonViews.swift` | All skeleton placeholders with shimmer animation | ~246 |
+
+    ### Skeleton Views
+
+    | Skeleton | Replaces | Structure |
+    |---|---|---|
+    | `BannerSkeletonView` | `BannerCarouselView` | RoundedRect (h:110) + 3 dot placeholders |
+    | `MarketOverviewRowSkeletonView` | `MarketOverviewRowView` | Horizontal scroll of 4x `MarketIndexCardSkeletonView` |
+    | `MarketIndexCardSkeletonView` | `MarketIndexCardView` | w:140, blocks for flag/name/value/change/status |
+    | `CurrencyRateCardSkeletonView` | `CurrencyRateCardView` | w:140 h:120, blocks for flag/code/rate/change/unit |
+    | `StockListSkeletonView` | `StockListView` | Header skeleton + 5x StockRowSkeleton + More button placeholder |
+    | `NewsSectionSkeletonView` | `NewsSectionView` | Header block + 5x NewsRowSkeleton in card |
+
+    ### Animations & Visual Effects
+
+    | Element | Animation | Duration | Description |
+    |---|---|---|---|
+    | H2 Banner auto-scroll | `easeInOut` | 0.4s (3s interval) | Automatic page transition every 3 seconds, toggleable via play/pause |
+    | H2 Page dots | `easeInOut` | 0.3s | Active dot highlight follows current page |
+    | H3 Market session dot | `easeInOut repeatForever` | 1.5s | Pulsing ring animation on live session indicator |
+    | H5 Live price | `numericText + easeInOut` | 0.3s | Smooth digit transition when WebSocket price updates |
+    | All skeletons | `.shimmer()` | Continuous | Shimmer gradient sweep on skeleton placeholder blocks |
+
+    <Modal triggerLabel="View Test Code" title="HomeViewModelTests.swift" size="large">
+
+    ```swift
+    // Test: All 6 data sources load in parallel without blocking
+    func testLoadHomeData() async {
+        let vm = HomeViewModel(
+            marketRepo: MockMarketRepository(),
+            bannerRepo: MockBannerRepository(),
+            newsRepo: MockNewsRepository()
+        )
+        await vm.loadHomeData()
+
+        XCTAssertFalse(vm.indices.isEmpty)
+        XCTAssertFalse(vm.stocks.isEmpty)
+        XCTAssertFalse(vm.banners.isEmpty)
+        XCTAssertFalse(vm.news.isEmpty)
+        XCTAssertFalse(vm.currencyRates.isEmpty)
+        XCTAssertFalse(vm.marketThemes.isEmpty)
+    }
+
+    // Test: Filter change triggers stock re-fetch + WS re-subscribe
+    func testSelectFilter() async {
+        let vm = HomeViewModel(
+            marketRepo: MockMarketRepository(),
+            bannerRepo: MockBannerRepository(),
+            newsRepo: MockNewsRepository()
+        )
+        await vm.loadHomeData()
+        await vm.selectFilter(.gainers)
+        XCTAssertEqual(vm.selectedFilter, .gainers)
+    }
+
+    // Test: WebSocket only activates for domestic exchanges
+    func testLiveUpdatesOnlyDomestic() async {
+        let vm = HomeViewModel(
+            marketRepo: MockMarketRepository(),
+            bannerRepo: MockBannerRepository(),
+            newsRepo: MockNewsRepository()
+        )
+        await vm.selectExchange(.nasdaq)
+        vm.startLiveUpdates()
+        XCTAssertTrue(vm.livePrices.isEmpty)
+    }
+    ```
+
+    </Modal>
+
+  </Tab>
+</Tabs>

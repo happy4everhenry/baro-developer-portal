@@ -1,0 +1,54 @@
+# My Page <KoreanLabel>마이페이지</KoreanLabel>
+
+<PageMeta status="live" layer="frontend" since="2025" />
+
+<InfoBox type="fun" title="What is My Page?">
+**My Page** is your personal control center — like the settings app on your phone but for BARO. You can see your profile, manage favorites, adjust app settings, and find help here. This screen is 100% complete as of Phase 2.
+</InfoBox>
+
+<InfoBox type="info" title="Settings Integrated">
+All Settings functionality (previously a separate screen) has been fully merged into My Page. App settings, notification preferences, display options, and compliance information are all accessible here.
+</InfoBox>
+
+## What You See
+
+```
+┌─────────────────────────────┐
+│  Profile Section            │  ← Name, email, avatar
+│  Investment Summary         │  ← Portfolio overview
+│  ─── Services ───           │
+│  Notification Settings      │  → Notification preferences
+│  Investment Report          │  → Performance reports
+│  AI Insights Settings       │  → AI customization
+│  Favorites Management       │  → Manage watchlist
+│  Browsing History           │  → Recent views
+│  ─── App Settings ───       │
+│  Theme (Light/Dark)         │  → Appearance toggle
+│  Font Size                  │  → Text size adjustment
+│  Language                   │  → Language selection
+│  ─── Information ───        │
+│  Help / FAQ                 │  → Support articles
+│  Terms of Service           │  → Legal terms
+│  Privacy Policy             │  → Data privacy
+│  Open Source Licenses       │  → Third-party licenses
+│  ─────────────────          │
+│  Logout Button              │  ← Sign out
+└─────────────────────────────┘
+```
+
+## Features
+
+- **Profile display** — Shows user name, email, and auth provider (email or Apple)
+- **Investment summary** — Portfolio value at a glance
+- **Service navigation** — Quick links to notification settings, reports, favorites
+- **App customization** — Theme, font size, and language settings (previously in Settings screen)
+- **Notification preferences** — Full notification management (previously in Settings screen)
+- **Legal & help** — Terms, privacy, FAQ, and open source licenses
+- **Logout** — Clears Keychain tokens and returns to login screen
+
+## Source Files
+
+| File | Purpose |
+|------|---------|
+| `Features/MyPage/MyPageView.swift` | Main profile and settings hub |
+| `Features/MyPage/MyPageDetailViews.swift` | All sub-page implementations |

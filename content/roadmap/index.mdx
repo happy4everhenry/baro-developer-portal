@@ -1,0 +1,124 @@
+---
+title: Roadmap
+description: Where BARO has been, where it's going, and the big plans ahead!
+---
+
+<PageMeta status="live" layer="shared" />
+
+# Roadmap
+
+## The Journey So Far — and What's Next
+
+Building BARO is like building a city. First you lay the roads and put up the main buildings. Then you add shops, parks, and cool stuff. And eventually? You add flying cars and robot helpers.
+
+Here's our plan, broken into three big phases.
+
+## Overall Progress
+
+<ProgressBar value={100} label="Phase 1 — Foundation" color="jade" />
+<ProgressBar value={100} label="Phase 2 — Expansion" color="blue" />
+<ProgressBar value={15} label="Phase 3 — Intelligence" color="amber" />
+
+## The Timeline
+
+<Timeline>
+  <TimelineItem date="Q1 2025" title="Home Screen" status="live" icon="🏠">
+    The main screen of BARO — showing your watchlist, market summary, and top movers. The front door to everything!
+  </TimelineItem>
+  <TimelineItem date="Q1 2025" title="Stock Detail" status="live" icon="📊">
+    Tap on any stock and see everything about it — price chart, key stats, order book, and more. Like a baseball card for stocks!
+  </TimelineItem>
+  <TimelineItem date="Q2 2025" title="Market Overview" status="live" icon="🌍">
+    See the big picture — how the whole Korean stock market (KOSPI and KOSDAQ) is doing, sector performance, and top rankings.
+  </TimelineItem>
+  <TimelineItem date="Q2 2025" title="Search" status="live" icon="🔍">
+    Find any stock by name or ticker code. Includes popular searches and recent history so you can find things fast.
+  </TimelineItem>
+  <TimelineItem date="Q3 2025" title="Login & Authentication" status="live" icon="🔐">
+    User accounts, secure login, and session management. Make BARO truly yours.
+  </TimelineItem>
+  <TimelineItem date="Q3 2025" title="Events & Calendar" status="live" icon="📅">
+    Stay on top of earnings dates, dividends, IPOs, and other market events with a built-in calendar.
+  </TimelineItem>
+  <TimelineItem date="Q4 2025" title="MyPage & Settings" status="live" icon="⚙️">
+    Your personal profile, portfolio overview, preferences, and personalization settings all in one place.
+  </TimelineItem>
+  <TimelineItem date="Q4 2025" title="Notifications" status="live" icon="🔔">
+    Real-time push notifications for price alerts, watchlist changes, market events, and AI insights.
+  </TimelineItem>
+  <TimelineItem date="Q1 2026" title="AI Section on Home" status="live" icon="🧠">
+    AI-powered market insights integrated directly into the Home screen — smart summaries, trend highlights, and personalized signals. (Intelligence Hub merged into Home's AI section.)
+  </TimelineItem>
+  <TimelineItem date="Q1 2026" title="Backend Specification Complete" status="live" icon="📋">
+    Full backend API specification finalized covering all screens, services, and data models.
+  </TimelineItem>
+  <TimelineItem date="Q2 2026" title="AI Platform — 12 Agents" status="in-progress" icon="🤖">
+    Twelve specialized AI agents that each do something different — from analyzing charts to summarizing news to predicting trends. Architecture defined, implementation starting.
+  </TimelineItem>
+  <TimelineItem date="2026" title="Voice Assistant" status="planned" icon="🎙️">
+    Talk to BARO! Ask questions about stocks using your voice and get spoken answers back.
+  </TimelineItem>
+  <TimelineItem date="2026+" title="RAG Pipeline" status="planned" icon="📚">
+    RAG (Retrieval-Augmented Generation) lets the AI read and understand thousands of financial documents to give you super-informed answers.
+  </TimelineItem>
+</Timeline>
+
+## Phase Breakdown
+
+<Tabs>
+  <Tab label="Phase 1" icon="🏗️">
+    ### Foundation <StatusBadge status="live">Complete</StatusBadge>
+
+    The basics that every stock app needs. All screens built and shipped!
+
+    - **Home Screen** — Your launchpad with watchlist and market summary
+    - **Stock Detail** — Deep dive into any stock
+    - **Market Overview** — The big picture of the whole market
+    - **Search** — Find any stock instantly
+
+    These four screens form the core of BARO. Everything else builds on top of them.
+  </Tab>
+  <Tab label="Phase 2" icon="🚀">
+    ### Expansion <StatusBadge status="live">Complete</StatusBadge>
+
+    More features, more power, more fun. All screens shipped!
+
+    - **Login & Authentication** — Secure user accounts and session management
+    - **Events & Calendar** — Market events, earnings, dividends, and IPOs
+    - **MyPage & Settings** — Personal profile, portfolio, and preferences
+    - **Notifications** — Real-time alerts for prices, events, and AI insights
+    - **AI on Home** — Intelligence Hub merged into the Home screen's AI section
+
+    BARO has gone from "cool stock viewer" to "full AI investing companion."
+  </Tab>
+  <Tab label="Phase 3" icon="🧠">
+    ### Intelligence <StatusBadge status="in-progress">In Progress</StatusBadge>
+
+    The big, ambitious, exciting stuff. Architecture defined — implementation starting!
+
+    - **12 AI Agents** — Each one a specialist (chart reader, news summarizer, trend spotter, and more)
+    - **Voice Assistant** — Talk to BARO like you talk to Siri
+    - **RAG Pipeline** — AI that reads thousands of documents to answer your questions
+
+    This is the future — and it's being built right now.
+  </Tab>
+</Tabs>
+
+<InfoBox type="tip" title="The AI Vision">
+Most stock apps just show you numbers. BARO wants to **explain** those numbers. Imagine asking "Why did Samsung go up today?" and getting a clear, simple answer that even a kid could understand. That's what the 12 AI agents are being built to do — each one specializing in a different type of analysis, working together like a team of super-smart analysts.
+</InfoBox>
+
+## AI Platform
+
+<InfoBox type="tip" title="New: AI Platform Deep Dive">
+Want to understand the technology behind BARO's 12 AI agents? The **AI Platform** section covers the full architecture — from the AI stack and intelligence layer to security, governance, and operations. Head over to [AI Platform](/ai-platform) for the complete technical specs.
+</InfoBox>
+
+## Explore More
+
+<FeatureGrid columns={2}>
+  <FeatureCard icon="📅" title="Full Timeline" description="See every milestone with dates, details, and current status." href="/roadmap/timeline" color="blue" />
+  <FeatureCard icon="🤖" title="AI Services" description="Meet the 12 AI agents and learn what each one does." href="/roadmap/ai-services" color="purple" />
+  <FeatureCard icon="📋" title="Release Notes" description="What changed in each version — the full changelog." href="/roadmap/release-notes" color="jade" />
+  <FeatureCard icon="🧠" title="AI Platform" description="Deep dive into the AI stack, intelligence layer, security, and governance." href="/ai-platform" color="amber" />
+</FeatureGrid>

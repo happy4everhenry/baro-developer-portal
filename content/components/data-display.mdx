@@ -1,0 +1,493 @@
+# Data Display <KoreanLabel>데이터 표시</KoreanLabel>
+
+<PageMeta status="live" layer="frontend" />
+
+These components turn raw market data into beautiful cards, rows, charts, and lists on the home screen. Each one knows how to show numbers, colors, and labels the Korean market way!
+
+<StatGrid columns={4}>
+  <StatCard value="13" label="Display Components" />
+  <StatCard value="3" label="Data Sources" />
+  <StatCard value="5" label="List Filters" />
+  <StatCard value="2" label="Color Conventions" />
+</StatGrid>
+
+<InfoBox type="fun" title="Why so many components?">
+Each piece of market data needs its own special outfit! Stock prices look different from news articles, and currency rates look different from bubble charts. Every component is tailored to show its data in the clearest, prettiest way possible.
+</InfoBox>
+
+<Tabs>
+<Tab label="Cards" icon="🃏">
+
+## Card Components
+
+Cards are the compact, self-contained boxes you see on the home screen.
+
+<Accordion>
+<AccordionItem title="MarketIndexCardView" icon="📊" badge="Market" defaultOpen={true}>
+
+Compact card for a single market index (KOSPI, KOSDAQ, NASDAQ, etc.) with flag emoji, current value, change, and market status. Used in the horizontally scrollable `MarketOverviewRowView`.
+
+<PropsTable>
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `index` | `MarketIndex` | Required | Model containing id, name, flag, value, change, changePercent, status |
+</PropsTable>
+
+### MarketIndex Model
+
+| Field | Type | Example |
+|-------|------|---------|
+| `id` | `String` | `"kospi"` |
+| `name` | `String` | `"코스피"` |
+| `flag` | `String` | `"🇰🇷"` |
+| `value` | `Double` | `5584.87` |
+| `change` | `Double` | `0.97` |
+| `changePercent` | `Double` | `0.02` |
+| `status` | `String` | `"장종료"` (Market Closed) |
+
+```swift filename="MarketIndexCardView.swift"
+MarketIndexCardView(index: MarketIndex(
+    id: "kospi", name: "코스피", flag: "🇰🇷",
+    value: 5584.87, change: 0.97, changePercent: 0.02,
+    status: "장종료"
+))
+.frame(width: 140)
+```
+
+</AccordionItem>
+
+<AccordionItem title="CurrencyRateCardView" icon="💱" badge="FX">
+
+Fixed-size card showing a currency exchange rate with flag, country code, rate, change indicator, and unit label. Same dimensions as market index cards (140pt x 120pt) for visual consistency.
+
+<PropsTable>
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `rate` | `CurrencyRate` | Required | Model: id, country, code, flag, rate, change, changePercent |
+</PropsTable>
+
+### Layout Spec
+
+| Property | Value |
+|----------|-------|
+| Fixed width | `140pt` |
+| Fixed height | `120pt` |
+| Padding | `KLINESpacing.md` (12pt) |
+| Corner radius | `radiusMedium` (14pt), continuous |
+| Shadow | `black.opacity(0.04)`, blur 4, y: 2 |
+
+```swift filename="CurrencyRateCardView.swift"
+CurrencyRateCardView(rate: CurrencyRate(
+    id: "usd", country: "미국", code: "USD", flag: "🇺🇸",
+    rate: 1481.60, change: 18.70, changePercent: 1.28
+))
+```
+
+</AccordionItem>
+
+<AccordionItem title="NewsCardView" icon="📰" badge="News">
+
+Horizontally scrollable news card with a gradient header, title, and tags. Each article has unique gradient colors for visual distinction. Fixed width of 210pt.
+
+<PropsTable>
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `article` | `NewsArticle` | Required | Model: id, title, source, timeAgo, region, category, tags, gradientColors |
+</PropsTable>
+
+| Section | Height | Details |
+|---------|--------|---------|
+| Gradient header | 130pt | Three-color gradient with decorative shapes |
+| Content area | Auto | Title (2 lines max, `.klBody`) + tags (`.klCaption`) |
+
+**Visual Spec:** Card width 210pt, corner radius 14pt, shadow 0.04 opacity / 4px blur
+
+```swift filename="NewsCardView.swift"
+NewsCardView(article: NewsArticle(
+    id: "1",
+    title: "서울 강남 집값 주춤, 수도권 중저가 지역...",
+    source: "한국경제", timeAgo: "1시간 전",
+    region: .domestic, category: .economy,
+    tags: ["#경제", "#부동산"],
+    gradientColors: [
+        Color(hex: "7FB3D8"),
+        Color(hex: "A8C8E0"),
+        Color(hex: "D4E4EF")
+    ]
+))
+```
+
+</AccordionItem>
+
+<AccordionItem title="BannerCarouselView" icon="🎠" badge="Banner">
+
+Auto-playing banner carousel using SwiftUI `TabView` with page-style swiping. Includes dot indicators and a play/pause toggle.
+
+<InfoBox type="tip" title="Auto-play timing">
+Banners advance every 3 seconds with a smooth 0.4s easeInOut transition. The dots at the bottom show which banner you are on!
+</InfoBox>
+
+<PropsTable>
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `banners` | `[BannerItem]` | Required | Array of banner data with title, subtitle, icon, gradientColors |
+</PropsTable>
+
+| Property | Value |
+|----------|-------|
+| Timer interval | 3.0 seconds |
+| Transition animation | `.easeInOut(duration: 0.4)` |
+| Dot indicator size | 6pt circles |
+| Active dot color | `#6B7280` |
+| Inactive dot color | `#D1D5DB` |
+| Banner height | 110pt (container) / 100pt (card) |
+| Corner radius | `radiusXLarge` (24pt) |
+
+```swift filename="BannerCarouselView.swift"
+private let timer = Timer.publish(every: 3.0, on: .main, in: .common).autoconnect()
+
+.onReceive(timer) { _ in
+    guard isPlaying, banners.count > 1 else { return }
+    withAnimation(.easeInOut(duration: 0.4)) {
+        currentPage = (currentPage + 1) % banners.count
+    }
+}
+```
+
+</AccordionItem>
+
+<AccordionItem title="MarketThemeBubbleChartView" icon="🫧" badge="Themes">
+
+A force-directed packed circle chart that shows market themes as bubbles. Bigger bubbles = bigger themes. Uses a spiral placement algorithm so bubbles do not overlap. Each bubble is tappable!
+
+<PropsTable>
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `themes` | `[MarketTheme]` | Required | Theme data with name, weight (0-1), bubbleColor |
+| `onTap` | `(MarketTheme) -> Void` | Required | Callback when a bubble is tapped |
+</PropsTable>
+
+### Layout Algorithm
+
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| Min radius | 16pt | Smallest possible bubble |
+| Max radius | 60pt | Largest possible bubble |
+| Padding between bubbles | 3pt | Minimum gap |
+| Radius formula | `min + (max - min) * sqrt(weight)` | Square root scaling for perceptual accuracy |
+| Aspect ratio | 1.1 | Slightly wider than tall |
+
+### Font Sizing
+
+| Radius Range | Font Size |
+|-------------|-----------|
+| >= 50pt | 16pt |
+| >= 35pt | 13pt |
+| >= 25pt | 11pt |
+| < 25pt | 9pt |
+
+```swift filename="MarketThemeBubbleChartView.swift"
+// Sorted largest-first, spiral outward from center
+let sorted = themes.sorted { $0.weight > $1.weight }
+
+for theme in sorted {
+    let r = radius(for: theme)
+    let pos = findPosition(for: r, among: placed, center: center, bounds: size)
+    placed.append((theme.id, pos, r))
+}
+
+// Spiral search: incrementally increase angle and distance
+// until a non-overlapping position is found
+var angle: CGFloat = 0
+var dist: CGFloat = 0
+let step: CGFloat = 2
+let angleStep: CGFloat = 0.3
+
+while dist < max(bounds.width, bounds.height) {
+    let x = center.x + cos(angle) * dist
+    let y = center.y + sin(angle) * dist
+    angle += angleStep
+    dist += step / (2 * .pi)  // gradually spiral outward
+}
+```
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+
+<Tab label="Rows & Lists" icon="📋">
+
+## Row & List Components
+
+These components display data in horizontal rows and scrollable lists.
+
+<Accordion>
+<AccordionItem title="StockRowView" icon="📈" badge="Stock" defaultOpen={true}>
+
+A single stock list row with rank, company logo, name, subtitle (varies by filter), price, and price change. Supports real-time WebSocket price overlay with animated digit transitions via `.numericText()`.
+
+<PropsTable>
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `stock` | `Stock` | Required | Full stock model with rank, name, price, logo style, etc. |
+| `filter` | `StockFilter?` | `nil` | Determines which subtitle to display below the company name |
+| `livePrice` | `PriceUpdate?` | `nil` | Optional WebSocket real-time price overlay |
+</PropsTable>
+
+### Subtitle Variants by Filter
+
+| Filter | Subtitle | Example |
+|--------|----------|---------|
+| `.marketCap` / `nil` | Market capitalization | <KoreanLabel>시가총액</KoreanLabel> 1,114.08조 |
+| `.volume` | Trading volume | <KoreanLabel>거래량</KoreanLabel> 28,540,000 |
+| `.popular` | Trading value | <KoreanLabel>거래대금</KoreanLabel> 5.3조 |
+| `.dividend` | Dividend yield | <KoreanLabel>배당수익률</KoreanLabel> 2.35% |
+| `.gainers` / `.losers` | No subtitle | -- |
+
+```swift filename="StockRowView.swift"
+// Display values: prefer live data over REST snapshot
+private var displayPrice: Int { livePrice?.price ?? stock.price }
+private var displayChange: Int { livePrice?.change ?? stock.change }
+private var displayChangePercent: Double { livePrice?.changePercent ?? stock.changePercent }
+
+// Animated digit transition for price
+Text(displayPrice.formattedWon)
+    .font(.klPrice)
+    .contentTransition(.numericText())
+    .animation(.easeInOut(duration: 0.3), value: displayPrice)
+```
+
+</AccordionItem>
+
+<AccordionItem title="MarketOverviewRowView" icon="🏦" badge="Market">
+
+Horizontal scroll container that combines market index cards and currency rate cards in one row. Includes skeleton loading and a "more" chevron button.
+
+<PropsTable>
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `indices` | `[MarketIndex]` | Required | Array of market index data |
+| `currencyRates` | `[CurrencyRate]` | Required | Array of FX rate data |
+| `isLoadingIndices` | `Bool` | `false` | Shows skeleton cards when true and data is empty |
+| `isLoadingRates` | `Bool` | `false` | Shows skeleton cards when true and data is empty |
+| `repository` | `MarketRepositoryProtocol?` | `nil` | Passed to detail view for data refresh |
+</PropsTable>
+
+<FlowDiagram>
+  <FlowRow>
+    <FlowNode type="service">Loading (skeleton cards)</FlowNode>
+    <FlowArrow />
+    <FlowNode type="vm">Data loaded (live cards)</FlowNode>
+    <FlowArrow />
+    <FlowNode type="view">Chevron button visible</FlowNode>
+    <FlowArrow />
+    <FlowNode type="vm">fullScreenCover detail</FlowNode>
+  </FlowRow>
+</FlowDiagram>
+
+```swift filename="MarketOverviewRowView.swift"
+if indices.isEmpty && isLoadingIndices {
+    ForEach(0..<3, id: \.self) { _ in
+        MarketIndexCardSkeletonView()
+    }
+} else {
+    ForEach(indices) { index in
+        MarketIndexCardView(index: index).frame(width: 140)
+    }
+}
+```
+
+</AccordionItem>
+
+<AccordionItem title="CurrencyRatesRowView" icon="💹" badge="FX">
+
+Inline within `MarketOverviewRowView`. Renders currency rate cards with flag, country code, rate value, and change indicator. Same card dimensions as `MarketIndexCardView` (140pt x 120pt) for visual consistency.
+
+</AccordionItem>
+
+<AccordionItem title="NewsSectionView" icon="📰" badge="News">
+
+News section on the home screen with a header ("AI 뉴스" + filter icon), a horizontally scrollable row of `NewsCardView` cards, and a vertical list of news rows below.
+
+| Section | Layout |
+|---------|--------|
+| Header | "AI 뉴스" title + filter icon button (opens `NewsFilterSheet`) |
+| Card row | Horizontal `ScrollView`, 210pt-wide `NewsCardView` cards, `md` (12pt) spacing |
+| News list | Vertical `LazyVStack`, each row with colored accent bar (4pt wide), title, source, timeAgo, tags |
+| Card container | `klSurface` background, `radiusMedium`, `lg` (16pt) padding |
+
+### NewsFilterSheet
+
+Bottom sheet for filtering news by region (국내/해외/전체) and category (경제/정치/산업/테크/부동산). Each option is a capsule pill toggle.
+
+</AccordionItem>
+
+<AccordionItem title="AIMarketIssuesView" icon="🤖" badge="AI">
+
+Compact row linking to the market themes bubble chart. Shows an "AI 분석" badge in jade green, a headline, and a chevron icon.
+
+| Element | Spec |
+|---------|------|
+| Badge | "AI 분석", `.klCaptionBold`, jade background with 10% opacity, `radiusSmall` |
+| Title | Dynamic text, `.klBody`, `klText` color, 1 line max |
+| Chevron | `chevron.right`, 12pt, `klTextTertiary` |
+| Container | Full width, `klSurface` background, `radiusMedium` corner radius |
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+
+<Tab label="Headers & Controls" icon="🎛️">
+
+## Headers & Controls
+
+Top-level headers and filter controls on the home screen.
+
+<Accordion>
+<AccordionItem title="HomeHeaderView" icon="🏠" badge="Header" defaultOpen={true}>
+
+Top header bar with BARO logo (leaf icon + "BARO" text) on the left and notification bell + profile icon on the right.
+
+| Element | Spec |
+|---------|------|
+| Logo icon | `leaf.fill`, 22pt, `.green` |
+| Logo text | "BARO", `.klTitle`, `klText` color |
+| Bell icon | `bell`, 18pt medium, `klTextSecondary` |
+| Profile icon | `person.circle`, 20pt medium, `klTextSecondary` |
+| Touch targets | 44x44pt each (iOS HIG minimum) |
+| Padding | Horizontal: `xl` (20pt), Vertical: `mld` (14pt) |
+
+```swift filename="HomeHeaderView.swift"
+HStack {
+    HStack(spacing: KLINESpacing.sm) {
+        Image(systemName: "leaf.fill")
+            .font(.system(size: 22))
+            .foregroundStyle(.green)
+        Text("BARO")
+            .font(.klTitle)
+            .foregroundStyle(Color.klText)
+    }
+    Spacer()
+    HStack(spacing: KLINESpacing.xs) {
+        Button(action: {}) {
+            Image(systemName: "bell")
+                .font(.system(size: 18, weight: .medium))
+                .foregroundStyle(Color.klTextSecondary)
+                .frame(width: 44, height: 44)
+        }
+        Button(action: {}) {
+            Image(systemName: "person.circle")
+                .font(.system(size: 20, weight: .medium))
+                .foregroundStyle(Color.klTextSecondary)
+                .frame(width: 44, height: 44)
+        }
+    }
+}
+```
+
+</AccordionItem>
+
+<AccordionItem title="DateDisplayView" icon="📅" badge="Date">
+
+Shows the current date in Korean format with a market session status badge. The status dot pulses when the market is open!
+
+| Element | Spec |
+|---------|------|
+| Date text | `Date().koreanDateString` (e.g. "3월 11일 화요일"), `.klTitle`, `klText` |
+| Status badge | Market session label, `.klSmall` font |
+| Status colors | Pre-market: `klAmber`, Open: `klPriceUp` (red), Closed: `klTextTertiary` |
+
+### MarketSessionStatus
+
+| Case | Korean Label | Time Range | Color |
+|------|-------------|------------|-------|
+| `.preMarket` | 장전 | Before 09:00 | Amber |
+| `.open` | 거래중 | 09:00-15:30 | Red (klPriceUp) |
+| `.closed` | 장마감 | After 15:30 | Gray (klTextTertiary) |
+| `.weekend` | 휴장 | Saturday/Sunday | Gray |
+
+```swift filename="DateDisplayView.swift"
+HStack(spacing: KLINESpacing.sm) {
+    Text(Date().koreanDateString)
+        .font(.klTitle)
+        .foregroundStyle(Color.klText)
+    Text(status.label)
+        .font(.klSmall)
+        .foregroundStyle(status.color)
+}
+```
+
+</AccordionItem>
+
+<AccordionItem title="FilterTabsView" icon="🔍" badge="Filter">
+
+Horizontally scrollable filter pills for the stock list section. The active tab uses a dark capsule with white text; inactive tabs use light background with gray text.
+
+<PropsTable>
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `selected` | `Binding<StockFilter>` | Currently selected filter |
+| `onFilterSheet` | `() -> Void` | Opens the `StockFilterSheet` |
+</PropsTable>
+
+### StockFilter Options
+
+| Case | Korean Label | Sort By |
+|------|-------------|---------|
+| `.marketCap` | 시가총액 | Market capitalization descending |
+| `.volume` | 거래량 | Trading volume descending |
+| `.popular` | 거래대금 | Trading value descending |
+| `.gainers` | 상승 | Price change % descending |
+| `.losers` | 하락 | Price change % ascending |
+| `.dividend` | 배당 | Dividend yield descending |
+
+```swift filename="FilterTabsView.swift"
+// Active pill: dark background, white text
+Text(filter.rawValue)
+    .font(.klBody)
+    .foregroundStyle(.white)
+    .padding(.horizontal, KLINESpacing.md)
+    .padding(.vertical, KLINESpacing.xsm)
+    .background(Capsule().fill(Color.klTabActive))
+
+// Inactive pill: light background, gray text
+Text(filter.rawValue)
+    .font(.klBody)
+    .foregroundStyle(Color.klTextTertiary)
+    .padding(.horizontal, KLINESpacing.md)
+    .padding(.vertical, KLINESpacing.xsm)
+    .background(Capsule().fill(Color.klTabInactive))
+```
+
+</AccordionItem>
+
+<AccordionItem title="StockFilterSheet & ExchangeSelectionSheet" icon="⚙️" badge="Sheet">
+
+### StockFilterSheet
+
+Bottom sheet for advanced stock filtering. Presented as `.medium` detent with options for exchange selection and sort order.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `selectedExchange` | `Binding<StockExchange>` | Selected market (KOSPI/KOSDAQ/NASDAQ/NYSE/AMEX) |
+| `selectedFilter` | `Binding<StockFilter>` | Selected sort filter |
+
+### ExchangeSelectionSheet
+
+Scrollable bottom sheet for selecting the active stock exchange. Each row shows a flag emoji, exchange name, and a checkmark for the selected item.
+
+| Case | Flag | Korean Label | Market Status |
+|------|------|-------------|---------------|
+| `.kospi` | 🇰🇷 | KOSPI | "장마감" / "거래중" |
+| `.kosdaq` | 🇰🇷 | KOSDAQ | "장마감" / "거래중" |
+| `.nasdaq` | 🇺🇸 | NASDAQ | "거래중" / "장마감" |
+| `.nyse` | 🇺🇸 | NYSE | "거래중" / "장마감" |
+| `.amex` | 🇺🇸 | AMEX | "거래중" / "장마감" |
+
+</AccordionItem>
+</Accordion>
+
+</Tab>
+</Tabs>

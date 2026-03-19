@@ -1,0 +1,322 @@
+<PageMeta status="live" layer="frontend" />
+
+# Market Overview Screen
+
+This is a full-screen detail page that shows you all the market indices (like KOSPI, NASDAQ, S&P 500) and currency exchange rates (like USD, EUR, JPY) in one place. You get here by tapping the "more" arrow on the Home screen's market overview row. It is a simple two-tab list for browsing financial data.
+
+<StatGrid columns={4}>
+  <StatCard value="4" label="Elements" />
+  <StatCard value="2" label="Data Tabs" />
+  <StatCard value="2" label="API Endpoints" />
+  <StatCard value="10" label="Skeleton Rows" />
+</StatGrid>
+
+<Tabs>
+  <Tab label="Overview" icon="📊">
+
+    <InfoBox type="info" title="What does this screen do?">
+      This screen has a segmented tab control at the top that switches between two lists: market indices (지수) and currency exchange rates (환율). Both lists load their data when the screen appears. If one fails, the other still works. It is a terminal screen -- there is no outgoing navigation, just a back button to go home.
+    </InfoBox>
+
+    ### Screen Layout
+
+    <Diagram title="Market Overview Structure">
+      <DiagramRow>
+        <DiagramNode type="view" icon="📱" label="MarketOverviewDetailView" sublabel=".fullScreenCover from Home H4" />
+      </DiagramRow>
+      <DiagramArrow direction="down" label="VStack(spacing: 0)" />
+      <DiagramRow>
+        <DiagramNode type="view" icon="🔀" label="MO1: KLScrollableTabHeader" sublabel="지수 | 환율 tabs + dismiss button" />
+      </DiagramRow>
+      <DiagramArrow direction="down" label="ScrollViewReader" />
+      <DiagramRow>
+        <DiagramGroup label="Tab Content" color="blue">
+          <DiagramRow>
+            <DiagramNode type="data" icon="📈" label="MO2: Indices List" sublabel="MarketIndexRowView x N" />
+            <DiagramNode type="data" icon="💱" label="MO3: FX Rates List" sublabel="CurrencyRateRowView x N" />
+          </DiagramRow>
+        </DiagramGroup>
+      </DiagramRow>
+      <DiagramArrow direction="down" label="during loading" />
+      <DiagramRow>
+        <DiagramNode type="default" icon="✨" label="MO4: Skeleton Rows" sublabel="10x DetailRowSkeletonView + shimmer" />
+      </DiagramRow>
+    </Diagram>
+
+    ### Navigation Context
+
+    | Direction | Source / Target | Presentation | Parameters |
+    |---|---|---|---|
+    | Inbound | `MarketOverviewRowView` (Home H4) | `.fullScreenCover` | indices, currencyRates, repository |
+    | Outbound | None (terminal screen) | -- | -- |
+    | Dismiss | Back to Home | `dismiss()` | Via KLScrollableTabHeader onDismiss callback |
+
+  </Tab>
+
+  <Tab label="Elements" icon="🧩">
+
+    <Accordion>
+      <AccordionItem title="MO1 -- Segmented Control" icon="🔀" badge="Static" defaultOpen={true}>
+
+        **Component:** `KLScrollableTabHeader`
+
+        Two tabs at the top: "지수" (Indices) and "환율" (FX Rates). Also has a dismiss button (back arrow) to close the screen. When you tap a tab, the list scrolls back to the top automatically.
+
+        **Data:** `MarketOverviewTab.allCases` -- Static enum: `.indices` ("지수"), `.currency` ("환율")
+
+        **States:** Selected (filled), Unselected (dimmed)
+
+      </AccordionItem>
+
+      <AccordionItem title="MO2 -- Indices List" icon="📈" badge="REST API">
+
+        **Component:** `MarketIndexRowView` (ForEach in LazyVStack)
+
+        A vertical list of all market index rows. Each row shows a flag circle, index name, market status, current value, and price change with color coding (jade for up, red for down).
+
+        **Data:** `MarketRepositoryProtocol.fetchAllIndices()` -> `GET /api/market/indices` -> `[MarketIndex]`
+
+        **Row Layout:**
+        | Zone | Content | Styling |
+        |---|---|---|
+        | Leading | Flag emoji in Circle(44) | `Color.klSurface` fill, 0.04 shadow |
+        | Center top | Index name | `.klSubheadline`, `Color.klText` |
+        | Center bottom | Market status | `.klCaption`, `Color.klTextTertiary` |
+        | Trailing top | Index value | `.klPrice`, `Color.klText` |
+        | Trailing bottom | Change + percent | `.klCaptionBold`, `klPriceUp`/`klPriceDown` |
+
+        **States:** Skeleton, Loaded, Error
+
+      </AccordionItem>
+
+      <AccordionItem title="MO3 -- FX Rates List" icon="💱" badge="REST API">
+
+        **Component:** `CurrencyRateRowView` (ForEach in LazyVStack)
+
+        Same layout as the indices list, but for currency exchange rates. Each row shows the country flag, currency code, unit label, rate in KRW, and change.
+
+        **Data:** `MarketRepositoryProtocol.fetchCurrencyRates()` -> `GET /api/market/currency-rates` -> `[CurrencyRate]`
+
+        **Row Layout:**
+        | Zone | Content | Styling |
+        |---|---|---|
+        | Leading | Flag emoji in Circle(44) | `Color.klSurface` fill, 0.04 shadow |
+        | Center top | Country + code | `.klSubheadline`, `Color.klText` |
+        | Center bottom | Unit label (e.g., "1 USD") | `.klCaption`, `Color.klTextTertiary` |
+        | Trailing top | Exchange rate | `.klPrice`, `Color.klText` |
+        | Trailing bottom | Formatted change | `.klCaptionBold`, `klPriceUp`/`klPriceDown` |
+
+        **States:** Skeleton, Loaded, Error
+
+      </AccordionItem>
+
+      <AccordionItem title="MO4 -- Skeleton / Loading" icon="✨" badge="Auto">
+
+        **Component:** `DetailRowSkeletonView` (10 rows)
+
+        Shows 10 shimmer rows while data is loading. Each skeleton row has a Circle(44), two SkeletonBlock pairs (70/40pt and 80/60pt), all with the `.shimmer()` modifier.
+
+        **Condition:** Visible when `isLoading && data.isEmpty`
+
+        **Behavior:** Auto-hidden once data arrives.
+
+      </AccordionItem>
+    </Accordion>
+
+  </Tab>
+
+  <Tab label="Data & API" icon="🔗">
+
+    ### API Endpoint Mapping
+
+    | Section | Repository Method | REST Endpoint | Response Model | Fallback |
+    |---|---|---|---|---|
+    | MO2 Indices | `repository.fetchAllIndices()` | `GET /api/market/indices` | `[MarketIndex]` | Error alert + retry button |
+    | MO3 FX Rates | `repository.fetchCurrencyRates()` | `GET /api/market/currency-rates` | `[CurrencyRate]` | Error alert + retry (if no prior error) |
+
+    <InfoBox type="warning" title="Sequential Loading">
+      Unlike the Home screen, this screen loads indices first, then currency rates -- sequentially, not in parallel. Each can fail independently without blocking the other.
+    </InfoBox>
+
+    ### Data Models
+
+    <Accordion>
+      <AccordionItem title="MarketIndex" icon="📈" defaultOpen={true}>
+
+        | Property | Type | Description |
+        |---|---|---|
+        | `id` | `String` | "kospi", "nasdaq", etc. |
+        | `name` | `String` | "코스피", "나스닥" |
+        | `flag` | `String` | Emoji flag |
+        | `value` | `Double` | Current index value |
+        | `change` | `Double` | Absolute change (+/-) |
+        | `changePercent` | `Double` | Percent change |
+        | `status` | `String` | "장종료", "장중", etc. |
+        | `isPositive` | `Bool` | Computed: `change >= 0` |
+        | `formattedValue` | `String` | Formatted with comma grouping |
+
+      </AccordionItem>
+
+      <AccordionItem title="CurrencyRate" icon="💱">
+
+        | Property | Type | Description |
+        |---|---|---|
+        | `id` | `String` | "usd", "eur", etc. |
+        | `country` | `String` | "미국", "유럽" etc. |
+        | `code` | `String` | "USD", "EUR" |
+        | `flag` | `String` | Emoji flag |
+        | `rate` | `Double` | KRW exchange rate |
+        | `change` | `Double` | Absolute change |
+        | `changePercent` | `Double` | Percent change |
+        | `unitLabel` | `String` | Computed: "1 USD" etc. |
+        | `formattedRate` | `String` | Formatted with comma grouping |
+        | `formattedChange` | `String` | Signed change string |
+        | `isPositive` | `Bool` | Computed: `change >= 0` |
+
+      </AccordionItem>
+    </Accordion>
+
+    ### View State Properties
+
+    | Property | Type | Default | Description |
+    |---|---|---|---|
+    | `selectedTab` | `MarketOverviewTab` | `.indices` | Controls which data list is rendered |
+    | `allIndices` | `[MarketIndex]` | `[]` | Full list of market indices from API |
+    | `allRates` | `[CurrencyRate]` | `[]` | Full list of currency exchange rates from API |
+    | `isLoadingIndices` | `Bool` | `true` | Shows skeleton rows when true and data is empty |
+    | `isLoadingRates` | `Bool` | `true` | Shows skeleton rows when true and data is empty |
+    | `errorMessage` | `String?` | `nil` | Korean error message for alert body |
+    | `showError` | `Bool` | `false` | Controls error alert presentation |
+
+    ### State Machine
+
+    **Initial Load (per data source):** Idle (isLoading=true, data=[]) -> Skeleton (10 rows) -> Loaded (data populated)
+
+    **Error Recovery:** Loading -> Error Alert ("데이터 로딩 실패") -> User taps "재시도" -> loadInitialData() -> Loaded
+
+    **Tab Switch:** Tab A Visible -> Tap Tab B -> scrollTo("scrollTop") -> Tab B Visible
+
+    | Section | Skeleton View | Error Behavior | Skeleton Condition |
+    |---|---|---|---|
+    | MO1 Tab Header | None (static) | N/A | Always rendered |
+    | MO2 Indices List | `DetailRowSkeletonView` x 10 | Alert: "지수 데이터를 불러올 수 없습니다." | `isLoadingIndices && allIndices.isEmpty` |
+    | MO3 FX Rates List | `DetailRowSkeletonView` x 10 | Alert: "환율 데이터를 불러올 수 없습니다." (only if no prior error) | `isLoadingRates && allRates.isEmpty` |
+
+    ### Error Handling
+
+    | Section | Strategy | Error Message (Korean) |
+    |---|---|---|
+    | MO2 Indices | Alert with retry | "지수 데이터를 불러올 수 없습니다." |
+    | MO3 FX Rates | Alert with retry (suppressed if prior error) | "환율 데이터를 불러올 수 없습니다." |
+
+    <Modal triggerLabel="View Data Loading Code" title="MarketOverviewDetailView.swift -- Data Loading" size="medium">
+
+    ```swift
+    // Indices load first, then currency rates -- each fails independently
+    private func loadInitialData() async {
+        do {
+            allIndices = try await repository.fetchAllIndices()
+        } catch {
+            errorMessage = "지수 데이터를 불러올 수 없습니다."
+            showError = true
+        }
+        isLoadingIndices = false
+
+        do {
+            allRates = try await repository.fetchCurrencyRates()
+        } catch {
+            if errorMessage == nil {
+                errorMessage = "환율 데이터를 불러올 수 없습니다."
+                showError = true
+            }
+        }
+        isLoadingRates = false
+    }
+
+    // Triggered once on view appear
+    .task { await loadInitialData() }
+    ```
+
+    </Modal>
+
+  </Tab>
+
+  <Tab label="Source Files" icon="📁">
+
+    ### Source Files
+
+    | File | Role | Lines |
+    |---|---|---|
+    | `Features/MarketOverview/MarketOverviewDetailView.swift` | Root view: tab header + tabbed ScrollView + data loading + error alert | ~252 |
+    | `Components/KLScrollableTabHeader.swift` | Reusable tab header with dismiss button and generic tab items | -- |
+    | `Components/SkeletonViews.swift` | SkeletonBlock + shimmer modifier (shared across all screens) | -- |
+    | `Models/MarketIndex.swift` | MarketIndex model: id, name, flag, value, change, status | -- |
+    | `Models/CurrencyRate.swift` | CurrencyRate model: id, country, code, flag, rate, change | -- |
+    | `Services/MarketRepositoryProtocol.swift` | Protocol: fetchAllIndices(), fetchCurrencyRates() | -- |
+
+    ### Component Hierarchy
+
+    <Modal triggerLabel="View Full Component Tree" title="MarketOverviewDetailView Hierarchy" size="large">
+
+    ```
+    MarketOverviewDetailView
+    ├── init(indices: [MarketIndex], currencyRates: [CurrencyRate], repository: MarketRepositoryProtocol)
+    ├── @Environment(\.dismiss) → dismiss()
+    ├── @State selectedTab / allIndices / allRates / isLoadingIndices / isLoadingRates / errorMessage / showError
+    │
+    ├── VStack(spacing: 0)
+    │   ├── KLScrollableTabHeader [MO1]
+    │   │   ├── selected: $selectedTab
+    │   │   ├── items: MarketOverviewTab.allCases → ["지수", "환율"]
+    │   │   └── onDismiss: { dismiss() }
+    │   │
+    │   └── ScrollViewReader { proxy in }
+    │       ├── ScrollView
+    │       │   ├── LazyVStack(spacing: 0)
+    │       │   │   ├── Color.clear.frame(height:0).id("scrollTop")
+    │       │   │   ├── if .indices: skeleton or MarketIndexRowView [MO2]
+    │       │   │   └── if .currency: skeleton or CurrencyRateRowView [MO3]
+    │       └── .onChange(of: selectedTab) → proxy.scrollTo("scrollTop")
+    │
+    ├── .background(Color.klBackground)
+    ├── .alert("데이터 로딩 실패") → "확인" | "재시도"
+    └── .task { await loadInitialData() }
+    ```
+
+    </Modal>
+
+    ### Design Specs
+
+    | Aspect | Specification |
+    |---|---|
+    | Row height | Auto-sized with vertical padding `KLINESpacing.mld` |
+    | Flag circle | 44pt diameter, `Color.klSurface` fill, subtle shadow (0.04 opacity, 2pt radius) |
+    | Dividers | `Color.klDivider`, horizontal padding `KLINESpacing.lg` |
+    | Price coloring | Positive: `Color.klPriceUp` (jade), Negative: `Color.klPriceDown` (red) |
+    | Background | `Color.klBackground` |
+    | Skeleton count | 10 shimmer rows per tab during initial load |
+    | Error alert title | "데이터 로딩 실패" (Data Loading Failed) |
+    | Error alert actions | "확인" (Cancel), "재시도" (Retry) |
+
+    ### Animations
+
+    | Element | Animation | Duration | Description |
+    |---|---|---|---|
+    | MO4 Skeleton rows | `.shimmer()` | Continuous | Shimmer gradient sweep on skeleton placeholder blocks |
+    | MO1 Tab switch | Implicit SwiftUI | ~0.25s | Content swap between indices and FX lists |
+    | Scroll reset | `scrollTo("scrollTop")` | Instant | Resets scroll position to top when tab changes |
+
+    ### Interaction Map
+
+    | Element | Gesture | Action | Target / Result |
+    |---|---|---|---|
+    | MO1 Tab "지수" | Tap | Switch to indices list | `selectedTab = .indices`, scroll resets to top |
+    | MO1 Tab "환율" | Tap | Switch to FX rates list | `selectedTab = .currency`, scroll resets to top |
+    | MO1 Dismiss Button | Tap | Close full-screen cover | `dismiss()` -- returns to Home screen |
+    | MO2 Index Row | None | Display only | Flag, name, status, value, change with color coding |
+    | MO3 FX Rate Row | None | Display only | Flag, country+code, unit label, rate, change with color coding |
+    | Error Alert "확인" | Tap | Dismiss alert | Alert closes, data remains in current state |
+    | Error Alert "재시도" | Tap | Retry data loading | `Task { await loadInitialData() }` |
+
+  </Tab>
+</Tabs>
