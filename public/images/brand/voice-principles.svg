@@ -6,44 +6,44 @@
   <g transform="translate(12, 12)">
     <rect width="88" height="76" rx="8" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
     <circle cx="44" cy="26" r="12" fill="#3B3F8C" opacity="0.1"/>
-    <text x="44" y="30" text-anchor="middle" font-family="Inter, sans-serif" font-size="17" fill="#3B3F8C">🎓</text>
-    <text x="44" y="50" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#1A1D2E" font-weight="600">Mentor</text>
-    <text x="44" y="62" text-anchor="middle" font-family="Inter, sans-serif" font-size="16" fill="#6B7085">Not salesperson</text>
+    <text x="44" y="30" text-anchor="middle" font-family="Inter, sans-serif" font-size="23" fill="#3B3F8C">🎓</text>
+    <text x="44" y="50" text-anchor="middle" font-family="Inter, sans-serif" font-size="24" fill="#1A1D2E" font-weight="600">Mentor</text>
+    <text x="44" y="62" text-anchor="middle" font-family="Inter, sans-serif" font-size="22" fill="#6B7085">Not salesperson</text>
   </g>
 
   <!-- Precise -->
   <g transform="translate(108, 12)">
     <rect width="88" height="76" rx="8" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
     <circle cx="44" cy="26" r="12" fill="#3B3F8C" opacity="0.1"/>
-    <text x="44" y="30" text-anchor="middle" font-family="Inter, sans-serif" font-size="17" fill="#3B3F8C">📊</text>
-    <text x="44" y="50" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#1A1D2E" font-weight="600">Precise</text>
-    <text x="44" y="62" text-anchor="middle" font-family="Inter, sans-serif" font-size="16" fill="#6B7085">Financial terms</text>
+    <text x="44" y="30" text-anchor="middle" font-family="Inter, sans-serif" font-size="23" fill="#3B3F8C">📊</text>
+    <text x="44" y="50" text-anchor="middle" font-family="Inter, sans-serif" font-size="24" fill="#1A1D2E" font-weight="600">Precise</text>
+    <text x="44" y="62" text-anchor="middle" font-family="Inter, sans-serif" font-size="22" fill="#6B7085">Financial terms</text>
   </g>
 
   <!-- Data first -->
   <g transform="translate(204, 12)">
     <rect width="88" height="76" rx="8" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
     <circle cx="44" cy="26" r="12" fill="#D4A843" opacity="0.15"/>
-    <text x="44" y="30" text-anchor="middle" font-family="Inter, sans-serif" font-size="17" fill="#D4A843">📈</text>
-    <text x="44" y="50" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#1A1D2E" font-weight="600">Data First</text>
-    <text x="44" y="62" text-anchor="middle" font-family="Inter, sans-serif" font-size="16" fill="#6B7085">Evidence, then opinion</text>
+    <text x="44" y="30" text-anchor="middle" font-family="Inter, sans-serif" font-size="23" fill="#D4A843">📈</text>
+    <text x="44" y="50" text-anchor="middle" font-family="Inter, sans-serif" font-size="24" fill="#1A1D2E" font-weight="600">Data First</text>
+    <text x="44" y="62" text-anchor="middle" font-family="Inter, sans-serif" font-size="22" fill="#6B7085">Evidence, then opinion</text>
   </g>
 
   <!-- Bilingual -->
   <g transform="translate(300, 12)">
     <rect width="88" height="76" rx="8" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
     <circle cx="44" cy="26" r="12" fill="#3AAFA8" opacity="0.15"/>
-    <text x="44" y="30" text-anchor="middle" font-family="Inter, sans-serif" font-size="17" fill="#3AAFA8">🌐</text>
-    <text x="44" y="50" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#1A1D2E" font-weight="600">Bilingual</text>
-    <text x="44" y="62" text-anchor="middle" font-family="Inter, sans-serif" font-size="16" fill="#6B7085">Korean + English</text>
+    <text x="44" y="30" text-anchor="middle" font-family="Inter, sans-serif" font-size="23" fill="#3AAFA8">🌐</text>
+    <text x="44" y="50" text-anchor="middle" font-family="Inter, sans-serif" font-size="24" fill="#1A1D2E" font-weight="600">Bilingual</text>
+    <text x="44" y="62" text-anchor="middle" font-family="Inter, sans-serif" font-size="22" fill="#6B7085">Korean + English</text>
   </g>
 
   <!-- Concise -->
   <g transform="translate(396, 12)">
     <rect width="72" height="76" rx="8" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
     <circle cx="36" cy="26" r="12" fill="#1A1D2E" opacity="0.08"/>
-    <text x="36" y="30" text-anchor="middle" font-family="Inter, sans-serif" font-size="17" fill="#1A1D2E">✎</text>
-    <text x="36" y="50" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#1A1D2E" font-weight="600">Concise</text>
-    <text x="36" y="62" text-anchor="middle" font-family="Inter, sans-serif" font-size="16" fill="#6B7085">No hype</text>
+    <text x="36" y="30" text-anchor="middle" font-family="Inter, sans-serif" font-size="23" fill="#1A1D2E">✎</text>
+    <text x="36" y="50" text-anchor="middle" font-family="Inter, sans-serif" font-size="24" fill="#1A1D2E" font-weight="600">Concise</text>
+    <text x="36" y="62" text-anchor="middle" font-family="Inter, sans-serif" font-size="22" fill="#6B7085">No hype</text>
   </g>
 </svg>

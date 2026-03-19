@@ -6,53 +6,53 @@
   <g transform="translate(20, 20)">
     <rect width="440" height="36" rx="8" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
     <rect x="1" y="1" width="34" height="34" rx="7" fill="#3B3F8C"/>
-    <text x="48" y="16" font-family="Inter, sans-serif" font-size="15" fill="#1A1D2E" font-weight="700">Indigo</text>
-    <text x="108" y="16" font-family="Inter, sans-serif" font-size="19" fill="#6B7085" font-weight="500">AI presence / Primary</text>
-    <text x="48" y="29" font-family="Inter, sans-serif" font-size="18" fill="#9CA3B8">Contemplation, wisdom, analytical depth. Korean tradition of scholarly authority.</text>
+    <text x="48" y="16" font-family="Inter, sans-serif" font-size="21" fill="#1A1D2E" font-weight="700">Indigo</text>
+    <text x="108" y="16" font-family="Inter, sans-serif" font-size="26" fill="#6B7085" font-weight="500">AI presence / Primary</text>
+    <text x="48" y="29" font-family="Inter, sans-serif" font-size="24" fill="#9CA3B8">Contemplation, wisdom, analytical depth. Korean tradition of scholarly authority.</text>
   </g>
 
   <!-- Indigo Light -->
   <g transform="translate(20, 64)">
     <rect width="440" height="36" rx="8" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
     <rect x="1" y="1" width="34" height="34" rx="7" fill="#6366A8"/>
-    <text x="48" y="16" font-family="Inter, sans-serif" font-size="15" fill="#1A1D2E" font-weight="700">Indigo Light</text>
-    <text x="128" y="16" font-family="Inter, sans-serif" font-size="19" fill="#6B7085" font-weight="500">Hover, secondary emphasis</text>
-    <text x="48" y="29" font-family="Inter, sans-serif" font-size="18" fill="#9CA3B8">Softer variant for interactive states. Maintains brand cohesion at lower intensity.</text>
+    <text x="48" y="16" font-family="Inter, sans-serif" font-size="21" fill="#1A1D2E" font-weight="700">Indigo Light</text>
+    <text x="128" y="16" font-family="Inter, sans-serif" font-size="26" fill="#6B7085" font-weight="500">Hover, secondary emphasis</text>
+    <text x="48" y="29" font-family="Inter, sans-serif" font-size="24" fill="#9CA3B8">Softer variant for interactive states. Maintains brand cohesion at lower intensity.</text>
   </g>
 
   <!-- Gold -->
   <g transform="translate(20, 108)">
     <rect width="440" height="36" rx="8" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
     <rect x="1" y="1" width="34" height="34" rx="7" fill="#D4A843"/>
-    <text x="48" y="16" font-family="Inter, sans-serif" font-size="15" fill="#1A1D2E" font-weight="700">Gold</text>
-    <text x="88" y="16" font-family="Inter, sans-serif" font-size="19" fill="#6B7085" font-weight="500">Attention / signal</text>
-    <text x="48" y="29" font-family="Inter, sans-serif" font-size="18" fill="#9CA3B8">Wealth, prestige, premium quality. Bloomberg-grade warm accent for key data points.</text>
+    <text x="48" y="16" font-family="Inter, sans-serif" font-size="21" fill="#1A1D2E" font-weight="700">Gold</text>
+    <text x="88" y="16" font-family="Inter, sans-serif" font-size="26" fill="#6B7085" font-weight="500">Attention / signal</text>
+    <text x="48" y="29" font-family="Inter, sans-serif" font-size="24" fill="#9CA3B8">Wealth, prestige, premium quality. Bloomberg-grade warm accent for key data points.</text>
   </g>
 
   <!-- Teal -->
   <g transform="translate(20, 152)">
     <rect width="440" height="36" rx="8" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
     <rect x="1" y="1" width="34" height="34" rx="7" fill="#3AAFA8"/>
-    <text x="48" y="16" font-family="Inter, sans-serif" font-size="15" fill="#1A1D2E" font-weight="700">Teal</text>
-    <text x="84" y="16" font-family="Inter, sans-serif" font-size="19" fill="#6B7085" font-weight="500">Data visualization, AI/tech</text>
-    <text x="48" y="29" font-family="Inter, sans-serif" font-size="18" fill="#9CA3B8">Modernity, clarity. Complements indigo on the color wheel for visual balance.</text>
+    <text x="48" y="16" font-family="Inter, sans-serif" font-size="21" fill="#1A1D2E" font-weight="700">Teal</text>
+    <text x="84" y="16" font-family="Inter, sans-serif" font-size="26" fill="#6B7085" font-weight="500">Data visualization, AI/tech</text>
+    <text x="48" y="29" font-family="Inter, sans-serif" font-size="24" fill="#9CA3B8">Modernity, clarity. Complements indigo on the color wheel for visual balance.</text>
   </g>
 
   <!-- Slate 900 -->
   <g transform="translate(20, 196)">
     <rect width="440" height="36" rx="8" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
     <rect x="1" y="1" width="34" height="34" rx="7" fill="#0F1018"/>
-    <text x="48" y="16" font-family="Inter, sans-serif" font-size="15" fill="#1A1D2E" font-weight="700">Slate 900</text>
-    <text x="118" y="16" font-family="Inter, sans-serif" font-size="19" fill="#6B7085" font-weight="500">Dark mode canvas</text>
-    <text x="48" y="29" font-family="Inter, sans-serif" font-size="18" fill="#9CA3B8">Indigo-tinted near-black. More premium than warm charcoal or pure black.</text>
+    <text x="48" y="16" font-family="Inter, sans-serif" font-size="21" fill="#1A1D2E" font-weight="700">Slate 900</text>
+    <text x="118" y="16" font-family="Inter, sans-serif" font-size="26" fill="#6B7085" font-weight="500">Dark mode canvas</text>
+    <text x="48" y="29" font-family="Inter, sans-serif" font-size="24" fill="#9CA3B8">Indigo-tinted near-black. More premium than warm charcoal or pure black.</text>
   </g>
 
   <!-- Slate 50 -->
   <g transform="translate(20, 240)">
     <rect width="440" height="36" rx="8" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
     <rect x="1" y="1" width="34" height="34" rx="7" fill="#F8F9FC" stroke="#E2E4ED" stroke-width="0.5"/>
-    <text x="48" y="16" font-family="Inter, sans-serif" font-size="15" fill="#1A1D2E" font-weight="700">Slate 50</text>
-    <text x="112" y="16" font-family="Inter, sans-serif" font-size="19" fill="#6B7085" font-weight="500">Light mode canvas</text>
-    <text x="48" y="29" font-family="Inter, sans-serif" font-size="18" fill="#9CA3B8">Cool-tinted white with subtle blue undertone. Calm, professional foundation.</text>
+    <text x="48" y="16" font-family="Inter, sans-serif" font-size="21" fill="#1A1D2E" font-weight="700">Slate 50</text>
+    <text x="112" y="16" font-family="Inter, sans-serif" font-size="26" fill="#6B7085" font-weight="500">Light mode canvas</text>
+    <text x="48" y="29" font-family="Inter, sans-serif" font-size="24" fill="#9CA3B8">Cool-tinted white with subtle blue undertone. Calm, professional foundation.</text>
   </g>
 </svg>

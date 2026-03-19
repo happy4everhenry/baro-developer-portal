@@ -3,50 +3,50 @@
   <rect width="480" height="220" rx="16" fill="#F8F9FC"/>
 
   <!-- Section: Brand Semantics -->
-  <text x="20" y="30" font-family="Inter, sans-serif" font-size="19" fill="#9CA3B8" font-weight="600" letter-spacing="0.5">BRAND SEMANTICS</text>
+  <text x="20" y="30" font-family="Inter, sans-serif" font-size="26" fill="#9CA3B8" font-weight="600" letter-spacing="0.5">BRAND SEMANTICS</text>
 
   <!-- Indigo = AI presence -->
   <g transform="translate(20, 42)">
     <rect width="136" height="52" rx="10" fill="#3B3F8C"/>
-    <text x="68" y="24" text-anchor="middle" font-family="Inter, sans-serif" font-size="15" fill="#FFFFFF" font-weight="700">Indigo</text>
-    <text x="68" y="38" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#9CA3B8">AI presence, narration</text>
+    <text x="68" y="24" text-anchor="middle" font-family="Inter, sans-serif" font-size="21" fill="#FFFFFF" font-weight="700">Indigo</text>
+    <text x="68" y="38" text-anchor="middle" font-family="Inter, sans-serif" font-size="24" fill="#9CA3B8">AI presence, narration</text>
   </g>
 
   <!-- Gold = Signal -->
   <g transform="translate(168, 42)">
     <rect width="136" height="52" rx="10" fill="#D4A843"/>
-    <text x="68" y="24" text-anchor="middle" font-family="Inter, sans-serif" font-size="15" fill="#FFFFFF" font-weight="700">Gold</text>
-    <text x="68" y="38" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#FFFFFF" opacity="0.85">Signal, premium attention</text>
+    <text x="68" y="24" text-anchor="middle" font-family="Inter, sans-serif" font-size="21" fill="#FFFFFF" font-weight="700">Gold</text>
+    <text x="68" y="38" text-anchor="middle" font-family="Inter, sans-serif" font-size="24" fill="#FFFFFF" opacity="0.85">Signal, premium attention</text>
   </g>
 
   <!-- Teal = Data -->
   <g transform="translate(316, 42)">
     <rect width="144" height="52" rx="10" fill="#3AAFA8"/>
-    <text x="72" y="24" text-anchor="middle" font-family="Inter, sans-serif" font-size="15" fill="#FFFFFF" font-weight="700">Teal</text>
-    <text x="72" y="38" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#FFFFFF" opacity="0.85">Data viz, AI tech</text>
+    <text x="72" y="24" text-anchor="middle" font-family="Inter, sans-serif" font-size="21" fill="#FFFFFF" font-weight="700">Teal</text>
+    <text x="72" y="38" text-anchor="middle" font-family="Inter, sans-serif" font-size="24" fill="#FFFFFF" opacity="0.85">Data viz, AI tech</text>
   </g>
 
   <!-- Divider -->
   <line x1="20" y1="112" x2="460" y2="112" stroke="#E2E4ED" stroke-width="1"/>
 
   <!-- Section: Korean Financial (restricted) -->
-  <text x="20" y="132" font-family="Inter, sans-serif" font-size="19" fill="#9CA3B8" font-weight="600" letter-spacing="0.5">KOREAN FINANCIAL CONVENTION</text>
+  <text x="20" y="132" font-family="Inter, sans-serif" font-size="26" fill="#9CA3B8" font-weight="600" letter-spacing="0.5">KOREAN FINANCIAL CONVENTION</text>
 
   <!-- Red = Price UP -->
   <g transform="translate(20, 144)">
     <rect width="212" height="56" rx="10" fill="#FFFFFF" stroke="#E04848" stroke-width="1.5"/>
     <rect x="12" y="12" width="32" height="32" rx="6" fill="#E04848"/>
-    <text x="21" y="33" font-family="Inter, sans-serif" font-size="19" fill="#FFFFFF" font-weight="700" text-anchor="middle">&#x25B2;</text>
-    <text x="56" y="26" font-family="Inter, sans-serif" font-size="16" fill="#E04848" font-weight="700">Red #E04848</text>
-    <text x="56" y="40" font-family="Inter, sans-serif" font-size="18" fill="#6B7085">Price UP only -- never as UI accent</text>
+    <text x="21" y="33" font-family="Inter, sans-serif" font-size="26" fill="#FFFFFF" font-weight="700" text-anchor="middle">&#x25B2;</text>
+    <text x="56" y="26" font-family="Inter, sans-serif" font-size="22" fill="#E04848" font-weight="700">Red #E04848</text>
+    <text x="56" y="40" font-family="Inter, sans-serif" font-size="24" fill="#6B7085">Price UP only -- never as UI accent</text>
   </g>
 
   <!-- Blue = Price DOWN -->
   <g transform="translate(248, 144)">
     <rect width="212" height="56" rx="10" fill="#FFFFFF" stroke="#3478F6" stroke-width="1.5"/>
     <rect x="12" y="12" width="32" height="32" rx="6" fill="#3478F6"/>
-    <text x="21" y="33" font-family="Inter, sans-serif" font-size="19" fill="#FFFFFF" font-weight="700" text-anchor="middle">&#x25BC;</text>
-    <text x="56" y="26" font-family="Inter, sans-serif" font-size="16" fill="#3478F6" font-weight="700">Blue #3478F6</text>
-    <text x="56" y="40" font-family="Inter, sans-serif" font-size="18" fill="#6B7085">Price DOWN only -- never as UI accent</text>
+    <text x="21" y="33" font-family="Inter, sans-serif" font-size="26" fill="#FFFFFF" font-weight="700" text-anchor="middle">&#x25BC;</text>
+    <text x="56" y="26" font-family="Inter, sans-serif" font-size="22" fill="#3478F6" font-weight="700">Blue #3478F6</text>
+    <text x="56" y="40" font-family="Inter, sans-serif" font-size="24" fill="#6B7085">Price DOWN only -- never as UI accent</text>
   </g>
 </svg>

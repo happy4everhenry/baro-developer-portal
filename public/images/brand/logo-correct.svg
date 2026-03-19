@@ -2,8 +2,8 @@
   <rect width="480" height="220" rx="16" fill="#F8F9FC"/>
 
   <!-- Title bar -->
-  <text x="20" y="24" font-family="Inter, sans-serif" font-size="16" fill="#1A1D2E" font-weight="700">Correct Usage</text>
-  <text x="130" y="24" font-family="Inter, sans-serif" font-size="19" fill="#6B7085" font-weight="400">Full color on light/dark, monochrome variants. Always maintain clear space and locked proportions.</text>
+  <text x="20" y="24" font-family="Inter, sans-serif" font-size="22" fill="#1A1D2E" font-weight="700">Correct Usage</text>
+  <text x="130" y="24" font-family="Inter, sans-serif" font-size="26" fill="#6B7085" font-weight="400">Full color on light/dark, monochrome variants. Always maintain clear space and locked proportions.</text>
 
   <!-- 1: Full color on light -->
   <g transform="translate(20, 40)">
@@ -17,8 +17,8 @@
       <line x1="8" y1="40" x2="72" y2="40" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
       <circle cx="40" cy="40" r="8" fill="#D4A843"/>
     </g>
-    <text x="50" y="158" text-anchor="middle" font-family="Inter, sans-serif" font-size="19" fill="#1A1D2E" font-weight="600">On Light</text>
-    <text x="50" y="170" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#9CA3B8">Full color, white BG</text>
+    <text x="50" y="158" text-anchor="middle" font-family="Inter, sans-serif" font-size="26" fill="#1A1D2E" font-weight="600">On Light</text>
+    <text x="50" y="170" text-anchor="middle" font-family="Inter, sans-serif" font-size="24" fill="#9CA3B8">Full color, white BG</text>
   </g>
 
   <!-- 2: Full color on dark -->
@@ -33,8 +33,8 @@
       <line x1="8" y1="40" x2="72" y2="40" stroke="#6366A8" stroke-width="2.5" stroke-linecap="round"/>
       <circle cx="40" cy="40" r="8" fill="#D4A843"/>
     </g>
-    <text x="50" y="158" text-anchor="middle" font-family="Inter, sans-serif" font-size="19" fill="#1A1D2E" font-weight="600">On Dark</text>
-    <text x="50" y="170" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#9CA3B8">Full color, indigo BG</text>
+    <text x="50" y="158" text-anchor="middle" font-family="Inter, sans-serif" font-size="26" fill="#1A1D2E" font-weight="600">On Dark</text>
+    <text x="50" y="170" text-anchor="middle" font-family="Inter, sans-serif" font-size="24" fill="#9CA3B8">Full color, indigo BG</text>
   </g>
 
   <!-- 3: Monochrome white -->
@@ -49,8 +49,8 @@
       <line x1="8" y1="40" x2="72" y2="40" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
       <circle cx="40" cy="40" r="8" fill="#FFFFFF"/>
     </g>
-    <text x="50" y="158" text-anchor="middle" font-family="Inter, sans-serif" font-size="19" fill="#1A1D2E" font-weight="600">Mono White</text>
-    <text x="50" y="170" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#9CA3B8">White on dark surfaces</text>
+    <text x="50" y="158" text-anchor="middle" font-family="Inter, sans-serif" font-size="26" fill="#1A1D2E" font-weight="600">Mono White</text>
+    <text x="50" y="170" text-anchor="middle" font-family="Inter, sans-serif" font-size="24" fill="#9CA3B8">White on dark surfaces</text>
   </g>
 
   <!-- 4: Monochrome dark -->
@@ -65,7 +65,7 @@
       <line x1="8" y1="40" x2="72" y2="40" stroke="#1A1D2E" stroke-width="2.5" stroke-linecap="round"/>
       <circle cx="40" cy="40" r="8" fill="#1A1D2E"/>
     </g>
-    <text x="50" y="158" text-anchor="middle" font-family="Inter, sans-serif" font-size="19" fill="#1A1D2E" font-weight="600">Mono Dark</text>
-    <text x="50" y="170" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#9CA3B8">Dark on light surfaces</text>
+    <text x="50" y="158" text-anchor="middle" font-family="Inter, sans-serif" font-size="26" fill="#1A1D2E" font-weight="600">Mono Dark</text>
+    <text x="50" y="170" text-anchor="middle" font-family="Inter, sans-serif" font-size="24" fill="#9CA3B8">Dark on light surfaces</text>
   </g>
 </svg>
