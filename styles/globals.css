@@ -3,7 +3,7 @@
    Redesigned with advanced visual styling
    ============================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
 
 /* ============================================
    CSS CUSTOM PROPERTIES
@@ -42,7 +42,7 @@
   --kl-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   --kl-spring: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Inter', 'Noto Sans KR', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -1368,4 +1368,329 @@ nav[class*="nextra-sidebar"] a:hover {
 ::selection {
   background: var(--kl-jade-glow-strong);
   color: var(--kl-text);
+}
+
+/* ============================================
+   RESPONSIVE & MOBILE-FIRST OVERRIDES
+   Industry-standard breakpoints:
+   - Desktop: 1025px+
+   - Tablet: 769px - 1024px
+   - Mobile: 481px - 768px
+   - Small mobile: 480px and below
+   ============================================ */
+
+/* --- TABLES: Horizontal scroll on all small screens --- */
+@media (max-width: 1024px) {
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+  table thead, table tbody, table tr { display: table; width: 100%; table-layout: auto; }
+  th, td { font-size: 12px; padding: 8px 12px; }
+
+  .kl-props-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .kl-props-table th, .kl-props-table td { white-space: nowrap; padding: 8px 10px; font-size: 12px; }
+}
+
+/* --- TABLET: 769px - 1024px --- */
+@media (max-width: 1024px) {
+  .kl-hero { padding: 44px 24px 36px; margin: -16px -16px 24px; }
+  .kl-hero-title { font-size: 34px; }
+  .kl-hero-description { font-size: 15px; }
+  .kl-hero-glow { width: 350px; height: 350px; }
+
+  .kl-quick-nav { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+  .kl-quick-nav-card { padding: 18px; }
+
+  .kl-stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .kl-stat-value { font-size: 28px; }
+
+  .kl-tabs-content { padding: 18px 16px; }
+  .kl-tabs-trigger { padding: 10px 14px; font-size: 12px; }
+
+  .kl-diagram-canvas { padding: 16px; }
+  .kl-diagram-row { gap: 8px; }
+  .kl-diagram-node { padding: 10px 14px; font-size: 11px; min-width: 80px; }
+  .kl-diagram-node-icon { font-size: 16px; }
+
+  .kl-flow-diagram { padding: 16px; }
+  .kl-flow-row { gap: 10px; }
+  .kl-flow-node { padding: 10px 14px; font-size: 11px; min-width: 100px; }
+
+  .kl-modal-large { width: 90vw; }
+  .kl-modal-full { width: 96vw; }
+
+  .kl-accordion-trigger { padding: 14px 16px; }
+  .kl-accordion-inner { padding: 4px 16px 16px; }
+
+  .kl-compare-side { padding: 16px 18px; }
+
+  .kl-grid-2, .kl-grid-3 { grid-template-columns: 1fr; }
+}
+
+/* --- MOBILE: 481px - 768px --- */
+@media (max-width: 768px) {
+  .kl-hero { padding: 36px 18px 28px; margin: -12px -12px 20px; }
+  .kl-hero-title { font-size: 28px; letter-spacing: -1px; }
+  .kl-hero-subtitle { font-size: 11px; letter-spacing: 1.5px; }
+  .kl-hero-description { font-size: 14px; max-width: 100%; }
+  .kl-hero-actions { gap: 8px; }
+  .kl-hero-badge { padding: 7px 14px; font-size: 12px; }
+  .kl-hero-glow { width: 280px; height: 280px; top: -60px; }
+
+  .kl-quick-nav { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .kl-quick-nav-card { padding: 16px; }
+  .kl-quick-nav-icon { font-size: 24px; margin-bottom: 8px; }
+  .kl-quick-nav-title { font-size: 14px; }
+  .kl-quick-nav-desc { font-size: 12px; }
+
+  .kl-stat-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .kl-stat-card { padding: 16px; }
+  .kl-stat-value { font-size: 26px; }
+  .kl-stat-label { font-size: 11px; }
+
+  .kl-feature-card { gap: 12px; padding: 14px 16px; }
+  .kl-feature-card-icon { font-size: 22px; }
+  .kl-feature-card-title { font-size: 13px; }
+  .kl-feature-card-desc { font-size: 11px; }
+
+  .kl-tabs-header { overflow-x: auto; }
+  .kl-tabs-trigger { flex: none; padding: 10px 16px; font-size: 12px; }
+  .kl-tabs-content { padding: 16px 14px; }
+
+  .kl-accordion-title { font-size: 13px; }
+  .kl-accordion-icon { font-size: 18px; }
+  .kl-accordion-trigger { padding: 12px 14px; }
+  .kl-accordion-inner { padding: 4px 14px 14px; }
+  .kl-accordion-badge { font-size: 9px; padding: 2px 6px; }
+
+  .kl-step-title { font-size: 14px; }
+  .kl-step-body { font-size: 13px; }
+  .kl-step-number { width: 30px; height: 30px; font-size: 12px; }
+  .kl-step-content { padding-bottom: 20px; }
+
+  .kl-timeline-date { font-size: 10px; }
+  .kl-timeline-title { font-size: 14px; }
+  .kl-timeline-body { font-size: 12px; }
+  .kl-timeline-dot { width: 28px; height: 28px; font-size: 12px; }
+
+  .kl-diagram-node { padding: 8px 10px; font-size: 10px; min-width: 70px; }
+  .kl-diagram-node-icon { font-size: 14px; }
+  .kl-diagram-node-sublabel { font-size: 9px; }
+  .kl-diagram-arrow-label { font-size: 8px; }
+  .kl-diagram-arrow-symbol { font-size: 14px; }
+  .kl-diagram-group { padding: 12px; }
+  .kl-diagram-group-label { font-size: 9px; }
+  .kl-diagram-canvas { padding: 14px 10px; gap: 10px; }
+  .kl-diagram-row { gap: 6px; }
+
+  .kl-flow-diagram { padding: 14px; gap: 12px; }
+  .kl-flow-row { gap: 8px; }
+  .kl-flow-node { padding: 8px 12px; font-size: 11px; min-width: 80px; }
+  .kl-flow-arrow { font-size: 14px; }
+  .kl-flow-arrow-down { font-size: 16px; }
+
+  .kl-api-header { padding: 12px 14px; gap: 8px; flex-wrap: wrap; }
+  .kl-api-path { font-size: 12px; }
+  .kl-api-desc { font-size: 11px; margin-left: 0; width: 100%; margin-top: 4px; }
+  .kl-method-badge { font-size: 9px; padding: 3px 8px; }
+  .kl-api-body { padding: 14px; }
+
+  .kl-modal-small, .kl-modal-medium, .kl-modal-large, .kl-modal-full { width: 95vw; max-width: none; }
+  .kl-modal-header { padding: 16px 18px; }
+  .kl-modal-title { font-size: 16px; }
+  .kl-modal-body { padding: 16px 18px; }
+
+  .kl-compare { flex-direction: column; }
+  .kl-compare-side { padding: 14px 16px; }
+  .kl-compare-divider { padding: 6px; justify-content: center; flex-direction: row; }
+
+  .kl-infobox-header { padding: 10px 14px; }
+  .kl-infobox-body { padding: 12px 14px; font-size: 12px; }
+
+  .kl-page-meta { padding: 10px 12px; gap: 6px; }
+  .kl-meta-tag { font-size: 10px; padding: 2px 8px; }
+  .kl-meta-detail { font-size: 10px; }
+
+  .kl-screen-map-device { max-width: 100%; border-radius: 24px; }
+  .kl-screen-map-body { min-height: 400px; }
+
+  .kl-swatch-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+  .kl-swatch-color { height: 48px; }
+  .kl-swatch-info { padding: 8px 10px; }
+  .kl-swatch-name { font-size: 10px; }
+
+  .kl-card { padding: 18px; }
+
+  pre { margin: 14px 0 !important; font-size: 12px !important; }
+  blockquote { padding: 10px 14px !important; margin: 14px 0 !important; }
+
+  .kl-progress-label, .kl-progress-value { font-size: 11px; }
+
+  .kl-file-link { font-size: 11px; padding: 3px 8px; }
+  .kl-file-link code { font-size: 10px; }
+}
+
+/* --- SMALL MOBILE: 480px and below --- */
+@media (max-width: 480px) {
+  .kl-hero { padding: 28px 14px 24px; margin: -8px -8px 16px; border-radius: 0 0 var(--kl-radius-lg) var(--kl-radius-lg); }
+  .kl-hero-title { font-size: 24px; letter-spacing: -0.8px; }
+  .kl-hero-subtitle { font-size: 10px; letter-spacing: 1px; margin-bottom: 8px; }
+  .kl-hero-description { font-size: 13px; line-height: 1.5; }
+  .kl-hero-actions { flex-direction: column; align-items: center; }
+  .kl-hero-badge { width: 100%; justify-content: center; }
+  .kl-hero-glow { width: 220px; height: 220px; top: -50px; }
+
+  .kl-quick-nav { grid-template-columns: 1fr; gap: 8px; }
+  .kl-quick-nav-card { padding: 14px; flex-direction: row; gap: 12px; align-items: center; }
+  .kl-quick-nav-icon { font-size: 24px; margin-bottom: 0; }
+  .kl-quick-nav-title { font-size: 14px; }
+
+  .kl-stat-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .kl-stat-card { padding: 12px; }
+  .kl-stat-value { font-size: 22px; }
+  .kl-stat-label { font-size: 10px; margin-top: 4px; }
+
+  .kl-feature-card { padding: 12px 14px; gap: 10px; }
+  .kl-feature-card-icon { font-size: 20px; }
+  .kl-feature-card-arrow { display: none; }
+
+  .kl-tabs-trigger { padding: 8px 12px; font-size: 11px; gap: 4px; }
+  .kl-tabs-icon { font-size: 14px; }
+  .kl-tabs-content { padding: 14px 12px; }
+
+  .kl-accordion-trigger { padding: 10px 12px; }
+  .kl-accordion-title { font-size: 12px; }
+  .kl-accordion-icon { font-size: 16px; }
+  .kl-accordion-inner { padding: 4px 12px 12px; }
+
+  .kl-step { gap: 12px; }
+  .kl-step-number { width: 26px; height: 26px; font-size: 11px; }
+  .kl-step-title { font-size: 13px; line-height: 26px; }
+  .kl-step-body { font-size: 12px; }
+  .kl-step-content { padding-bottom: 16px; }
+
+  .kl-timeline-content { padding-bottom: 16px; }
+  .kl-timeline-title { font-size: 13px; }
+  .kl-timeline-body { font-size: 11px; }
+  .kl-timeline-dot { width: 24px; height: 24px; font-size: 10px; }
+
+  /* Diagrams: stack nodes vertically on very small screens */
+  .kl-diagram-row { flex-direction: column; gap: 4px; }
+  .kl-diagram-arrow-right { transform: rotate(90deg); }
+  .kl-diagram-node { min-width: 100%; }
+  .kl-diagram-canvas { padding: 12px 8px; }
+
+  .kl-flow-row { flex-direction: column; gap: 4px; }
+  .kl-flow-node { min-width: 100%; }
+  .kl-flow-diagram { padding: 12px; }
+
+  .kl-api-header { padding: 10px 12px; }
+  .kl-api-path { font-size: 11px; word-break: break-all; }
+  .kl-api-body { padding: 12px; }
+  .kl-method-badge { font-size: 8px; padding: 2px 6px; }
+
+  .kl-modal-overlay { padding: 8px; }
+  .kl-modal { border-radius: var(--kl-radius-lg); max-height: 90vh; }
+  .kl-modal-header { padding: 14px 16px; }
+  .kl-modal-body { padding: 14px 16px; }
+
+  .kl-compare-side { padding: 12px 14px; }
+  .kl-compare-label { font-size: 9px; }
+  .kl-compare-content { font-size: 12px; }
+
+  .kl-infobox-header { padding: 8px 12px; font-size: 12px; }
+  .kl-infobox-body { padding: 10px 12px; font-size: 12px; }
+
+  .kl-page-meta { flex-direction: column; align-items: flex-start; gap: 4px; padding: 8px 10px; }
+  .kl-meta-detail { margin-left: 0; }
+
+  .kl-screen-map-device { border-radius: 20px; padding: 6px; }
+  .kl-screen-map-notch { width: 80px; height: 18px; border-radius: 0 0 12px 12px; }
+  .kl-screen-map-body { min-height: 350px; padding: 4px 6px; }
+
+  .kl-swatch-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; }
+  .kl-swatch-color { height: 40px; }
+  .kl-swatch-info { padding: 6px 8px; }
+  .kl-swatch-name { font-size: 9px; }
+  .kl-swatch-hex { font-size: 9px; }
+
+  .kl-card { padding: 14px; margin-bottom: 16px; }
+
+  pre { font-size: 11px !important; padding: 12px !important; }
+  code { font-size: 11px; }
+  th { font-size: 10px; padding: 6px 10px; }
+  td { font-size: 11px; padding: 6px 10px; }
+  blockquote { font-size: 13px !important; }
+
+  hr { margin: 28px 0; }
+
+  .kl-progress-track { height: 6px; }
+}
+
+/* --- NEXTRA FRAMEWORK MOBILE OVERRIDES --- */
+@media (max-width: 768px) {
+  /* Better content padding on mobile */
+  .nextra-content { padding: 0 4px !important; }
+  article { padding: 0 !important; }
+
+  /* Fix heading sizes on mobile */
+  .nextra-content h1 { font-size: 24px !important; letter-spacing: -0.5px; }
+  .nextra-content h2 { font-size: 20px !important; }
+  .nextra-content h3 { font-size: 17px !important; }
+  .nextra-content h4 { font-size: 15px !important; }
+  .nextra-content p, .nextra-content li { font-size: 14px; line-height: 1.7; }
+
+  /* Table of contents hidden on mobile (Nextra handles this but enforce it) */
+  nav[class*="toc"] { display: none !important; }
+}
+
+@media (max-width: 480px) {
+  .nextra-content h1 { font-size: 22px !important; }
+  .nextra-content h2 { font-size: 18px !important; margin-top: 28px !important; }
+  .nextra-content h3 { font-size: 16px !important; }
+  .nextra-content p, .nextra-content li { font-size: 13px; }
+}
+
+/* --- TOUCH DEVICE OPTIMIZATION --- */
+@media (hover: none) and (pointer: coarse) {
+  .kl-quick-nav-card:hover,
+  .kl-feature-card:hover,
+  .kl-stat-card:hover,
+  .kl-swatch:hover,
+  .kl-diagram-node:hover,
+  .kl-flow-node:hover {
+    transform: none;
+  }
+
+  .kl-quick-nav-card:active { transform: scale(0.98); }
+  .kl-feature-card:active { transform: scale(0.99); }
+  .kl-accordion-trigger:active { background: var(--kl-bg-card-hover); }
+
+  /* Larger tap targets */
+  .kl-tabs-trigger { min-height: 44px; }
+  .kl-accordion-trigger { min-height: 48px; }
+  .kl-api-header { min-height: 48px; }
+  .kl-modal-close { width: 36px; height: 36px; }
+  .kl-screen-region { padding: 10px 12px; }
+  .kl-file-link { padding: 6px 12px; min-height: 36px; }
+}
+
+/* --- SAFE AREA: Notched phones (iPhone X+) --- */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .kl-modal-overlay { padding-bottom: env(safe-area-inset-bottom); }
+  .nextra-content { padding-bottom: calc(24px + env(safe-area-inset-bottom)) !important; }
+}
+
+/* --- PRINT STYLES --- */
+@media print {
+  .kl-hero-glow, .kl-hero-badge, .kl-modal-trigger { display: none !important; }
+  .kl-card, .kl-accordion-item, .kl-tabs, .kl-diagram, .kl-flow-diagram {
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+    break-inside: avoid;
+  }
+  table { white-space: normal; }
 }
