@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 220" width="480" height="220">
+  <rect width="480" height="220" rx="16" fill="#F8F9FC"/>
+
+  <!-- DO side -->
+  <g transform="translate(12, 12)">
+    <rect width="220" height="196" rx="12" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
+
+    <!-- Abstract data viz / calm chart -->
+    <rect x="12" y="12" width="196" height="120" rx="8" fill="#0F1018"/>
+
+    <!-- Grid lines -->
+    <line x1="24" y1="40" x2="196" y2="40" stroke="#3B3F8C" stroke-opacity="0.15" stroke-width="0.5"/>
+    <line x1="24" y1="65" x2="196" y2="65" stroke="#3B3F8C" stroke-opacity="0.15" stroke-width="0.5"/>
+    <line x1="24" y1="90" x2="196" y2="90" stroke="#3B3F8C" stroke-opacity="0.15" stroke-width="0.5"/>
+    <line x1="24" y1="115" x2="196" y2="115" stroke="#3B3F8C" stroke-opacity="0.15" stroke-width="0.5"/>
+
+    <!-- Calm trend line -->
+    <polyline points="30,100 55,92 80,88 105,78 130,72 155,60 180,45 196,38" fill="none" stroke="#3B3F8C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Secondary trend -->
+    <polyline points="30,108 55,102 80,95 105,90 130,88 155,82 180,70 196,62" fill="none" stroke="#6366A8" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Gold signal dot -->
+    <circle cx="180" cy="45" r="4" fill="#D4A843"/>
+    <circle cx="180" cy="45" r="7" fill="none" stroke="#D4A843" stroke-width="0.5" stroke-opacity="0.5"/>
+
+    <!-- Subtle area fill -->
+    <polygon points="30,100 55,92 80,88 105,78 130,72 155,60 180,45 196,38 196,120 30,120" fill="#3B3F8C" fill-opacity="0.08"/>
+
+    <!-- Muted Korean cityscape silhouette at bottom -->
+    <rect x="30" y="108" width="8" height="12" fill="#1A1D2E" opacity="0.15"/>
+    <rect x="40" y="104" width="6" height="16" fill="#1A1D2E" opacity="0.12"/>
+    <rect x="48" y="110" width="10" height="10" fill="#1A1D2E" opacity="0.1"/>
+    <rect x="60" y="102" width="5" height="18" fill="#1A1D2E" opacity="0.13"/>
+    <rect x="67" y="106" width="7" height="14" fill="#1A1D2E" opacity="0.11"/>
+
+    <!-- Check badge -->
+    <circle cx="190" cy="124" r="8" fill="#3B3F8C"/>
+    <polyline points="186,124 189,127 195,121" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <text x="110" y="150" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#1A1D2E" font-weight="600">Calm, composed, data-driven</text>
+    <text x="110" y="164" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#6B7085">Muted tones, indigo + gold highlights</text>
+    <text x="110" y="178" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#9CA3B8">Abstract charts, Korean urban landscapes</text>
+  </g>
+
+  <!-- DON'T side -->
+  <g transform="translate(248, 12)">
+    <rect width="220" height="196" rx="12" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
+
+    <!-- Chaotic / hype imagery -->
+    <rect x="12" y="12" width="196" height="120" rx="8" fill="#FEF2F2"/>
+
+    <!-- Flashy confetti / celebration chaos -->
+    <rect x="30" y="30" width="16" height="16" rx="2" fill="#EF4444" opacity="0.6" transform="rotate(15 38 38)"/>
+    <rect x="70" y="25" width="12" height="12" rx="2" fill="#F59E0B" opacity="0.7" transform="rotate(-20 76 31)"/>
+    <rect x="120" y="35" width="14" height="14" rx="2" fill="#10B981" opacity="0.6" transform="rotate(30 127 42)"/>
+    <rect x="160" y="28" width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.7" transform="rotate(-10 165 33)"/>
+    <circle cx="50" cy="70" r="6" fill="#F59E0B" opacity="0.5"/>
+    <circle cx="100" cy="55" r="5" fill="#EF4444" opacity="0.4"/>
+    <circle cx="145" cy="75" r="7" fill="#10B981" opacity="0.5"/>
+    <circle cx="180" cy="60" r="4" fill="#8B5CF6" opacity="0.6"/>
+
+    <!-- Hype text -->
+    <text x="108" y="98" text-anchor="middle" font-family="Georgia, serif" font-size="14" fill="#EF4444" font-weight="700" font-style="italic">TO THE MOON! 🚀</text>
+    <text x="108" y="115" text-anchor="middle" font-family="Georgia, serif" font-size="10" fill="#F59E0B" font-weight="700">+9999% 💰🎉</text>
+
+    <!-- X badge -->
+    <circle cx="190" cy="124" r="8" fill="#EF4444"/>
+    <line x1="187" y1="121" x2="193" y2="127" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="193" y1="121" x2="187" y2="127" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round"/>
+
+    <!-- Red X overlay -->
+    <line x1="32" y1="32" x2="188" y2="112" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" opacity="0.3"/>
+    <line x1="188" y1="32" x2="32" y2="112" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" opacity="0.3"/>
+
+    <text x="110" y="150" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#EF4444" font-weight="600">Hype, chaos, celebrations</text>
+    <text x="110" y="164" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#6B7085">No flashy colors, confetti, or FOMO</text>
+    <text x="110" y="178" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#9CA3B8">No stock photos, no gambling imagery</text>
+  </g>
+</svg>
