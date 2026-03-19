@@ -1,46 +1,89 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260" width="400" height="260">
-  <!-- Clear Space & Minimum Size diagram -->
-  <rect width="400" height="260" rx="16" fill="#F8F9FC"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 300" width="480" height="300">
+  <rect width="480" height="300" rx="16" fill="#F8F9FC"/>
 
-  <!-- Clear space zone (dashed border) -->
-  <rect x="100" y="30" width="200" height="200" rx="4" fill="none" stroke="#3B3F8C" stroke-width="1" stroke-dasharray="6 4" opacity="0.3"/>
+  <!-- Title + stats row -->
+  <text x="20" y="24" font-family="Inter, sans-serif" font-size="11" fill="#1A1D2E" font-weight="700">Clear Space &amp; Minimum Size</text>
 
-  <!-- 1x markers -->
-  <!-- Top -->
-  <line x1="150" y1="30" x2="150" y2="60" stroke="#D4A843" stroke-width="1"/>
-  <line x1="145" y1="30" x2="155" y2="30" stroke="#D4A843" stroke-width="1"/>
-  <line x1="145" y1="60" x2="155" y2="60" stroke="#D4A843" stroke-width="1"/>
-  <text x="160" y="50" font-family="Inter, sans-serif" font-size="9" fill="#D4A843" font-weight="600">1x</text>
-
-  <!-- Left -->
-  <line x1="100" y1="100" x2="130" y2="100" stroke="#D4A843" stroke-width="1"/>
-  <line x1="100" y1="95" x2="100" y2="105" stroke="#D4A843" stroke-width="1"/>
-  <line x1="130" y1="95" x2="130" y2="105" stroke="#D4A843" stroke-width="1"/>
-  <text x="108" y="93" font-family="Inter, sans-serif" font-size="9" fill="#D4A843" font-weight="600">1x</text>
-
-  <!-- Right -->
-  <line x1="270" y1="100" x2="300" y2="100" stroke="#D4A843" stroke-width="1"/>
-  <line x1="270" y1="95" x2="270" y2="105" stroke="#D4A843" stroke-width="1"/>
-  <line x1="300" y1="95" x2="300" y2="105" stroke="#D4A843" stroke-width="1"/>
-  <text x="278" y="93" font-family="Inter, sans-serif" font-size="9" fill="#D4A843" font-weight="600">1x</text>
-
-  <!-- Bottom -->
-  <line x1="250" y1="200" x2="250" y2="230" stroke="#D4A843" stroke-width="1"/>
-  <line x1="245" y1="200" x2="255" y2="200" stroke="#D4A843" stroke-width="1"/>
-  <line x1="245" y1="230" x2="255" y2="230" stroke="#D4A843" stroke-width="1"/>
-  <text x="256" y="220" font-family="Inter, sans-serif" font-size="9" fill="#D4A843" font-weight="600">1x</text>
-
-  <!-- The BARO mark centered -->
-  <g transform="translate(130, 60) scale(1.75)">
-    <line x1="20" y1="8" x2="20" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="60" y1="8" x2="60" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="8" y1="20" x2="72" y2="20" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="8" y1="60" x2="72" y2="60" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="40" y1="8" x2="40" y2="72" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
-    <line x1="8" y1="40" x2="72" y2="40" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
-    <circle cx="40" cy="40" r="8" fill="#D4A843"/>
+  <!-- Stats inline -->
+  <g transform="translate(20, 36)">
+    <rect width="140" height="40" rx="8" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
+    <text x="70" y="18" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" fill="#3B3F8C" font-weight="700">1x</text>
+    <text x="70" y="32" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#6B7085">Clear space on all sides</text>
+  </g>
+  <g transform="translate(170, 36)">
+    <rect width="140" height="40" rx="8" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
+    <text x="70" y="18" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" fill="#3B3F8C" font-weight="700">80px</text>
+    <text x="70" y="32" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#6B7085">Full logo minimum</text>
+  </g>
+  <g transform="translate(320, 36)">
+    <rect width="140" height="40" rx="8" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
+    <text x="70" y="18" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" fill="#3B3F8C" font-weight="700">24px</text>
+    <text x="70" y="32" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#6B7085">Icon only minimum</text>
   </g>
 
-  <!-- Label -->
-  <text x="200" y="252" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#6B7085" font-weight="500">1x clear space on all sides</text>
+  <!-- Clear space diagram -->
+  <g transform="translate(40, 90)">
+    <rect x="40" y="0" width="160" height="160" rx="4" fill="none" stroke="#3B3F8C" stroke-width="1" stroke-dasharray="6 4" opacity="0.3"/>
+
+    <!-- 1x markers -->
+    <line x1="80" y1="0" x2="80" y2="24" stroke="#D4A843" stroke-width="1"/>
+    <line x1="76" y1="0" x2="84" y2="0" stroke="#D4A843" stroke-width="1"/>
+    <line x1="76" y1="24" x2="84" y2="24" stroke="#D4A843" stroke-width="1"/>
+    <text x="88" y="16" font-family="Inter, sans-serif" font-size="9" fill="#D4A843" font-weight="600">1x</text>
+
+    <line x1="40" y1="60" x2="64" y2="60" stroke="#D4A843" stroke-width="1"/>
+    <line x1="40" y1="56" x2="40" y2="64" stroke="#D4A843" stroke-width="1"/>
+    <line x1="64" y1="56" x2="64" y2="64" stroke="#D4A843" stroke-width="1"/>
+    <text x="46" y="54" font-family="Inter, sans-serif" font-size="9" fill="#D4A843" font-weight="600">1x</text>
+
+    <!-- The BARO mark -->
+    <g transform="translate(64, 24) scale(1.4)">
+      <line x1="20" y1="8" x2="20" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="60" y1="8" x2="60" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="8" y1="20" x2="72" y2="20" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="8" y1="60" x2="72" y2="60" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="40" y1="8" x2="40" y2="72" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="8" y1="40" x2="72" y2="40" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="40" cy="40" r="8" fill="#D4A843"/>
+    </g>
+  </g>
+
+  <!-- Minimum sizes -->
+  <g transform="translate(300, 100)">
+    <!-- 80px -->
+    <g transform="translate(0, 0) scale(1)">
+      <line x1="20" y1="8" x2="20" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="60" y1="8" x2="60" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="8" y1="20" x2="72" y2="20" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="8" y1="60" x2="72" y2="60" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="40" y1="8" x2="40" y2="72" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="8" y1="40" x2="72" y2="40" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="40" cy="40" r="8" fill="#D4A843"/>
+    </g>
+    <text x="40" y="90" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#1A1D2E" font-weight="600">80px</text>
+
+    <!-- 40px -->
+    <g transform="translate(90, 20) scale(0.5)">
+      <line x1="20" y1="8" x2="20" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="60" y1="8" x2="60" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="8" y1="20" x2="72" y2="20" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="8" y1="60" x2="72" y2="60" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="40" y1="8" x2="40" y2="72" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="8" y1="40" x2="72" y2="40" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="40" cy="40" r="8" fill="#D4A843"/>
+    </g>
+    <text x="110" y="90" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#1A1D2E" font-weight="600">40px</text>
+
+    <!-- 24px -->
+    <g transform="translate(140, 32) scale(0.3)">
+      <line x1="20" y1="8" x2="20" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="60" y1="8" x2="60" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="8" y1="20" x2="72" y2="20" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="8" y1="60" x2="72" y2="60" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="40" y1="8" x2="40" y2="72" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="8" y1="40" x2="72" y2="40" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="40" cy="40" r="8" fill="#D4A843"/>
+    </g>
+    <text x="152" y="90" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#1A1D2E" font-weight="600">24px</text>
+  </g>
 </svg>

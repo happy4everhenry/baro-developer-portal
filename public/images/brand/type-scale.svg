@@ -1,45 +1,57 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 280" width="480" height="280">
-  <!-- Type Scale -->
-  <rect width="480" height="280" rx="16" fill="#F8F9FC"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 300" width="480" height="300">
+  <rect width="480" height="300" rx="16" fill="#F8F9FC"/>
+
+  <!-- Size bar on left edge -->
+  <rect x="8" y="20" width="3" height="48" rx="1.5" fill="#3B3F8C" opacity="0.6"/>
+  <rect x="8" y="80" width="3" height="36" rx="1.5" fill="#3B3F8C" opacity="0.45"/>
+  <rect x="8" y="130" width="3" height="28" rx="1.5" fill="#3B3F8C" opacity="0.35"/>
+  <rect x="8" y="175" width="3" height="22" rx="1.5" fill="#3B3F8C" opacity="0.25"/>
+  <rect x="8" y="215" width="3" height="16" rx="1.5" fill="#3B3F8C" opacity="0.15"/>
 
   <!-- 32px Display -->
   <g transform="translate(20, 20)">
     <text x="0" y="28" font-family="Inter, sans-serif" font-size="32" fill="#1A1D2E" font-weight="300">Display Heading</text>
-    <text x="380" y="28" font-family="JetBrains Mono, monospace" font-size="9" fill="#9CA3B8" font-weight="400" text-anchor="end">32px / Light 300</text>
-    <line x1="0" y1="40" x2="460" y2="40" stroke="#E2E4ED" stroke-width="1"/>
+    <rect x="330" y="6" width="60" height="22" rx="6" fill="#3B3F8C" opacity="0.08"/>
+    <text x="360" y="21" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#3B3F8C" font-weight="600">32px</text>
+    <text x="430" y="21" text-anchor="end" font-family="Inter, sans-serif" font-size="9" fill="#9CA3B8">Light 300</text>
+    <line x1="0" y1="40" x2="440" y2="40" stroke="#E2E4ED" stroke-width="1"/>
   </g>
 
   <!-- 24px Heading -->
-  <g transform="translate(20, 72)">
+  <g transform="translate(20, 80)">
     <text x="0" y="22" font-family="Inter, sans-serif" font-size="24" fill="#1A1D2E" font-weight="400">Section Heading</text>
-    <text x="380" y="22" font-family="JetBrains Mono, monospace" font-size="9" fill="#9CA3B8" font-weight="400" text-anchor="end">24px / Regular 400</text>
-    <line x1="0" y1="34" x2="460" y2="34" stroke="#E2E4ED" stroke-width="1"/>
+    <rect x="330" y="2" width="60" height="22" rx="6" fill="#3B3F8C" opacity="0.08"/>
+    <text x="360" y="17" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#3B3F8C" font-weight="600">24px</text>
+    <text x="430" y="17" text-anchor="end" font-family="Inter, sans-serif" font-size="9" fill="#9CA3B8">Regular 400</text>
+    <line x1="0" y1="34" x2="440" y2="34" stroke="#E2E4ED" stroke-width="1"/>
   </g>
 
   <!-- 18px Subheading -->
-  <g transform="translate(20, 118)">
+  <g transform="translate(20, 130)">
     <text x="0" y="18" font-family="Inter, sans-serif" font-size="18" fill="#1A1D2E" font-weight="500">Card Subheading</text>
-    <text x="380" y="18" font-family="JetBrains Mono, monospace" font-size="9" fill="#9CA3B8" font-weight="400" text-anchor="end">18px / Medium 500</text>
-    <line x1="0" y1="30" x2="460" y2="30" stroke="#E2E4ED" stroke-width="1"/>
+    <rect x="330" y="0" width="60" height="22" rx="6" fill="#3B3F8C" opacity="0.08"/>
+    <text x="360" y="15" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#3B3F8C" font-weight="600">18px</text>
+    <text x="430" y="15" text-anchor="end" font-family="Inter, sans-serif" font-size="9" fill="#9CA3B8">Medium 500</text>
+    <line x1="0" y1="30" x2="440" y2="30" stroke="#E2E4ED" stroke-width="1"/>
   </g>
 
   <!-- 14px Body -->
-  <g transform="translate(20, 160)">
-    <text x="0" y="14" font-family="Inter, sans-serif" font-size="14" fill="#1A1D2E" font-weight="400">Body text for paragraphs, descriptions, and general content throughout the interface.</text>
-    <text x="380" y="30" font-family="JetBrains Mono, monospace" font-size="9" fill="#9CA3B8" font-weight="400" text-anchor="end">14px / Regular 400</text>
-    <line x1="0" y1="42" x2="460" y2="42" stroke="#E2E4ED" stroke-width="1"/>
+  <g transform="translate(20, 175)">
+    <text x="0" y="14" font-family="Inter, sans-serif" font-size="14" fill="#1A1D2E" font-weight="400">Body text for paragraphs, descriptions, and general content.</text>
+    <rect x="330" y="-4" width="60" height="22" rx="6" fill="#3B3F8C" opacity="0.08"/>
+    <text x="360" y="11" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#3B3F8C" font-weight="600">14px</text>
+    <text x="430" y="11" text-anchor="end" font-family="Inter, sans-serif" font-size="9" fill="#9CA3B8">Regular 400</text>
+    <line x1="0" y1="26" x2="440" y2="26" stroke="#E2E4ED" stroke-width="1"/>
   </g>
 
   <!-- 12px Caption -->
-  <g transform="translate(20, 214)">
-    <text x="0" y="12" font-family="Inter, sans-serif" font-size="12" fill="#6B7085" font-weight="400">Captions, labels, metadata, and small supporting text used for secondary information.</text>
-    <text x="380" y="28" font-family="JetBrains Mono, monospace" font-size="9" fill="#9CA3B8" font-weight="400" text-anchor="end">12px / Regular 400</text>
+  <g transform="translate(20, 215)">
+    <text x="0" y="12" font-family="Inter, sans-serif" font-size="12" fill="#6B7085" font-weight="400">Captions, labels, metadata, and small supporting text.</text>
+    <rect x="330" y="-6" width="60" height="22" rx="6" fill="#3B3F8C" opacity="0.08"/>
+    <text x="360" y="9" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#3B3F8C" font-weight="600">12px</text>
+    <text x="430" y="9" text-anchor="end" font-family="Inter, sans-serif" font-size="9" fill="#9CA3B8">Regular 400</text>
   </g>
 
-  <!-- Size comparison bar on left edge -->
-  <rect x="8" y="20" width="3" height="48" rx="1.5" fill="#3B3F8C" opacity="0.6"/>
-  <rect x="8" y="72" width="3" height="36" rx="1.5" fill="#3B3F8C" opacity="0.45"/>
-  <rect x="8" y="118" width="3" height="28" rx="1.5" fill="#3B3F8C" opacity="0.35"/>
-  <rect x="8" y="160" width="3" height="22" rx="1.5" fill="#3B3F8C" opacity="0.25"/>
-  <rect x="8" y="214" width="3" height="16" rx="1.5" fill="#3B3F8C" opacity="0.15"/>
+  <!-- Bottom note -->
+  <text x="240" y="268" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#9CA3B8">Default body is 14px. Hierarchy is created through weight variation, not size jumps.</text>
 </svg>

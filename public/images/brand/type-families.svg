@@ -1,42 +1,44 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 240" width="480" height="240">
-  <!-- Font Family Showcase -->
-  <rect width="480" height="240" rx="16" fill="#F8F9FC"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 260" width="480" height="260">
+  <rect width="480" height="260" rx="16" fill="#F8F9FC"/>
 
   <!-- Inter -->
-  <g transform="translate(20, 20)">
-    <rect width="440" height="60" rx="10" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
-    <rect x="1" y="1" width="58" height="58" rx="9" fill="#3B3F8C"/>
-    <text x="30" y="28" text-anchor="middle" font-family="Inter, sans-serif" font-size="16" fill="#FFFFFF" font-weight="300">Aa</text>
-    <text x="30" y="46" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#9CA3B8" font-weight="500">300-900</text>
-    <text x="72" y="24" font-family="Inter, sans-serif" font-size="13" fill="#1A1D2E" font-weight="700">Inter</text>
-    <text x="115" y="24" font-family="Inter, sans-serif" font-size="10" fill="#6B7085" font-weight="500">Primary -- All UI text</text>
-    <text x="72" y="44" font-family="Inter, sans-serif" font-size="11" fill="#1A1D2E" font-weight="300">Light </text>
-    <text x="108" y="44" font-family="Inter, sans-serif" font-size="11" fill="#1A1D2E" font-weight="400">Regular </text>
-    <text x="160" y="44" font-family="Inter, sans-serif" font-size="11" fill="#1A1D2E" font-weight="500">Medium </text>
-    <text x="213" y="44" font-family="Inter, sans-serif" font-size="11" fill="#1A1D2E" font-weight="600">Semibold </text>
-    <text x="278" y="44" font-family="Inter, sans-serif" font-size="11" fill="#1A1D2E" font-weight="700">Bold </text>
-    <text x="316" y="44" font-family="Inter, sans-serif" font-size="11" fill="#1A1D2E" font-weight="900">Black</text>
+  <g transform="translate(20, 16)">
+    <rect width="440" height="68" rx="10" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
+    <rect x="1" y="1" width="58" height="66" rx="9" fill="#3B3F8C"/>
+    <text x="30" y="30" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#FFFFFF" font-weight="300">Aa</text>
+    <text x="30" y="48" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#9CA3B8" font-weight="500">300–900</text>
+    <text x="72" y="18" font-family="Inter, sans-serif" font-size="13" fill="#1A1D2E" font-weight="700">Inter</text>
+    <text x="108" y="18" font-family="Inter, sans-serif" font-size="9" fill="#6B7085" font-weight="500">— Primary. All UI text across the platform.</text>
+    <text x="72" y="36" font-family="Inter, sans-serif" font-size="11" fill="#1A1D2E" font-weight="300">Light </text>
+    <text x="108" y="36" font-family="Inter, sans-serif" font-size="11" fill="#1A1D2E" font-weight="400">Regular </text>
+    <text x="160" y="36" font-family="Inter, sans-serif" font-size="11" fill="#1A1D2E" font-weight="500">Medium </text>
+    <text x="213" y="36" font-family="Inter, sans-serif" font-size="11" fill="#1A1D2E" font-weight="600">Semibold </text>
+    <text x="278" y="36" font-family="Inter, sans-serif" font-size="11" fill="#1A1D2E" font-weight="700">Bold </text>
+    <text x="316" y="36" font-family="Inter, sans-serif" font-size="11" fill="#1A1D2E" font-weight="900">Black</text>
+    <text x="72" y="56" font-family="Inter, sans-serif" font-size="9" fill="#9CA3B8">The quick brown fox jumps over the lazy dog — 0123456789</text>
   </g>
 
   <!-- JetBrains Mono -->
-  <g transform="translate(20, 92)">
-    <rect width="440" height="60" rx="10" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
-    <rect x="1" y="1" width="58" height="58" rx="9" fill="#D4A843"/>
-    <text x="30" y="28" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="15" fill="#FFFFFF" font-weight="400">01</text>
-    <text x="30" y="46" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#FFFFFF" font-weight="500" opacity="0.8">400-600</text>
-    <text x="72" y="24" font-family="Inter, sans-serif" font-size="13" fill="#1A1D2E" font-weight="700">JetBrains Mono</text>
-    <text x="185" y="24" font-family="Inter, sans-serif" font-size="10" fill="#6B7085" font-weight="500">Code/Data -- Prices, charts, data</text>
-    <text x="72" y="44" font-family="JetBrains Mono, monospace" font-size="11" fill="#1A1D2E" font-weight="400">&#8361;1,234,567  +2.34%  52,400.00  0xA3F8</text>
+  <g transform="translate(20, 96)">
+    <rect width="440" height="68" rx="10" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
+    <rect x="1" y="1" width="58" height="66" rx="9" fill="#D4A843"/>
+    <text x="30" y="30" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="17" fill="#FFFFFF" font-weight="400">01</text>
+    <text x="30" y="48" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#FFFFFF" font-weight="500" opacity="0.8">400–600</text>
+    <text x="72" y="18" font-family="Inter, sans-serif" font-size="13" fill="#1A1D2E" font-weight="700">JetBrains Mono</text>
+    <text x="185" y="18" font-family="Inter, sans-serif" font-size="9" fill="#6B7085" font-weight="500">— Code/Data. Prices, charts, financial data.</text>
+    <text x="72" y="38" font-family="JetBrains Mono, monospace" font-size="11" fill="#1A1D2E" font-weight="400">&#8361;1,234,567  +2.34%  52,400.00</text>
+    <text x="72" y="56" font-family="JetBrains Mono, monospace" font-size="9" fill="#9CA3B8">Consistent column alignment for financial tables</text>
   </g>
 
   <!-- Noto Sans KR -->
-  <g transform="translate(20, 164)">
-    <rect width="440" height="60" rx="10" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
-    <rect x="1" y="1" width="58" height="58" rx="9" fill="#3AAFA8"/>
-    <text x="30" y="32" text-anchor="middle" font-family="Noto Sans KR, sans-serif" font-size="18" fill="#FFFFFF" font-weight="400">&#xBC14;</text>
-    <text x="30" y="48" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#FFFFFF" font-weight="500" opacity="0.8">400-700</text>
-    <text x="72" y="24" font-family="Inter, sans-serif" font-size="13" fill="#1A1D2E" font-weight="700">Noto Sans KR</text>
-    <text x="170" y="24" font-family="Inter, sans-serif" font-size="10" fill="#6B7085" font-weight="500">Korean -- Korean language text</text>
-    <text x="72" y="44" font-family="Noto Sans KR, sans-serif" font-size="11" fill="#1A1D2E" font-weight="400">&#xBC14;&#xB85C;&#xAC00; &#xBD84;&#xC11D;&#xD55C; &#xC624;&#xB298;&#xC758; &#xC2DC;&#xC7A5; &#xD750;&#xB984;&#xC744; &#xD655;&#xC778;&#xD558;&#xC138;&#xC694;</text>
+  <g transform="translate(20, 176)">
+    <rect width="440" height="68" rx="10" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
+    <rect x="1" y="1" width="58" height="66" rx="9" fill="#3AAFA8"/>
+    <text x="30" y="34" text-anchor="middle" font-family="Noto Sans KR, sans-serif" font-size="20" fill="#FFFFFF" font-weight="400">&#xBC14;</text>
+    <text x="30" y="50" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#FFFFFF" font-weight="500" opacity="0.8">400–700</text>
+    <text x="72" y="18" font-family="Inter, sans-serif" font-size="13" fill="#1A1D2E" font-weight="700">Noto Sans KR</text>
+    <text x="170" y="18" font-family="Inter, sans-serif" font-size="9" fill="#6B7085" font-weight="500">— Korean. Korean language text and labels.</text>
+    <text x="72" y="38" font-family="Noto Sans KR, sans-serif" font-size="11" fill="#1A1D2E" font-weight="400">&#xBC14;&#xB85C;&#xAC00; &#xBD84;&#xC11D;&#xD55C; &#xC624;&#xB298;&#xC758; &#xC2DC;&#xC7A5; &#xD750;&#xB984;&#xC744; &#xD655;&#xC778;&#xD558;&#xC138;&#xC694;</text>
+    <text x="72" y="56" font-family="Inter, sans-serif" font-size="9" fill="#9CA3B8">Aligns with Inter at the same size for mixed-script harmony</text>
   </g>
 </svg>
