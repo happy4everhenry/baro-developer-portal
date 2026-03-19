@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 140" width="480" height="140">
+  <rect width="480" height="140" rx="16" fill="#F8F9FC"/>
+
+  <!-- Purposeful: ease-out curve -->
+  <g transform="translate(16, 14)">
+    <rect width="216" height="112" rx="10" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
+    <rect x="1" y="1" width="214" height="26" rx="9" fill="#3B3F8C"/>
+    <text x="12" y="18" font-family="Inter, sans-serif" font-size="9" fill="#FFFFFF" font-weight="700">Purposeful &amp; Measured</text>
+
+    <!-- Ease-out curve -->
+    <text x="12" y="46" font-family="Inter, sans-serif" font-size="8" fill="#6B7085" font-weight="500">Ease-out curve (200–400ms)</text>
+    <path d="M 16,90 C 40,50 60,56 200,56" fill="none" stroke="#3B3F8C" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="16" cy="90" r="3" fill="#3B3F8C"/>
+    <circle cx="200" cy="56" r="3" fill="#D4A843"/>
+
+    <!-- Axis labels -->
+    <text x="16" y="104" font-family="Inter, sans-serif" font-size="7" fill="#9CA3B8">0ms</text>
+    <text x="190" y="104" font-family="Inter, sans-serif" font-size="7" fill="#9CA3B8">400ms</text>
+    <line x1="16" y1="96" x2="200" y2="96" stroke="#E2E4ED" stroke-width="0.5"/>
+  </g>
+
+  <!-- Don'ts -->
+  <g transform="translate(248, 14)">
+    <rect width="216" height="112" rx="10" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
+    <rect x="1" y="1" width="214" height="26" rx="9" fill="#EF4444"/>
+    <text x="12" y="18" font-family="Inter, sans-serif" font-size="9" fill="#FFFFFF" font-weight="700">Never Do</text>
+
+    <!-- Bounce/chaos pattern -->
+    <polyline points="16,72 30,48 44,72 58,48 72,72 86,48 100,72" fill="none" stroke="#EF4444" stroke-width="1" stroke-linecap="round" opacity="0.4"/>
+    <line x1="30" y1="38" x2="86" y2="38" stroke="#EF4444" stroke-width="1" stroke-linecap="round" opacity="0.2"/>
+    <line x1="30" y1="82" x2="86" y2="82" stroke="#EF4444" stroke-width="1" stroke-linecap="round" opacity="0.2"/>
+
+    <text x="12" y="50" font-family="Inter, sans-serif" font-size="8" fill="#EF4444" font-weight="500">No confetti, bounce, or shake</text>
+    <text x="12" y="68" font-family="Inter, sans-serif" font-size="8" fill="#6B7085">No celebration animations</text>
+    <text x="12" y="82" font-family="Inter, sans-serif" font-size="8" fill="#6B7085">No urgency countdowns</text>
+    <text x="12" y="96" font-family="Inter, sans-serif" font-size="8" fill="#6B7085">No spinning/bouncing loaders</text>
+  </g>
+</svg>
