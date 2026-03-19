@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="320" height="80">
+  <!-- BARO Wordmark with Mark — As seen in splash screen and header -->
+
+  <!-- The Intersection Mark -->
+  <g transform="translate(0,0)">
+    <!-- Secondary gridlines -->
+    <line x1="20" y1="8" x2="20" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="60" y1="8" x2="60" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="8" y1="20" x2="72" y2="20" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="8" y1="60" x2="72" y2="60" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- Primary crosshair -->
+    <line x1="40" y1="8" x2="40" y2="72" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="8" y1="40" x2="72" y2="40" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Gold dot -->
+    <circle cx="40" cy="40" r="8" fill="#D4A843"/>
+  </g>
+
+  <!-- BARO Text -->
+  <text x="96" y="54" font-family="Inter, -apple-system, sans-serif" font-size="42" font-weight="900" letter-spacing="-2" fill="#3B3F8C">BARO</text>
+</svg>

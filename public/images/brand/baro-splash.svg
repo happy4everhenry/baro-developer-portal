@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844">
+  <!-- BARO Splash Screen — Recreated from SplashView.swift -->
+  <defs>
+    <linearGradient id="textGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#3B3F8C"/>
+      <stop offset="100%" stop-color="#6366A8"/>
+    </linearGradient>
+    <linearGradient id="progressGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#3B3F8C"/>
+      <stop offset="100%" stop-color="#D4A843"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Dark background (baroSlate900) -->
+  <rect width="390" height="844" rx="40" fill="#0F1117"/>
+
+  <!-- Centered logo mark (larger for splash) -->
+  <g transform="translate(155, 330)">
+    <!-- Secondary gridlines -->
+    <line x1="20" y1="8" x2="20" y2="72" stroke="#6366A8" stroke-opacity="0.3" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="60" y1="8" x2="60" y2="72" stroke="#6366A8" stroke-opacity="0.3" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="8" y1="20" x2="72" y2="20" stroke="#6366A8" stroke-opacity="0.3" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="8" y1="60" x2="72" y2="60" stroke="#6366A8" stroke-opacity="0.3" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- Primary crosshair -->
+    <line x1="40" y1="8" x2="40" y2="72" stroke="#6366A8" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="8" y1="40" x2="72" y2="40" stroke="#6366A8" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Gold signal dot -->
+    <circle cx="40" cy="40" r="8" fill="#D4A843"/>
+  </g>
+
+  <!-- BARO text with gradient -->
+  <text x="195" y="460" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="36" font-weight="900" letter-spacing="-1.5" fill="url(#textGrad)">BARO</text>
+
+  <!-- Korean tagline -->
+  <text x="195" y="492" text-anchor="middle" font-family="'Noto Sans KR', sans-serif" font-size="14" font-weight="500" fill="#6366A8" opacity="0.7">투자의 새로운 기준</text>
+
+  <!-- Progress bar -->
+  <rect x="145" y="530" width="100" height="3" rx="1.5" fill="#1C1F2E"/>
+  <rect x="145" y="530" width="65" height="3" rx="1.5" fill="url(#progressGrad)"/>
+
+  <!-- Footer copyright -->
+  <text x="195" y="790" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#6366A8" opacity="0.4">© 2026 BARO Securities</text>
+</svg>
