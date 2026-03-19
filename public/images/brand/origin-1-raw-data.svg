@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Step 1: Raw Data — scattered candlesticks and volume bars -->
+  <rect width="200" height="200" rx="16" fill="#F8F9FC"/>
+
+  <!-- Scattered candlesticks (noise) -->
+  <line x1="30" y1="60" x2="30" y2="120" stroke="#9CA3B8" stroke-width="1" stroke-linecap="round"/>
+  <rect x="26" y="75" width="8" height="30" rx="1" fill="#E44332" opacity="0.6"/>
+
+  <line x1="55" y1="50" x2="55" y2="130" stroke="#9CA3B8" stroke-width="1" stroke-linecap="round"/>
+  <rect x="51" y="65" width="8" height="40" rx="1" fill="#3B3F8C" opacity="0.5"/>
+
+  <line x1="80" y1="70" x2="80" y2="140" stroke="#9CA3B8" stroke-width="1" stroke-linecap="round"/>
+  <rect x="76" y="85" width="8" height="35" rx="1" fill="#E44332" opacity="0.5"/>
+
+  <line x1="105" y1="40" x2="105" y2="110" stroke="#9CA3B8" stroke-width="1" stroke-linecap="round"/>
+  <rect x="101" y="55" width="8" height="30" rx="1" fill="#3B3F8C" opacity="0.6"/>
+
+  <line x1="130" y1="80" x2="130" y2="150" stroke="#9CA3B8" stroke-width="1" stroke-linecap="round"/>
+  <rect x="126" y="95" width="8" height="35" rx="1" fill="#E44332" opacity="0.4"/>
+
+  <line x1="155" y1="55" x2="155" y2="125" stroke="#9CA3B8" stroke-width="1" stroke-linecap="round"/>
+  <rect x="151" y="70" width="8" height="30" rx="1" fill="#3B3F8C" opacity="0.5"/>
+
+  <!-- Scattered volume bars at bottom -->
+  <rect x="26" y="158" width="8" height="20" rx="1" fill="#9CA3B8" opacity="0.3"/>
+  <rect x="51" y="150" width="8" height="28" rx="1" fill="#9CA3B8" opacity="0.25"/>
+  <rect x="76" y="155" width="8" height="23" rx="1" fill="#9CA3B8" opacity="0.3"/>
+  <rect x="101" y="148" width="8" height="30" rx="1" fill="#9CA3B8" opacity="0.2"/>
+  <rect x="126" y="160" width="8" height="18" rx="1" fill="#9CA3B8" opacity="0.35"/>
+  <rect x="151" y="152" width="8" height="26" rx="1" fill="#9CA3B8" opacity="0.25"/>
+
+  <!-- Scattered dots (noise) -->
+  <circle cx="45" cy="95" r="2" fill="#9CA3B8" opacity="0.3"/>
+  <circle cx="68" cy="110" r="2" fill="#9CA3B8" opacity="0.2"/>
+  <circle cx="118" cy="75" r="2" fill="#9CA3B8" opacity="0.25"/>
+  <circle cx="142" cy="120" r="2" fill="#9CA3B8" opacity="0.2"/>
+  <circle cx="170" cy="90" r="2" fill="#9CA3B8" opacity="0.3"/>
+</svg>

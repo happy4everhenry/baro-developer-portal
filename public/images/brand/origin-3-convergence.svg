@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Step 3: Convergence — moving averages crossing at the signal point -->
+  <rect width="200" height="200" rx="16" fill="#F8F9FC"/>
+
+  <!-- Short MA crossing down through long MA -->
+  <polyline points="20,130 50,115 80,105 100,95 120,88 150,80 180,70"
+    fill="none" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Long MA crossing up through short MA -->
+  <polyline points="20,70 50,78 80,85 100,95 120,102 150,108 180,118"
+    fill="none" stroke="#D4A843" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Crossover point highlight -->
+  <circle cx="100" cy="95" r="16" fill="none" stroke="#D4A843" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.5"/>
+  <circle cx="100" cy="95" r="5" fill="#D4A843" opacity="0.8"/>
+
+  <!-- Faint grid structure beginning to appear -->
+  <line x1="100" y1="40" x2="100" y2="160" stroke="#3B3F8C" stroke-width="0.8" stroke-linecap="round" opacity="0.12"/>
+  <line x1="40" y1="95" x2="160" y2="95" stroke="#3B3F8C" stroke-width="0.8" stroke-linecap="round" opacity="0.12"/>
+
+  <!-- Signal pulse rings -->
+  <circle cx="100" cy="95" r="24" fill="none" stroke="#D4A843" stroke-width="0.5" opacity="0.2"/>
+  <circle cx="100" cy="95" r="36" fill="none" stroke="#D4A843" stroke-width="0.3" opacity="0.1"/>
+</svg>

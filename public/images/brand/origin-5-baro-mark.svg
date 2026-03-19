@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Step 5: Final BARO Mark — the complete brand identity -->
+  <rect width="200" height="200" rx="16" fill="#F8F9FC"/>
+
+  <!-- Exact reproduction of BAROMarkView at 200px, centered -->
+  <g transform="translate(25, 25) scale(1.875)">
+    <!-- Secondary gridlines (25% opacity) -->
+    <line x1="20" y1="8" x2="20" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="60" y1="8" x2="60" y2="72" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="8" y1="20" x2="72" y2="20" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="8" y1="60" x2="72" y2="60" stroke="#3B3F8C" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round"/>
+
+    <!-- Primary crosshair lines (full opacity) -->
+    <line x1="40" y1="8" x2="40" y2="72" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="8" y1="40" x2="72" y2="40" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
+
+    <!-- Gold signal dot -->
+    <circle cx="40" cy="40" r="8" fill="#D4A843"/>
+  </g>
+</svg>
