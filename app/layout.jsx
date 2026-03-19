@@ -15,18 +15,18 @@ export const metadata = {
 const logo = (
   <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
     <span style={{
-      fontSize: '22px',
-      width: '28px',
-      height: '28px',
+      width: '30px',
+      height: '30px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, #22C55E, #16A34A)',
-      borderRadius: '8px',
+      background: 'linear-gradient(135deg, #10B981, #0D9488)',
+      borderRadius: '9px',
       color: 'white',
       fontWeight: 900,
-      fontSize: '14px',
+      fontSize: '15px',
       letterSpacing: '-0.5px',
+      boxShadow: '0 1px 3px rgba(16, 185, 129, 0.3)',
     }}>
       B
     </span>
@@ -36,12 +36,15 @@ const logo = (
     <span
       style={{
         fontSize: '10px',
-        fontWeight: 700,
-        padding: '2px 8px',
-        background: 'rgba(34, 197, 94, 0.12)',
-        color: '#22C55E',
-        borderRadius: '10px',
-        letterSpacing: '0.5px',
+        fontWeight: 600,
+        padding: '3px 9px',
+        background: 'rgba(16, 185, 129, 0.08)',
+        color: '#10B981',
+        borderRadius: '6px',
+        letterSpacing: '0.8px',
+        border: '1px solid rgba(16, 185, 129, 0.15)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
       }}
     >
       DEV PORTAL
@@ -53,9 +56,14 @@ const navbar = <Navbar logo={logo} />
 
 const footer = (
   <Footer>
-    <span style={{ fontSize: '13px', opacity: 0.7 }}>
-      {new Date().getFullYear()} © BARO — Korea's AI Robo-Advisor
-    </span>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+      <span style={{ fontSize: '13px', opacity: 0.7 }}>
+        © {new Date().getFullYear()} BARO — Korea's AI Robo-Advisor
+      </span>
+      <span style={{ fontSize: '11px', opacity: 0.4 }}>
+        Built for developers, by BARO engineering
+      </span>
+    </div>
   </Footer>
 )
 
@@ -75,6 +83,7 @@ export default async function RootLayout({ children }) {
           navbar={navbar}
           pageMap={await getPageMap()}
           footer={footer}
+          docsRepositoryBase="https://github.com/baro-ai/developer-portal"
           sidebar={{ defaultMenuCollapseLevel: 2 }}
           toc={{ float: true }}
           editLink=""
