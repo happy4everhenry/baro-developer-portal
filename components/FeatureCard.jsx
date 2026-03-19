@@ -1,10 +1,24 @@
+const iconMap = {
+  'check': '✓',
+  'x': '✗',
+  'star': '★',
+  'heart': '♥',
+  'warning': '⚠',
+  'info': 'ℹ',
+  'arrow': '→',
+  'lock': '🔒',
+  'globe': '🌐',
+  'code': '</>',
+}
+
 export function FeatureCard({ icon, title, description, href, tag, color = 'jade' }) {
   const Wrapper = href ? 'a' : 'div'
   const wrapperProps = href ? { href, className: `kl-feature-card kl-feature-card-${color}` } : { className: `kl-feature-card kl-feature-card-${color}` }
+  const resolvedIcon = iconMap[icon] || icon
 
   return (
     <Wrapper {...wrapperProps}>
-      <div className="kl-feature-card-icon">{icon}</div>
+      <div className="kl-feature-card-icon">{resolvedIcon}</div>
       <div className="kl-feature-card-body">
         <div className="kl-feature-card-title">
           {title}

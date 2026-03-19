@@ -1236,6 +1236,13 @@ html[class~='dark'] .kl-compare-after { background: rgba(16,185,129,0.06); }
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 16px;
   margin: 24px 0;
+  align-items: stretch;
+}
+
+.kl-stat-grid > * {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .kl-stat-card {
@@ -1267,22 +1274,17 @@ html[class~='dark'] .kl-compare-after { background: rgba(16,185,129,0.06); }
 .kl-stat-card:hover::after { opacity: 1; }
 
 .kl-stat-value {
-  font-size: 36px;
-  font-weight: 900;
-  letter-spacing: -1.5px;
-  line-height: 1.1;
+  font-size: clamp(18px, 4vw, 32px);
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
   word-break: break-word;
   overflow-wrap: break-word;
-  hyphens: auto;
+  hyphens: none;
   background: linear-gradient(135deg, var(--kl-jade) 0%, #0EA5E9 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-}
-
-/* When stat value contains text (not just numbers), scale down */
-.kl-stat-value {
-  font-size: clamp(20px, 5vw, 36px);
 }
 
 .kl-stat-label {
@@ -1820,26 +1822,72 @@ blockquote p:last-child {
   margin-bottom: 0 !important;
 }
 
-/* --- Code blocks --- */
+/* --- Code blocks (Vercel/GitHub-tier) --- */
 pre {
   border-radius: var(--kl-radius-md) !important;
   margin: 24px 0 !important;
-  font-size: 13px !important;
-  line-height: 1.65 !important;
+  font-size: 13.5px !important;
+  line-height: 1.7 !important;
+  letter-spacing: 0.2px !important;
   box-shadow: var(--kl-shadow-md) !important;
-  border: none !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
   background: var(--kl-code-bg) !important;
+  padding: 20px 24px !important;
 }
+
+/* Boost code text brightness for readability */
+pre code {
+  color: #E2E8F0 !important;
+  text-shadow: 0 0 1px rgba(255,255,255,0.05);
+}
+
+/* Syntax highlighting overrides — boost contrast on all token types */
+pre code .token.comment,
+pre code .token.prolog,
+pre code .token.doctype { color: #7F8EA3 !important; font-style: italic; }
+pre code .token.keyword,
+pre code .token.builtin { color: #C792EA !important; }
+pre code .token.function { color: #82AAFF !important; }
+pre code .token.string,
+pre code .token.attr-value { color: #C3E88D !important; }
+pre code .token.number { color: #F78C6C !important; }
+pre code .token.operator { color: #89DDFF !important; }
+pre code .token.punctuation { color: #A6ACCD !important; }
+pre code .token.property { color: #FFCB6B !important; }
+pre code .token.class-name,
+pre code .token.maybe-class-name { color: #FFCB6B !important; }
+pre code .token.tag { color: #F07178 !important; }
+pre code .token.attr-name { color: #FFCB6B !important; }
+pre code .token.boolean { color: #FF5370 !important; }
+pre code .token.constant { color: #F78C6C !important; }
+pre code .token.parameter { color: #E2E8F0 !important; }
+pre code .token.plain-text { color: #E2E8F0 !important; }
+
+/* Also boost Nextra's built-in shiki/rehype token colors */
+pre code span[style*="color"] {
+  filter: brightness(1.25) !important;
+}
+
+/* Code block scrollbar (Webkit) */
+pre::-webkit-scrollbar { height: 6px; }
+pre::-webkit-scrollbar-track { background: transparent; }
+pre::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+pre::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
 
 /* --- Inline code --- */
 :not(pre) > code {
   background: var(--kl-surface) !important;
-  padding: 2px 8px !important;
-  border-radius: 5px !important;
+  padding: 3px 8px !important;
+  border-radius: 6px !important;
   font-size: 0.88em !important;
-  font-weight: 500 !important;
+  font-weight: 550 !important;
   color: var(--kl-jade) !important;
   border: 1px solid var(--kl-border) !important;
+  transition: background var(--kl-transition), color var(--kl-transition);
+}
+
+:not(pre) > code:hover {
+  background: var(--kl-jade-glow) !important;
 }
 
 /* --- Tables --- */

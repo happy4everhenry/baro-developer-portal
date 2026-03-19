@@ -22,19 +22,27 @@ export function Tooltip({ text, children }) {
   )
 }
 
+function parseInlineMarkdown(text) {
+  if (typeof text !== 'string') return text
+  const parts = text.split(/\*\*(.+?)\*\*/g)
+  return parts.map((part, i) =>
+    i % 2 === 1 ? <strong key={i}>{part}</strong> : part
+  )
+}
+
 export function Compare({ before, after, beforeLabel = 'Before', afterLabel = 'After' }) {
   return (
     <div className="kl-compare">
       <div className="kl-compare-side kl-compare-before">
         <div className="kl-compare-label">{beforeLabel}</div>
-        <div className="kl-compare-content">{before}</div>
+        <div className="kl-compare-content">{parseInlineMarkdown(before)}</div>
       </div>
       <div className="kl-compare-divider">
         <span className="kl-compare-vs">VS</span>
       </div>
       <div className="kl-compare-side kl-compare-after">
         <div className="kl-compare-label">{afterLabel}</div>
-        <div className="kl-compare-content">{after}</div>
+        <div className="kl-compare-content">{parseInlineMarkdown(after)}</div>
       </div>
     </div>
   )
