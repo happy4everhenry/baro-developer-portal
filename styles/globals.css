@@ -986,28 +986,29 @@ html[class~='dark'] .kl-diagram-node-vm { color: var(--kl-amber); }
    14. INFO BOX (Callout)
    ================================================================ */
 .kl-infobox {
-  margin: 24px 0;
+  margin: 28px 0;
   border-radius: var(--kl-radius-md);
   overflow: hidden;
-  border-left: 3px solid var(--kl-border);
+  border-left: 4px solid var(--kl-border);
+  box-shadow: var(--kl-shadow-sm);
 }
 
 .kl-infobox-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 14px 18px 0;
-  font-size: 13px;
+  gap: 10px;
+  padding: 18px 22px 2px;
+  font-size: 14px;
   font-weight: 700;
 }
 
-.kl-infobox-icon { font-size: 16px; }
-.kl-infobox-title { font-size: 13px; font-weight: 700; }
+.kl-infobox-icon { font-size: 20px; }
+.kl-infobox-title { font-size: 14px; font-weight: 700; }
 
 .kl-infobox-body {
-  padding: 10px 18px 14px;
+  padding: 10px 22px 18px;
   font-size: 14px;
-  line-height: 1.7;
+  line-height: 1.75;
   color: var(--kl-text-2);
 }
 
@@ -1266,10 +1267,11 @@ html[class~='dark'] .kl-compare-after { background: rgba(16,185,129,0.06); }
 .kl-stat-card:hover::after { opacity: 1; }
 
 .kl-stat-value {
-  font-size: 40px;
+  font-size: 44px;
   font-weight: 900;
-  letter-spacing: -1.5px;
-  background: linear-gradient(135deg, var(--kl-jade) 0%, var(--kl-blue) 100%);
+  letter-spacing: -2px;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--kl-jade) 0%, #0EA5E9 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1277,9 +1279,11 @@ html[class~='dark'] .kl-compare-after { background: rgba(16,185,129,0.06); }
 
 .kl-stat-label {
   font-size: 13px;
-  color: var(--kl-text-2);
-  margin-top: 8px;
-  font-weight: 500;
+  color: var(--kl-text-3);
+  margin-top: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 /* ================================================================
@@ -1491,24 +1495,25 @@ html[class~='dark'] .kl-flow-node-vm { color: var(--kl-amber); }
    27. PAGE META BANNER
    ================================================================ */
 .kl-page-meta {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
-  margin: 8px 0 32px 0;
-  padding: 10px 16px;
-  background: var(--kl-surface);
-  border-radius: var(--kl-radius-sm);
+  margin: 0 0 28px 0;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
 }
 
 .kl-meta-tag {
   display: inline-flex;
   align-items: center;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 3px 10px;
-  border-radius: var(--kl-radius-pill);
-  letter-spacing: 0.3px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
 }
 
 .kl-meta-live { background: var(--kl-jade-glow); color: var(--kl-jade); }
@@ -1706,39 +1711,101 @@ html[class~='dark'] .kl-screen-subregion-expanded { background: rgba(255,255,255
 .kl-file-link-desc { font-size: 12px; color: var(--kl-text-2); }
 
 /* ================================================================
-   30. GLOBAL ENHANCEMENTS — Nextra Overrides
+   30. GLOBAL ENHANCEMENTS — Nextra Overrides (Premium)
    ================================================================ */
 
-/* Page title spacing */
+/* --- Page Title --- */
 .nextra-content h1:first-child {
+  margin-bottom: 8px !important;
+  font-size: 38px !important;
+  font-weight: 900 !important;
+  letter-spacing: -1.5px !important;
+  line-height: 1.15 !important;
+  color: var(--kl-text) !important;
+}
+
+/* --- Content Headings --- */
+.nextra-content h2 {
+  margin-top: 56px !important;
+  margin-bottom: 16px !important;
+  padding-bottom: 12px !important;
+  border-bottom: 1px solid var(--kl-border) !important;
+  font-size: 28px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.8px !important;
+  color: var(--kl-text) !important;
+}
+
+.nextra-content h3 {
+  margin-top: 40px !important;
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.4px !important;
+  color: var(--kl-text) !important;
+}
+
+.nextra-content h4 {
+  margin-top: 28px !important;
+  font-size: 17px !important;
+  font-weight: 700 !important;
+  color: var(--kl-text) !important;
+}
+
+/* --- Body text: more readable --- */
+.nextra-content p {
+  font-size: 15px !important;
+  line-height: 1.85 !important;
+  color: var(--kl-text-2) !important;
   margin-bottom: 16px !important;
 }
 
-/* Blockquotes */
-blockquote {
-  border-left: 3px solid var(--kl-jade) !important;
-  background: rgba(16,185,129,0.04) !important;
-  padding: 14px 20px !important;
-  border-radius: 0 var(--kl-radius-sm) var(--kl-radius-sm) 0 !important;
-  margin: 24px 0 !important;
+.nextra-content li {
+  font-size: 15px !important;
+  line-height: 1.8 !important;
   color: var(--kl-text-2) !important;
 }
 
-html[class~='dark'] blockquote {
-  background: rgba(16,185,129,0.06) !important;
+/* --- Bold text stands out more --- */
+.nextra-content strong {
+  color: var(--kl-text) !important;
+  font-weight: 700 !important;
 }
 
-/* Code blocks */
+/* --- Blockquotes / Callouts --- */
+blockquote {
+  border-left: 4px solid var(--kl-jade) !important;
+  background: linear-gradient(135deg, rgba(16,185,129,0.05) 0%, rgba(59,130,246,0.02) 100%) !important;
+  padding: 20px 24px !important;
+  border-radius: 0 var(--kl-radius-md) var(--kl-radius-md) 0 !important;
+  margin: 28px 0 !important;
+  color: var(--kl-text-2) !important;
+  box-shadow: var(--kl-shadow-sm) !important;
+}
+
+html[class~='dark'] blockquote {
+  background: linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(59,130,246,0.04) 100%) !important;
+}
+
+blockquote p {
+  margin-bottom: 8px !important;
+}
+
+blockquote p:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* --- Code blocks --- */
 pre {
   border-radius: var(--kl-radius-md) !important;
   margin: 24px 0 !important;
   font-size: 13px !important;
+  line-height: 1.65 !important;
   box-shadow: var(--kl-shadow-md) !important;
   border: none !important;
   background: var(--kl-code-bg) !important;
 }
 
-/* Inline code */
+/* --- Inline code --- */
 :not(pre) > code {
   background: var(--kl-surface) !important;
   padding: 2px 8px !important;
@@ -1749,7 +1816,7 @@ pre {
   border: 1px solid var(--kl-border) !important;
 }
 
-/* Tables */
+/* --- Tables --- */
 table {
   border-radius: var(--kl-radius-md);
   overflow: hidden;
@@ -1776,39 +1843,37 @@ td {
   padding: 12px 16px;
   border-bottom: 1px solid var(--kl-border);
   color: var(--kl-text-2);
+  font-size: 14px;
 }
 
 tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--kl-bg-card-hover); }
 
-tr:hover td {
-  background: var(--kl-bg-card-hover);
-}
-
-/* Section dividers */
+/* --- Section Dividers: gradient fade --- */
 hr {
   border: none;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--kl-border), transparent);
-  margin: 48px 0;
+  background: linear-gradient(90deg, transparent 5%, var(--kl-border) 30%, var(--kl-border) 70%, transparent 95%);
+  margin: 56px 0;
 }
 
-/* Animated link underlines */
+/* --- Links: animated underline --- */
 .nextra-content a:not([class]) {
   color: var(--kl-jade);
   text-decoration: none;
   font-weight: 500;
   background-image: linear-gradient(var(--kl-jade), var(--kl-jade));
-  background-size: 0% 1px;
+  background-size: 0% 1.5px;
   background-position: left bottom;
   background-repeat: no-repeat;
-  transition: background-size var(--kl-transition);
+  transition: background-size 0.25s ease;
 }
 
 .nextra-content a:not([class]):hover {
-  background-size: 100% 1px;
+  background-size: 100% 1.5px;
 }
 
-/* Image styling */
+/* --- Images --- */
 .nextra-content img {
   border-radius: var(--kl-radius-md);
   transition: transform var(--kl-transition), box-shadow var(--kl-transition);
@@ -1820,9 +1885,45 @@ hr {
   box-shadow: var(--kl-shadow-lg);
 }
 
-/* Sidebar active link */
+/* --- Sidebar: Premium Active States --- */
 nav[class*="nextra-sidebar"] a:hover {
   color: var(--kl-jade) !important;
+}
+
+/* Sidebar active item - make it pop */
+nav[class*="nextra-sidebar"] li.active > a,
+nav[class*="nextra-sidebar"] a[data-active="true"] {
+  color: var(--kl-jade) !important;
+  font-weight: 700 !important;
+  background: var(--kl-jade-glow) !important;
+  border-radius: var(--kl-radius-sm) !important;
+}
+
+/* Sidebar section titles */
+nav[class*="nextra-sidebar"] > ul > li > button,
+nav[class*="nextra-sidebar"] > ul > li > a {
+  font-weight: 600 !important;
+  font-size: 14px !important;
+}
+
+/* --- Nextra Breadcrumb: tighter --- */
+nav[class*="nextra-breadcrumb"] {
+  margin-bottom: 8px !important;
+  font-size: 13px !important;
+}
+
+/* --- Lists: better spacing --- */
+.nextra-content ul, .nextra-content ol {
+  margin: 12px 0 16px !important;
+}
+
+.nextra-content li {
+  margin-bottom: 4px !important;
+}
+
+/* --- Nextra overall content area padding --- */
+article.nextra-content {
+  padding-top: 8px !important;
 }
 
 /* ================================================================
