@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
   <rect width="160" height="160" rx="14" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
   <rect x="1" y="1" width="158" height="36" rx="13" fill="#EF4444" opacity="0.1"/>
-  <text x="80" y="25" text-anchor="middle" font-family="Inter, sans-serif" font-size="20" fill="#EF4444" font-weight="700">The Problem</text>
+  <text x="80" y="25" text-anchor="middle" font-family="Inter, sans-serif" font-size="13" fill="#EF4444" font-weight="700">The Problem</text>
   <!-- Chaotic chart -->
   <polyline points="20,80 35,65 50,90 65,55 80,95 95,50 110,85 125,58 140,75" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
-  <text x="80" y="120" text-anchor="middle" font-family="Inter, sans-serif" font-size="20" fill="#6B7085" font-weight="500">Emotion-driven</text>
-  <text x="80" y="135" text-anchor="middle" font-family="Inter, sans-serif" font-size="20" fill="#6B7085" font-weight="500">trading</text>
+  <text x="80" y="120" text-anchor="middle" font-family="Inter, sans-serif" font-size="13" fill="#6B7085" font-weight="500">Emotion-driven</text>
+  <text x="80" y="135" text-anchor="middle" font-family="Inter, sans-serif" font-size="13" fill="#6B7085" font-weight="500">trading</text>
 </svg>

@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
   <rect width="160" height="160" rx="14" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
   <rect x="1" y="1" width="158" height="36" rx="13" fill="#D4A843" opacity="0.15"/>
-  <text x="80" y="25" text-anchor="middle" font-family="Inter, sans-serif" font-size="20" fill="#D4A843" font-weight="700">The Insight</text>
+  <text x="80" y="25" text-anchor="middle" font-family="Inter, sans-serif" font-size="13" fill="#D4A843" font-weight="700">The Insight</text>
   <!-- Golden cross -->
   <line x1="24" y1="95" x2="136" y2="58" stroke="#3B3F8C" stroke-width="2" stroke-linecap="round"/>
   <line x1="24" y1="65" x2="136" y2="82" stroke="#6366A8" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="4 3"/>
   <circle cx="88" cy="72" r="6" fill="#D4A843"/>
-  <text x="80" y="120" text-anchor="middle" font-family="Inter, sans-serif" font-size="20" fill="#6B7085" font-weight="500">정석 Jeongseok:</text>
-  <text x="80" y="135" text-anchor="middle" font-family="Inter, sans-serif" font-size="20" fill="#6B7085" font-weight="500">the proven way</text>
+  <text x="80" y="120" text-anchor="middle" font-family="Inter, sans-serif" font-size="13" fill="#6B7085" font-weight="500">정석 Jeongseok:</text>
+  <text x="80" y="135" text-anchor="middle" font-family="Inter, sans-serif" font-size="13" fill="#6B7085" font-weight="500">the proven way</text>
 </svg>
