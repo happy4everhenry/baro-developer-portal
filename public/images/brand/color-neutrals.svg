@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 180" width="480" height="180">
+  <!-- Neutral Colors (Indigo-Tinted Slate) -->
+  <rect width="480" height="180" rx="16" fill="#F8F9FC"/>
+
+  <!-- Slate 900 -->
+  <g transform="translate(12, 20)">
+    <rect width="72" height="100" rx="10" fill="#0F1018"/>
+    <text x="36" y="128" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#1A1D2E" font-weight="600">Slate 900</text>
+    <text x="36" y="141" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#6B7085" font-weight="500">#0F1018</text>
+    <text x="36" y="153" text-anchor="middle" font-family="Inter, sans-serif" font-size="7" fill="#9CA3B8">Dark canvas</text>
+  </g>
+
+  <!-- Slate 800 -->
+  <g transform="translate(96, 20)">
+    <rect width="72" height="100" rx="10" fill="#1A1D2E"/>
+    <text x="36" y="128" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#1A1D2E" font-weight="600">Slate 800</text>
+    <text x="36" y="141" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#6B7085" font-weight="500">#1A1D2E</text>
+    <text x="36" y="153" text-anchor="middle" font-family="Inter, sans-serif" font-size="7" fill="#9CA3B8">Primary text</text>
+  </g>
+
+  <!-- Slate 500 -->
+  <g transform="translate(180, 20)">
+    <rect width="72" height="100" rx="10" fill="#6B7085"/>
+    <text x="36" y="128" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#1A1D2E" font-weight="600">Slate 500</text>
+    <text x="36" y="141" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#6B7085" font-weight="500">#6B7085</text>
+    <text x="36" y="153" text-anchor="middle" font-family="Inter, sans-serif" font-size="7" fill="#9CA3B8">Secondary text</text>
+  </g>
+
+  <!-- Slate 300 -->
+  <g transform="translate(264, 20)">
+    <rect width="72" height="100" rx="10" fill="#9CA3B8"/>
+    <text x="36" y="128" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#1A1D2E" font-weight="600">Slate 300</text>
+    <text x="36" y="141" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#6B7085" font-weight="500">#9CA3B8</text>
+    <text x="36" y="153" text-anchor="middle" font-family="Inter, sans-serif" font-size="7" fill="#9CA3B8">Tertiary text</text>
+  </g>
+
+  <!-- Slate 200 -->
+  <g transform="translate(348, 20)">
+    <rect width="72" height="100" rx="10" fill="#E2E4ED" stroke="#D0D3DE" stroke-width="1"/>
+    <text x="36" y="128" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#1A1D2E" font-weight="600">Slate 200</text>
+    <text x="36" y="141" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#6B7085" font-weight="500">#E2E4ED</text>
+    <text x="36" y="153" text-anchor="middle" font-family="Inter, sans-serif" font-size="7" fill="#9CA3B8">Borders</text>
+  </g>
+
+  <!-- Slate 50 -->
+  <g transform="translate(432, 20)">
+    <rect width="72" height="100" rx="10" fill="#F8F9FC" stroke="#E2E4ED" stroke-width="1"/>
+    <text x="36" y="128" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#1A1D2E" font-weight="600">Slate 50</text>
+    <text x="36" y="141" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#6B7085" font-weight="500">#F8F9FC</text>
+    <text x="-20" y="153" text-anchor="middle" font-family="Inter, sans-serif" font-size="7" fill="#9CA3B8">Light canvas</text>
+  </g>
+</svg>

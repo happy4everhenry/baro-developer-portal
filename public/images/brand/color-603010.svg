@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 200" width="480" height="200">
+  <!-- 60-30-10 Color Architecture -->
+  <rect width="480" height="200" rx="16" fill="#F8F9FC"/>
+
+  <!-- Stacked horizontal bar -->
+  <!-- 60% Neutrals -->
+  <rect x="20" y="24" width="264" height="56" rx="8" fill="#1A1D2E"/>
+  <text x="152" y="48" text-anchor="middle" font-family="Inter, sans-serif" font-size="13" fill="#FFFFFF" font-weight="700">60%</text>
+  <text x="152" y="64" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#9CA3B8" font-weight="500">Neutrals</text>
+
+  <!-- 30% Primary (Indigo) -->
+  <rect x="288" y="24" width="132" height="56" rx="8" fill="#3B3F8C"/>
+  <text x="354" y="48" text-anchor="middle" font-family="Inter, sans-serif" font-size="13" fill="#FFFFFF" font-weight="700">30%</text>
+  <text x="354" y="64" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#9CA3B8" font-weight="500">Primary</text>
+
+  <!-- 10% Accents (Gold + Teal split) -->
+  <rect x="424" y="24" width="36" height="56" rx="8" fill="#D4A843"/>
+  <text x="442" y="48" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#FFFFFF" font-weight="700">10%</text>
+  <text x="442" y="64" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#FFFFFF" font-weight="500" opacity="0.8">Accent</text>
+
+  <!-- Legend row -->
+  <!-- Neutrals -->
+  <g transform="translate(20, 104)">
+    <rect width="12" height="12" rx="3" fill="#0F1018"/>
+    <rect x="15" width="12" height="12" rx="3" fill="#1A1D2E"/>
+    <rect x="30" width="12" height="12" rx="3" fill="#6B7085"/>
+    <rect x="45" width="12" height="12" rx="3" fill="#9CA3B8"/>
+    <rect x="60" width="12" height="12" rx="3" fill="#E2E4ED" stroke="#D0D3DE" stroke-width="0.5"/>
+    <rect x="75" width="12" height="12" rx="3" fill="#F8F9FC" stroke="#E2E4ED" stroke-width="0.5"/>
+    <text x="0" y="28" font-family="Inter, sans-serif" font-size="10" fill="#1A1D2E" font-weight="600">Neutrals</text>
+    <text x="0" y="40" font-family="Inter, sans-serif" font-size="8" fill="#6B7085">Canvas, text, borders</text>
+  </g>
+
+  <!-- Primary -->
+  <g transform="translate(200, 104)">
+    <rect width="12" height="12" rx="3" fill="#3B3F8C"/>
+    <rect x="15" width="12" height="12" rx="3" fill="#6366A8"/>
+    <text x="0" y="28" font-family="Inter, sans-serif" font-size="10" fill="#1A1D2E" font-weight="600">Primary</text>
+    <text x="0" y="40" font-family="Inter, sans-serif" font-size="8" fill="#6B7085">AI presence, brand, navigation</text>
+  </g>
+
+  <!-- Accents -->
+  <g transform="translate(380, 104)">
+    <rect width="12" height="12" rx="3" fill="#D4A843"/>
+    <rect x="15" width="12" height="12" rx="3" fill="#3AAFA8"/>
+    <text x="0" y="28" font-family="Inter, sans-serif" font-size="10" fill="#1A1D2E" font-weight="600">Accents</text>
+    <text x="0" y="40" font-family="Inter, sans-serif" font-size="8" fill="#6B7085">Signal, data viz</text>
+  </g>
+
+  <!-- Subtle divider -->
+  <line x1="20" y1="92" x2="460" y2="92" stroke="#E2E4ED" stroke-width="1"/>
+
+  <!-- Bottom label -->
+  <text x="240" y="185" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#9CA3B8" font-weight="500">60-30-10 color distribution ensures visual calm and hierarchy</text>
+</svg>
