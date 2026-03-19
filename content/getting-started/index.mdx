@@ -14,40 +14,59 @@ BARO is a **Korean AI robo-advisor** that helps people invest in stocks, ETFs, a
 
 <StatGrid columns={4}>
   <StatCard value="14" label="Screens" />
-  <StatCard value="100%" label="SwiftUI" />
-  <StatCard value="3" label="Asset Types" />
-  <StatCard value="1" label="App, Many Powers" />
+  <StatCard value="25+" label="API Endpoints" />
+  <StatCard value="12" label="AI Agents" />
+  <StatCard value="3" label="Layers" />
 </StatGrid>
 
 ---
 
 ## How the App is Built
 
-Think of BARO like a layered cake. Each layer has a special job:
+Think of BARO like a three-story building. The **iOS app** is the top floor (what you see), the **Python backend** is the middle floor (processes data and talks to stock exchanges), and the **AI platform** is the smart basement (analyzes everything and makes recommendations).
 
-<Diagram title="How BARO Works (Layer Cake!)">
+<Diagram title="How BARO Works (Three-Story Building!)">
   <DiagramRow>
-    <DiagramNode type="view" icon="📱" label="Screen" sublabel="What you see and tap" />
+    <DiagramGroup label="iOS App — The Top Floor" color="jade">
+      <DiagramNode type="view" icon="📱" label="Screens" sublabel="What you see and tap" />
+      <DiagramNode type="vm" icon="🧠" label="ViewModels" sublabel="The brains that think" />
+      <DiagramNode type="repo" icon="📦" label="Repositories" sublabel="The storage rooms" />
+    </DiagramGroup>
   </DiagramRow>
-  <DiagramArrow direction="down" label="talks to" />
+  <DiagramArrow direction="down" label="REST API + WebSocket" />
   <DiagramRow>
-    <DiagramNode type="vm" icon="🧠" label="ViewModel" sublabel="The brain that thinks" />
+    <DiagramGroup label="Python Backend — The Middle Floor" color="blue">
+      <DiagramNode type="service" icon="🐍" label="FastAPI Server" sublabel="25+ endpoints" />
+      <DiagramNode type="service" icon="⚡" label="WebSocket Relay" sublabel="Live price streaming" />
+      <DiagramNode type="service" icon="🔐" label="Auth Service" sublabel="Login, tokens, security" />
+    </DiagramGroup>
   </DiagramRow>
-  <DiagramArrow direction="down" label="asks for data" />
+  <DiagramArrow direction="down" label="fetches real data" />
   <DiagramRow>
-    <DiagramNode type="repo" icon="📦" label="Repository" sublabel="The storage room" />
+    <DiagramGroup label="External Data — The Outside World" color="amber">
+      <DiagramNode type="data" icon="📊" label="KIS API" sublabel="Korean stock exchange" />
+      <DiagramNode type="data" icon="🌐" label="Yahoo Finance" sublabel="Global markets + FX" />
+    </DiagramGroup>
   </DiagramRow>
-  <DiagramArrow direction="down" label="fetches from" />
+</Diagram>
+
+<Diagram title="AI Platform — The Smart Basement (Phase 3)">
   <DiagramRow>
-    <DiagramNode type="service" icon="🌐" label="API" sublabel="The internet connection" />
+    <DiagramGroup label="AI Intelligence Layer" color="purple">
+      <DiagramNode type="vm" icon="🤖" label="12 AI Agents" sublabel="Analysis, signals, chatbot" />
+      <DiagramNode type="service" icon="📡" label="RAG Pipeline" sublabel="Searches documents smartly" />
+      <DiagramNode type="data" icon="🔒" label="Safety Gates" sublabel="4-layer firewall" />
+    </DiagramGroup>
   </DiagramRow>
 </Diagram>
 
 <InfoBox type="info" title="What does each layer do?">
-- **Screen** — The pretty part you see! Buttons, charts, colors.
-- **ViewModel** — The brain. It takes data and decides what to show you.
-- **Repository** — Like a librarian. It knows where to find all the information.
-- **API** — The messenger that talks to servers on the internet to get live prices.
+- **Screens** — The pretty part you see! Buttons, charts, colors. Built with SwiftUI.
+- **ViewModels** — The brain. Takes data and decides what to show you.
+- **Repositories** — Like a librarian. Knows where to find all the information.
+- **FastAPI Backend** — The server that processes requests, handles login, and relays live stock prices from Korean exchanges.
+- **KIS API** — Korea Investment & Securities — the actual stock exchange connection for real-time prices, charts, and order books.
+- **AI Agents** — 12 specialized AI helpers that analyze markets, detect risks, generate reports, and power the chatbot. Currently being built (Phase 3).
 </InfoBox>
 
 ---

@@ -9,8 +9,8 @@
 
 <StatGrid columns={4}>
   <StatCard value="14" label="App Screens" />
-  <StatCard value="52" label="Color Tokens" />
-  <StatCard value="155+" label="Chart Indicators" />
+  <StatCard value="25+" label="API Endpoints" />
+  <StatCard value="12" label="AI Agents" />
   <StatCard value="29" label="Data Models" />
 </StatGrid>
 
@@ -86,25 +86,49 @@
 ## How the App is Built
 
 <InfoBox type="tip" title="Think of it like building blocks!">
-  BARO is built in **layers**, like stacking LEGO blocks. Each layer has a specific job. The screen you see talks to a "brain" (ViewModel), which asks a "helper" (Repository) to get data from the internet (API).
+  BARO is built in **three layers** — a SwiftUI iOS app, a Python FastAPI backend, and an AI platform. Each layer has a specific job, and they all work together to deliver real-time market data with intelligent insights.
 </InfoBox>
 
-<Diagram title="Architecture Overview" caption="Data flows from the server through layers to what you see on screen">
+<Diagram title="Full Architecture Overview" caption="Data flows from external sources through the backend and AI layers to your screen">
   <DiagramRow>
-    <DiagramNode type="view" icon="📱" label="Screen" sublabel="What you see" />
+    <DiagramGroup label="iOS App (SwiftUI)" color="jade">
+      <DiagramNode type="view" icon="📱" label="Screens" sublabel="14 SwiftUI views" />
+      <DiagramNode type="vm" icon="🧠" label="ViewModels" sublabel="Business logic" />
+      <DiagramNode type="repo" icon="📦" label="Repositories" sublabel="Data access" />
+    </DiagramGroup>
   </DiagramRow>
-  <DiagramArrow direction="down" label="updates" />
+  <DiagramArrow direction="down" label="REST + WebSocket" />
   <DiagramRow>
-    <DiagramNode type="vm" icon="🧠" label="ViewModel" sublabel="The brain" />
+    <DiagramGroup label="Backend (Python FastAPI)" color="blue">
+      <DiagramNode type="service" icon="🐍" label="REST API" sublabel="25+ endpoints" />
+      <DiagramNode type="service" icon="⚡" label="WebSocket Relay" sublabel="Live price streaming" />
+      <DiagramNode type="service" icon="🔐" label="Auth Service" sublabel="JWT + Keychain" />
+      <DiagramNode type="data" icon="🗄️" label="SQLite" sublabel="User database" />
+    </DiagramGroup>
   </DiagramRow>
-  <DiagramArrow direction="down" label="asks for data" />
+  <DiagramArrow direction="down" label="KIS API + data feeds" />
   <DiagramRow>
-    <DiagramNode type="repo" icon="📦" label="Repository" sublabel="Data helper" />
+    <DiagramGroup label="External Data Sources" color="amber">
+      <DiagramNode type="data" icon="📊" label="KIS Open API" sublabel="Korean stock data" />
+      <DiagramNode type="data" icon="🌐" label="Yahoo Finance" sublabel="Global indices + FX" />
+    </DiagramGroup>
   </DiagramRow>
-  <DiagramArrow direction="down" label="fetches" />
+</Diagram>
+
+<Diagram title="AI Platform (Phase 3 — In Progress)" caption="Intelligence layer being built on top of the existing architecture">
   <DiagramRow>
-    <DiagramNode type="service" icon="🌐" label="REST API" sublabel="Server" />
-    <DiagramNode type="data" icon="⚡" label="WebSocket" sublabel="Live prices" />
+    <DiagramGroup label="AI Agents" color="purple">
+      <DiagramNode type="vm" icon="🤖" label="12 AI Agents" sublabel="Trade Signal, Risk Guard, Chatbot..." />
+      <DiagramNode type="service" icon="📡" label="RAG Pipeline" sublabel="Semantic search + retrieval" />
+    </DiagramGroup>
+  </DiagramRow>
+  <DiagramArrow direction="down" label="orchestration" />
+  <DiagramRow>
+    <DiagramGroup label="AI Infrastructure" color="purple">
+      <DiagramNode type="data" icon="🧬" label="LangGraph" sublabel="Agent orchestration" />
+      <DiagramNode type="data" icon="📚" label="pgvector" sublabel="Embeddings store" />
+      <DiagramNode type="service" icon="🔒" label="4-Layer Firewall" sublabel="AI safety gates" />
+    </DiagramGroup>
   </DiagramRow>
 </Diagram>
 
@@ -125,10 +149,24 @@
   <Tab label="🖥️ Backend" icon="🖥️">
     | Technology | What it does |
     |---|---|
-    | **Python + FastAPI** | Runs the server that the app talks to |
-    | **WebSocket** | Sends live stock prices instantly |
-    | **KIS API** | Connects to Korea Investment & Securities for real data |
-    | **REST** | Standard request/response API pattern |
+    | **Python + FastAPI** | Async server with 25+ REST endpoints and WebSocket relay |
+    | **KIS Open API** | Korea Investment & Securities — real-time Korean stock data |
+    | **Yahoo Finance** | Global market indices and FX rates |
+    | **SQLite + aiosqlite** | User authentication database (async) |
+    | **PyJWT + bcrypt** | JWT token management and password hashing |
+    | **WebSocket relay** | Translates KIS binary feed into clean JSON for iOS |
+    | **httpx** | Async HTTP client for KIS API calls with rate limiting |
+  </Tab>
+  <Tab label="🤖 AI Platform" icon="🤖">
+    | Technology | What it does |
+    |---|---|
+    | **Claude (Anthropic)** | Primary LLM for analysis, chatbot, and report generation |
+    | **LangGraph** | Orchestrates 12 AI agents with typed state graphs |
+    | **BGE-M3 + pgvector** | Embedding model + vector database for semantic search |
+    | **KoBERT / FinBERT-KO** | Korean financial sentiment analysis |
+    | **6 MCP Servers** | 38 standardized tools for trading, compliance, and retrieval |
+    | **4-Layer Firewall** | Input, output, inter-agent, and training pipeline safety |
+    | **EXAONE 3.5 7.8B** | Local Korean LLM for cost-efficient routing |
   </Tab>
   <Tab label="🏗️ Patterns" icon="🏗️">
     | Pattern | What it means |
@@ -137,6 +175,8 @@
     | **Repository Pattern** | One central place to get data — can switch between fake and real data easily |
     | **Dependency Injection** | Lets you swap parts in and out, like changing batteries |
     | **Protocol-based** | Defines "contracts" so different parts know how to talk to each other |
+    | **CAG + RAG** | Context-augmented and retrieval-augmented generation for AI knowledge |
+    | **Human-in-the-Loop** | AI stages actions, humans confirm — no autonomous money movement |
   </Tab>
 </Tabs>
 

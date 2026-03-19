@@ -2,12 +2,10 @@
 
 <PageMeta status="live" layer="shared" />
 
-BARO uses the **MVVM + Repository** pattern. This page explains what that means, how each layer works, and how they all fit together.
-
-An **AI Platform layer** is currently being built on top of this architecture (Phase 3). It will add intelligent recommendation services, market sentiment analysis, and personalized insights that feed into the existing ViewModel layer via new AI-specific repositories.
+BARO is a **three-layer system**: an iOS app (SwiftUI), a Python backend (FastAPI), and an AI platform (LangGraph + Claude). This page explains how each layer works and how they all fit together.
 
 <InfoBox type="fun" title="Think of it like a restaurant">
-**Views** are the menu (what customers see). **ViewModels** are the waiters (they take orders and deliver food). **Repositories** are the kitchen (they prepare the actual data). **Models** are the recipes (they define the shape of the food).
+**Views** are the menu (what customers see). **ViewModels** are the waiters (they take orders and deliver food). **Repositories** are the kitchen (they prepare the actual data). The **Backend** is the supply chain that delivers fresh ingredients from the market. The **AI Platform** is the Michelin-star consultant analyzing trends and recommending new dishes.
 </InfoBox>
 
 ---
@@ -18,11 +16,11 @@ An **AI Platform layer** is currently being built on top of this architecture (P
 
 ## The Full Architecture
 
-This diagram shows every layer of BARO, from what you see on screen all the way down to the raw data models.
+This diagram shows every layer of BARO — from the iOS screens you see, through the Python backend, down to external data sources and the AI platform.
 
 <Diagram title="BARO Architecture — All Layers">
   <DiagramRow>
-    <DiagramGroup label="Presentation Layer" color="jade">
+    <DiagramGroup label="iOS Presentation Layer" color="jade">
       <DiagramNode type="view" icon="📱" label="HomeView" sublabel="Main screen" />
       <DiagramNode type="view" icon="🔍" label="SearchView" sublabel="Stock search" />
       <DiagramNode type="view" icon="📈" label="StockDetailPageView" sublabel="Detail screen" />
@@ -33,7 +31,7 @@ This diagram shows every layer of BARO, from what you see on screen all the way 
   </DiagramRow>
   <DiagramArrow direction="down" label="@Observable binding" />
   <DiagramRow>
-    <DiagramGroup label="Business Logic Layer" color="blue">
+    <DiagramGroup label="iOS Business Logic" color="blue">
       <DiagramNode type="vm" icon="🧠" label="HomeViewModel" />
       <DiagramNode type="vm" icon="🧠" label="SearchViewModel" />
       <DiagramNode type="vm" icon="🧠" label="StockDetailPageViewModel" />
@@ -42,39 +40,67 @@ This diagram shows every layer of BARO, from what you see on screen all the way 
   </DiagramRow>
   <DiagramArrow direction="down" label="async/await" />
   <DiagramRow>
-    <DiagramGroup label="Data Access Layer" color="purple">
+    <DiagramGroup label="iOS Data Access" color="purple">
       <DiagramNode type="repo" icon="📚" label="MarketRepository" sublabel="Protocol" />
       <DiagramNode type="repo" icon="📚" label="BannerRepository" sublabel="Protocol" />
       <DiagramNode type="repo" icon="📚" label="NewsRepository" sublabel="Protocol" />
       <DiagramNode type="repo" icon="📚" label="EventRepository" sublabel="Protocol" />
     </DiagramGroup>
   </DiagramRow>
-  <DiagramArrow direction="down" label="implementation" />
+  <DiagramArrow direction="down" label="HTTP + WebSocket" />
   <DiagramRow>
-    <DiagramGroup label="Implementations" color="amber">
-      <DiagramNode type="service" icon="🧪" label="MockMarketRepo" sublabel="Fake data" />
-      <DiagramNode type="service" icon="🌐" label="APIMarketRepo" sublabel="Real API" />
-      <DiagramNode type="service" icon="🧪" label="MockBannerRepo" sublabel="Fake data" />
-      <DiagramNode type="service" icon="🧪" label="MockNewsRepo" sublabel="Fake data" />
-      <DiagramNode type="service" icon="🧪" label="MockEventRepo" sublabel="Fake data" />
+    <DiagramGroup label="Python Backend (FastAPI)" color="blue">
+      <DiagramNode type="service" icon="🐍" label="REST Routers" sublabel="auth, market, stock" />
+      <DiagramNode type="service" icon="⚡" label="WebSocket Relay" sublabel="Stream manager" />
+      <DiagramNode type="service" icon="🔐" label="Auth Service" sublabel="JWT + bcrypt" />
+      <DiagramNode type="data" icon="🗄️" label="SQLite" sublabel="User database" />
     </DiagramGroup>
   </DiagramRow>
-  <DiagramArrow direction="down" />
+  <DiagramArrow direction="down" label="KIS OAuth2 + httpx" />
   <DiagramRow>
-    <DiagramGroup label="Real-time Layer" color="blue">
-      <DiagramNode type="service" icon="📱" label="WebSocketManager" sublabel="iOS client" />
-      <DiagramNode type="service" icon="🔄" label="FastAPI WS Relay" sublabel="Backend bridge" />
-      <DiagramNode type="service" icon="📊" label="KIS WebSocket" sublabel="Market feed" />
+    <DiagramGroup label="Backend Services" color="amber">
+      <DiagramNode type="service" icon="🔑" label="KIS Auth" sublabel="OAuth2 tokens" />
+      <DiagramNode type="service" icon="📊" label="KIS Stock Service" sublabel="Quote, chart, orderbook" />
+      <DiagramNode type="service" icon="🌍" label="KIS Market Service" sublabel="Indices + FX rates" />
+      <DiagramNode type="service" icon="📡" label="KIS WebSocket" sublabel="Real-time market feed" />
     </DiagramGroup>
   </DiagramRow>
-  <DiagramArrow direction="down" />
+  <DiagramArrow direction="down" label="external APIs" />
   <DiagramRow>
-    <DiagramGroup label="Domain Layer" color="jade">
-      <DiagramNode type="model" icon="💎" label="Stock" />
-      <DiagramNode type="model" icon="💎" label="MarketIndex" />
-      <DiagramNode type="model" icon="💎" label="StockDetailInfo" />
-      <DiagramNode type="model" icon="💎" label="PriceUpdate" />
-      <DiagramNode type="model" icon="💎" label="ChartSettings" />
+    <DiagramGroup label="External Data Sources" color="amber">
+      <DiagramNode type="data" icon="🇰🇷" label="KIS Open API" sublabel="Korean stock exchange" />
+      <DiagramNode type="data" icon="🌐" label="Yahoo Finance" sublabel="Global indices + FX" />
+    </DiagramGroup>
+  </DiagramRow>
+</Diagram>
+
+<Diagram title="AI Platform Layer (Phase 3 — In Progress)">
+  <DiagramRow>
+    <DiagramGroup label="12 AI Agents (LangGraph Orchestrated)" color="purple">
+      <DiagramNode type="vm" icon="📈" label="Trade Signal" sublabel="Buy/sell/hold" />
+      <DiagramNode type="vm" icon="🛡️" label="Risk Guard" sublabel="AML + fraud" />
+      <DiagramNode type="vm" icon="💬" label="AI Chatbot" sublabel="Korean Q&A" />
+      <DiagramNode type="vm" icon="📰" label="News Sentiment" sublabel="KoBERT + FinBERT" />
+      <DiagramNode type="vm" icon="🔔" label="Smart Notification" sublabel="Relevance scoring" />
+      <DiagramNode type="vm" icon="🏗️" label="Control Tower" sublabel="Watches all agents" />
+    </DiagramGroup>
+  </DiagramRow>
+  <DiagramArrow direction="down" label="tools + retrieval" />
+  <DiagramRow>
+    <DiagramGroup label="AI Infrastructure" color="purple">
+      <DiagramNode type="service" icon="🧬" label="LangGraph" sublabel="State graphs + HITL" />
+      <DiagramNode type="service" icon="📡" label="RAG Pipeline" sublabel="8-stage retrieval" />
+      <DiagramNode type="service" icon="🔧" label="6 MCP Servers" sublabel="38 tools" />
+      <DiagramNode type="service" icon="🔒" label="4-Layer Firewall" sublabel="Input/output/inter-agent" />
+    </DiagramGroup>
+  </DiagramRow>
+  <DiagramArrow direction="down" label="models + storage" />
+  <DiagramRow>
+    <DiagramGroup label="AI Models & Data" color="purple">
+      <DiagramNode type="data" icon="🧠" label="Claude (Anthropic)" sublabel="Primary LLM" />
+      <DiagramNode type="data" icon="🇰🇷" label="EXAONE 3.5" sublabel="Local Korean LLM" />
+      <DiagramNode type="data" icon="📚" label="pgvector" sublabel="Vector embeddings" />
+      <DiagramNode type="data" icon="⏱️" label="TimescaleDB" sublabel="Time-series data" />
     </DiagramGroup>
   </DiagramRow>
 </Diagram>
@@ -178,6 +204,64 @@ Models are like **blueprints**. A `Stock` model says "every stock has a name, a 
 - `StockDetailInfo` — Extended stock information for detail pages
 - `PriceUpdate` — Real-time price tick from WebSocket
 - `ChartSettings` — User's chart configuration (time range, chart type)
+
+</AccordionItem>
+
+<AccordionItem title="Python Backend — The server" icon="🐍" badge="FastAPI">
+
+The backend is a Python FastAPI server that sits between the iOS app and external data sources. It handles authentication, data processing, and real-time streaming.
+
+<InfoBox type="info" title="Analogy">
+The backend is like a **supply chain**. The iOS app orders ingredients (stock data), and the backend sources them from the right supplier (KIS API for Korean stocks, Yahoo Finance for global indices) and delivers them in a clean package (JSON).
+</InfoBox>
+
+**Backend components:**
+- **Routers** — `auth.py`, `market.py`, `stock.py`, `websocket.py` — handle incoming requests
+- **Services** — `kis_auth.py`, `kis_stock_service.py`, `kis_market_service.py` — talk to KIS API
+- **Auth Service** — JWT tokens, password hashing with bcrypt, Apple Sign In verification
+- **Stream Manager** — Reference-counted KIS WebSocket subscriptions with fan-out to iOS clients
+- **Database** — SQLite for user accounts and refresh tokens
+
+**Key numbers:**
+- 25+ REST endpoints across 4 routers
+- 2 WebSocket endpoints (streaming + status)
+- 26 global market indices tracked
+- 21 FX pairs vs KRW
+- Rate limited to 15 concurrent KIS API calls
+
+</AccordionItem>
+
+<AccordionItem title="AI Platform — The intelligent layer" icon="🤖" badge="Phase 3">
+
+The AI Platform is being built on top of the existing architecture. It adds 12 specialized agents that analyze markets, detect risks, and generate insights.
+
+<InfoBox type="info" title="Analogy">
+The AI Platform is like a team of **12 expert consultants**, each with a specialty. One analyzes market trends, another watches for fraud, another writes daily reports. They all work under a Control Tower that makes sure they play nice together.
+</InfoBox>
+
+**7-Layer Technology Stack:**
+1. **Infrastructure** — Vercel, Railway Seoul, Supabase, Redis, Cloudflare
+2. **Models** — Claude (Anthropic), XGBoost, KoBERT, FinBERT-KO, BGE-M3
+3. **Data** — TimescaleDB, pgvector, KIS API, Redis caching
+4. **Orchestration** — LangGraph typed state graphs, BullMQ, Redis Pub/Sub
+5. **Application** — Next.js, React Native, TradingView Charts
+6. **MCP** — 6 MCP Servers with 38 standardized tools
+7. **LangGraph** — Agent orchestration with checkpointing and human-in-the-loop
+
+**12 AI Agents:**
+- Trade Signal, AI Advisor Chatbot, Risk Guard, Market Analysis
+- Portfolio Optimizer, Smart Notification, News Sentiment, Document Analysis
+- CUI Agent (voice), Feature Request, Security Monitor, Control Tower
+
+**Knowledge System (CAG + RAG):**
+- **CAG** — Cached context (regulations, glossary) — 0ms retrieval
+- **RAG** — 8-stage semantic search pipeline — 100ms–2s retrieval
+- **Local LLM** — EXAONE 3.5 7.8B for cost-efficient Korean processing
+
+**Safety:**
+- 4-layer firewall (input, output, inter-agent, training pipeline)
+- Human-in-the-loop on all financial actions
+- 5-pillar governance (alignment, control, visibility, security, compliance)
 
 </AccordionItem>
 </Accordion>
