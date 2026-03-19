@@ -5,32 +5,32 @@
   <!-- Baro Indigo -->
   <g transform="translate(20, 20)">
     <rect width="100" height="100" rx="12" fill="#3B3F8C"/>
-    <text x="50" y="128" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#1A1D2E" font-weight="600">Baro Indigo</text>
-    <text x="50" y="142" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#6B7085" font-weight="500">#3B3F8C</text>
-    <text x="50" y="155" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#9CA3B8">AI presence, brand hero</text>
+    <text x="50" y="128" text-anchor="middle" font-family="Inter, sans-serif" font-size="15" fill="#1A1D2E" font-weight="600">Baro Indigo</text>
+    <text x="50" y="142" text-anchor="middle" font-family="Inter, sans-serif" font-size="19" fill="#6B7085" font-weight="500">#3B3F8C</text>
+    <text x="50" y="155" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#9CA3B8">AI presence, brand hero</text>
   </g>
 
   <!-- Indigo Light -->
   <g transform="translate(135, 20)">
     <rect width="100" height="100" rx="12" fill="#6366A8"/>
-    <text x="50" y="128" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#1A1D2E" font-weight="600">Indigo Light</text>
-    <text x="50" y="142" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#6B7085" font-weight="500">#6366A8</text>
-    <text x="50" y="155" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#9CA3B8">Hover, secondary</text>
+    <text x="50" y="128" text-anchor="middle" font-family="Inter, sans-serif" font-size="15" fill="#1A1D2E" font-weight="600">Indigo Light</text>
+    <text x="50" y="142" text-anchor="middle" font-family="Inter, sans-serif" font-size="19" fill="#6B7085" font-weight="500">#6366A8</text>
+    <text x="50" y="155" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#9CA3B8">Hover, secondary</text>
   </g>
 
   <!-- Baro Gold -->
   <g transform="translate(250, 20)">
     <rect width="100" height="100" rx="12" fill="#D4A843"/>
-    <text x="50" y="128" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#1A1D2E" font-weight="600">Baro Gold</text>
-    <text x="50" y="142" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#6B7085" font-weight="500">#D4A843</text>
-    <text x="50" y="155" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#9CA3B8">Signal, premium</text>
+    <text x="50" y="128" text-anchor="middle" font-family="Inter, sans-serif" font-size="15" fill="#1A1D2E" font-weight="600">Baro Gold</text>
+    <text x="50" y="142" text-anchor="middle" font-family="Inter, sans-serif" font-size="19" fill="#6B7085" font-weight="500">#D4A843</text>
+    <text x="50" y="155" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#9CA3B8">Signal, premium</text>
   </g>
 
   <!-- Baro Teal -->
   <g transform="translate(365, 20)">
     <rect width="100" height="100" rx="12" fill="#3AAFA8"/>
-    <text x="50" y="128" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#1A1D2E" font-weight="600">Baro Teal</text>
-    <text x="50" y="142" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#6B7085" font-weight="500">#3AAFA8</text>
-    <text x="50" y="155" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#9CA3B8">Data viz, AI tech</text>
+    <text x="50" y="128" text-anchor="middle" font-family="Inter, sans-serif" font-size="15" fill="#1A1D2E" font-weight="600">Baro Teal</text>
+    <text x="50" y="142" text-anchor="middle" font-family="Inter, sans-serif" font-size="19" fill="#6B7085" font-weight="500">#3AAFA8</text>
+    <text x="50" y="155" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#9CA3B8">Data viz, AI tech</text>
   </g>
 </svg>

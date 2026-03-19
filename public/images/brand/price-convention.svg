@@ -4,46 +4,46 @@
   <!-- Korean convention -->
   <g transform="translate(16, 14)">
     <rect width="216" height="92" rx="10" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
-    <text x="108" y="18" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#1A1D2E" font-weight="700">Korean Convention (BARO uses this)</text>
+    <text x="108" y="18" text-anchor="middle" font-family="Inter, sans-serif" font-size="19" fill="#1A1D2E" font-weight="700">Korean Convention (BARO uses this)</text>
 
     <!-- Price Up = Red -->
     <g transform="translate(16, 30)">
       <rect width="84" height="48" rx="6" fill="#E04848" opacity="0.08"/>
       <rect x="8" y="8" width="28" height="28" rx="6" fill="#E04848"/>
-      <text x="22" y="27" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" fill="#FFFFFF" font-weight="700">▲</text>
-      <text x="48" y="22" font-family="Inter, sans-serif" font-size="9" fill="#E04848" font-weight="700">Price UP</text>
-      <text x="48" y="34" font-family="Inter, sans-serif" font-size="8" fill="#E04848">Red 빨간색</text>
+      <text x="22" y="27" text-anchor="middle" font-family="Inter, sans-serif" font-size="19" fill="#FFFFFF" font-weight="700">▲</text>
+      <text x="48" y="22" font-family="Inter, sans-serif" font-size="19" fill="#E04848" font-weight="700">Price UP</text>
+      <text x="48" y="34" font-family="Inter, sans-serif" font-size="18" fill="#E04848">Red 빨간색</text>
     </g>
 
     <!-- Price Down = Blue -->
     <g transform="translate(116, 30)">
       <rect width="84" height="48" rx="6" fill="#3478F6" opacity="0.08"/>
       <rect x="8" y="8" width="28" height="28" rx="6" fill="#3478F6"/>
-      <text x="22" y="27" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" fill="#FFFFFF" font-weight="700">▼</text>
-      <text x="48" y="22" font-family="Inter, sans-serif" font-size="9" fill="#3478F6" font-weight="700">Price DOWN</text>
-      <text x="48" y="34" font-family="Inter, sans-serif" font-size="8" fill="#3478F6">Blue 파란색</text>
+      <text x="22" y="27" text-anchor="middle" font-family="Inter, sans-serif" font-size="19" fill="#FFFFFF" font-weight="700">▼</text>
+      <text x="48" y="22" font-family="Inter, sans-serif" font-size="19" fill="#3478F6" font-weight="700">Price DOWN</text>
+      <text x="48" y="34" font-family="Inter, sans-serif" font-size="18" fill="#3478F6">Blue 파란색</text>
     </g>
   </g>
 
   <!-- vs Western (reversed) -->
   <g transform="translate(248, 14)">
     <rect width="216" height="92" rx="10" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1" opacity="0.6"/>
-    <text x="108" y="18" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#9CA3B8" font-weight="700">Western Convention (NOT used)</text>
+    <text x="108" y="18" text-anchor="middle" font-family="Inter, sans-serif" font-size="19" fill="#9CA3B8" font-weight="700">Western Convention (NOT used)</text>
 
     <g transform="translate(16, 30)">
       <rect width="84" height="48" rx="6" fill="#9CA3B8" opacity="0.05"/>
       <rect x="8" y="8" width="28" height="28" rx="6" fill="#9CA3B8" opacity="0.3"/>
-      <text x="22" y="27" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" fill="#FFFFFF" font-weight="700">▲</text>
-      <text x="48" y="22" font-family="Inter, sans-serif" font-size="9" fill="#9CA3B8" font-weight="600">Price UP</text>
-      <text x="48" y="34" font-family="Inter, sans-serif" font-size="8" fill="#9CA3B8">Green</text>
+      <text x="22" y="27" text-anchor="middle" font-family="Inter, sans-serif" font-size="19" fill="#FFFFFF" font-weight="700">▲</text>
+      <text x="48" y="22" font-family="Inter, sans-serif" font-size="19" fill="#9CA3B8" font-weight="600">Price UP</text>
+      <text x="48" y="34" font-family="Inter, sans-serif" font-size="18" fill="#9CA3B8">Green</text>
     </g>
 
     <g transform="translate(116, 30)">
       <rect width="84" height="48" rx="6" fill="#9CA3B8" opacity="0.05"/>
       <rect x="8" y="8" width="28" height="28" rx="6" fill="#9CA3B8" opacity="0.3"/>
-      <text x="22" y="27" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" fill="#FFFFFF" font-weight="700">▼</text>
-      <text x="48" y="22" font-family="Inter, sans-serif" font-size="9" fill="#9CA3B8" font-weight="600">Price DOWN</text>
-      <text x="48" y="34" font-family="Inter, sans-serif" font-size="8" fill="#9CA3B8">Red</text>
+      <text x="22" y="27" text-anchor="middle" font-family="Inter, sans-serif" font-size="19" fill="#FFFFFF" font-weight="700">▼</text>
+      <text x="48" y="22" font-family="Inter, sans-serif" font-size="19" fill="#9CA3B8" font-weight="600">Price DOWN</text>
+      <text x="48" y="34" font-family="Inter, sans-serif" font-size="18" fill="#9CA3B8">Red</text>
     </g>
 
     <!-- X overlay -->

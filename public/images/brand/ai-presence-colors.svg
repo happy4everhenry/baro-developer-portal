@@ -5,19 +5,19 @@
   <g transform="translate(16, 14)">
     <rect width="216" height="72" rx="10" fill="#3B3F8C"/>
     <circle cx="28" cy="36" r="14" fill="#FFFFFF" fill-opacity="0.15"/>
-    <text x="28" y="40" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" fill="#FFFFFF">🎙</text>
-    <text x="52" y="28" font-family="Inter, sans-serif" font-size="11" fill="#FFFFFF" font-weight="700">Indigo #3B3F8C</text>
-    <text x="52" y="42" font-family="Inter, sans-serif" font-size="9" fill="#9CA3B8">AI is speaking</text>
-    <text x="52" y="56" font-family="Inter, sans-serif" font-size="8" fill="#9CA3B8" opacity="0.7">Narration, highlights, guided elements</text>
+    <text x="28" y="40" text-anchor="middle" font-family="Inter, sans-serif" font-size="19" fill="#FFFFFF">🎙</text>
+    <text x="52" y="28" font-family="Inter, sans-serif" font-size="16" fill="#FFFFFF" font-weight="700">Indigo #3B3F8C</text>
+    <text x="52" y="42" font-family="Inter, sans-serif" font-size="19" fill="#9CA3B8">AI is speaking</text>
+    <text x="52" y="56" font-family="Inter, sans-serif" font-size="18" fill="#9CA3B8" opacity="0.7">Narration, highlights, guided elements</text>
   </g>
 
   <!-- Gold = Look here -->
   <g transform="translate(248, 14)">
     <rect width="216" height="72" rx="10" fill="#FFFFFF" stroke="#D4A843" stroke-width="2"/>
     <circle cx="28" cy="36" r="14" fill="#D4A843"/>
-    <text x="28" y="40" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#FFFFFF" font-weight="700">●</text>
-    <text x="52" y="28" font-family="Inter, sans-serif" font-size="11" fill="#D4A843" font-weight="700">Gold #D4A843</text>
-    <text x="52" y="42" font-family="Inter, sans-serif" font-size="9" fill="#1A1D2E">Look here — the signal point</text>
-    <text x="52" y="56" font-family="Inter, sans-serif" font-size="8" fill="#6B7085">Where attention should focus</text>
+    <text x="28" y="40" text-anchor="middle" font-family="Inter, sans-serif" font-size="15" fill="#FFFFFF" font-weight="700">●</text>
+    <text x="52" y="28" font-family="Inter, sans-serif" font-size="16" fill="#D4A843" font-weight="700">Gold #D4A843</text>
+    <text x="52" y="42" font-family="Inter, sans-serif" font-size="19" fill="#1A1D2E">Look here — the signal point</text>
+    <text x="52" y="56" font-family="Inter, sans-serif" font-size="18" fill="#6B7085">Where attention should focus</text>
   </g>
 </svg>

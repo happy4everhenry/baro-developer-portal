@@ -2,23 +2,23 @@
   <rect width="480" height="300" rx="16" fill="#F8F9FC"/>
 
   <!-- Title + stats row -->
-  <text x="20" y="24" font-family="Inter, sans-serif" font-size="11" fill="#1A1D2E" font-weight="700">Clear Space &amp; Minimum Size</text>
+  <text x="20" y="24" font-family="Inter, sans-serif" font-size="16" fill="#1A1D2E" font-weight="700">Clear Space &amp; Minimum Size</text>
 
   <!-- Stats inline -->
   <g transform="translate(20, 36)">
     <rect width="140" height="40" rx="8" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
-    <text x="70" y="18" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" fill="#3B3F8C" font-weight="700">1x</text>
-    <text x="70" y="32" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#6B7085">Clear space on all sides</text>
+    <text x="70" y="18" text-anchor="middle" font-family="Inter, sans-serif" font-size="19" fill="#3B3F8C" font-weight="700">1x</text>
+    <text x="70" y="32" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#6B7085">Clear space on all sides</text>
   </g>
   <g transform="translate(170, 36)">
     <rect width="140" height="40" rx="8" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
-    <text x="70" y="18" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" fill="#3B3F8C" font-weight="700">80px</text>
-    <text x="70" y="32" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#6B7085">Full logo minimum</text>
+    <text x="70" y="18" text-anchor="middle" font-family="Inter, sans-serif" font-size="19" fill="#3B3F8C" font-weight="700">80px</text>
+    <text x="70" y="32" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#6B7085">Full logo minimum</text>
   </g>
   <g transform="translate(320, 36)">
     <rect width="140" height="40" rx="8" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
-    <text x="70" y="18" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" fill="#3B3F8C" font-weight="700">24px</text>
-    <text x="70" y="32" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#6B7085">Icon only minimum</text>
+    <text x="70" y="18" text-anchor="middle" font-family="Inter, sans-serif" font-size="19" fill="#3B3F8C" font-weight="700">24px</text>
+    <text x="70" y="32" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#6B7085">Icon only minimum</text>
   </g>
 
   <!-- Clear space diagram -->
@@ -29,12 +29,12 @@
     <line x1="80" y1="0" x2="80" y2="24" stroke="#D4A843" stroke-width="1"/>
     <line x1="76" y1="0" x2="84" y2="0" stroke="#D4A843" stroke-width="1"/>
     <line x1="76" y1="24" x2="84" y2="24" stroke="#D4A843" stroke-width="1"/>
-    <text x="88" y="16" font-family="Inter, sans-serif" font-size="9" fill="#D4A843" font-weight="600">1x</text>
+    <text x="88" y="16" font-family="Inter, sans-serif" font-size="19" fill="#D4A843" font-weight="600">1x</text>
 
     <line x1="40" y1="60" x2="64" y2="60" stroke="#D4A843" stroke-width="1"/>
     <line x1="40" y1="56" x2="40" y2="64" stroke="#D4A843" stroke-width="1"/>
     <line x1="64" y1="56" x2="64" y2="64" stroke="#D4A843" stroke-width="1"/>
-    <text x="46" y="54" font-family="Inter, sans-serif" font-size="9" fill="#D4A843" font-weight="600">1x</text>
+    <text x="46" y="54" font-family="Inter, sans-serif" font-size="19" fill="#D4A843" font-weight="600">1x</text>
 
     <!-- The BARO mark -->
     <g transform="translate(64, 24) scale(1.4)">
@@ -60,7 +60,7 @@
       <line x1="8" y1="40" x2="72" y2="40" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
       <circle cx="40" cy="40" r="8" fill="#D4A843"/>
     </g>
-    <text x="40" y="90" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#1A1D2E" font-weight="600">80px</text>
+    <text x="40" y="90" text-anchor="middle" font-family="Inter, sans-serif" font-size="19" fill="#1A1D2E" font-weight="600">80px</text>
 
     <!-- 40px -->
     <g transform="translate(90, 20) scale(0.5)">
@@ -72,7 +72,7 @@
       <line x1="8" y1="40" x2="72" y2="40" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
       <circle cx="40" cy="40" r="8" fill="#D4A843"/>
     </g>
-    <text x="110" y="90" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#1A1D2E" font-weight="600">40px</text>
+    <text x="110" y="90" text-anchor="middle" font-family="Inter, sans-serif" font-size="19" fill="#1A1D2E" font-weight="600">40px</text>
 
     <!-- 24px -->
     <g transform="translate(140, 32) scale(0.3)">
@@ -84,6 +84,6 @@
       <line x1="8" y1="40" x2="72" y2="40" stroke="#3B3F8C" stroke-width="2.5" stroke-linecap="round"/>
       <circle cx="40" cy="40" r="8" fill="#D4A843"/>
     </g>
-    <text x="152" y="90" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#1A1D2E" font-weight="600">24px</text>
+    <text x="152" y="90" text-anchor="middle" font-family="Inter, sans-serif" font-size="19" fill="#1A1D2E" font-weight="600">24px</text>
   </g>
 </svg>
