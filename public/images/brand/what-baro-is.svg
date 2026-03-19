@@ -1,9 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 250" width="560" height="250">
-  <rect width="560" height="250" rx="16" fill="#F8F9FC"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 252" width="560" height="252">
+  <rect width="560" height="252" rx="16" fill="#F8F9FC"/>
 
   <!-- WHAT WE ARE -->
   <g transform="translate(14, 14)">
-    <rect width="256" height="312" rx="14" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
+    <rect width="256" height="224" rx="14" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
     <rect x="1" y="1" width="254" height="42" rx="13" fill="#3B3F8C"/>
     <circle cx="26" cy="22" r="11" fill="#FFFFFF" fill-opacity="0.2"/>
     <polyline points="21,22 24,25 31,18" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -41,7 +41,7 @@
 
   <!-- WHAT WE ARE NOT -->
   <g transform="translate(290, 14)">
-    <rect width="256" height="312" rx="14" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
+    <rect width="256" height="224" rx="14" fill="#FFFFFF" stroke="#E2E4ED" stroke-width="1"/>
     <rect x="1" y="1" width="254" height="42" rx="13" fill="#EF4444" opacity="0.9"/>
     <circle cx="26" cy="22" r="11" fill="#FFFFFF" fill-opacity="0.2"/>
     <line x1="21" y1="17" x2="31" y2="27" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
