@@ -12,8 +12,8 @@
   <g transform="translate(20, 20)">
     <text x="0" y="28" font-family="Inter, sans-serif" font-size="32" fill="#1A1D2E" font-weight="300">Display Heading</text>
     <rect x="330" y="6" width="60" height="22" rx="6" fill="#3B3F8C" opacity="0.08"/>
-    <text x="360" y="21" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#3B3F8C" font-weight="600">32px</text>
-    <text x="430" y="21" text-anchor="end" font-family="Inter, sans-serif" font-size="9" fill="#9CA3B8">Light 300</text>
+    <text x="360" y="21" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" fill="#3B3F8C" font-weight="600">32px</text>
+    <text x="430" y="21" text-anchor="end" font-family="Inter, sans-serif" font-size="14" fill="#9CA3B8">Light 300</text>
     <line x1="0" y1="40" x2="440" y2="40" stroke="#E2E4ED" stroke-width="1"/>
   </g>
 
@@ -21,8 +21,8 @@
   <g transform="translate(20, 80)">
     <text x="0" y="22" font-family="Inter, sans-serif" font-size="24" fill="#1A1D2E" font-weight="400">Section Heading</text>
     <rect x="330" y="2" width="60" height="22" rx="6" fill="#3B3F8C" opacity="0.08"/>
-    <text x="360" y="17" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#3B3F8C" font-weight="600">24px</text>
-    <text x="430" y="17" text-anchor="end" font-family="Inter, sans-serif" font-size="9" fill="#9CA3B8">Regular 400</text>
+    <text x="360" y="17" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" fill="#3B3F8C" font-weight="600">24px</text>
+    <text x="430" y="17" text-anchor="end" font-family="Inter, sans-serif" font-size="14" fill="#9CA3B8">Regular 400</text>
     <line x1="0" y1="34" x2="440" y2="34" stroke="#E2E4ED" stroke-width="1"/>
   </g>
 
@@ -30,8 +30,8 @@
   <g transform="translate(20, 130)">
     <text x="0" y="18" font-family="Inter, sans-serif" font-size="18" fill="#1A1D2E" font-weight="500">Card Subheading</text>
     <rect x="330" y="0" width="60" height="22" rx="6" fill="#3B3F8C" opacity="0.08"/>
-    <text x="360" y="15" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#3B3F8C" font-weight="600">18px</text>
-    <text x="430" y="15" text-anchor="end" font-family="Inter, sans-serif" font-size="9" fill="#9CA3B8">Medium 500</text>
+    <text x="360" y="15" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" fill="#3B3F8C" font-weight="600">18px</text>
+    <text x="430" y="15" text-anchor="end" font-family="Inter, sans-serif" font-size="14" fill="#9CA3B8">Medium 500</text>
     <line x1="0" y1="30" x2="440" y2="30" stroke="#E2E4ED" stroke-width="1"/>
   </g>
 
@@ -39,8 +39,8 @@
   <g transform="translate(20, 175)">
     <text x="0" y="14" font-family="Inter, sans-serif" font-size="14" fill="#1A1D2E" font-weight="400">Body text for paragraphs, descriptions, and general content.</text>
     <rect x="330" y="-4" width="60" height="22" rx="6" fill="#3B3F8C" opacity="0.08"/>
-    <text x="360" y="11" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#3B3F8C" font-weight="600">14px</text>
-    <text x="430" y="11" text-anchor="end" font-family="Inter, sans-serif" font-size="9" fill="#9CA3B8">Regular 400</text>
+    <text x="360" y="11" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" fill="#3B3F8C" font-weight="600">14px</text>
+    <text x="430" y="11" text-anchor="end" font-family="Inter, sans-serif" font-size="14" fill="#9CA3B8">Regular 400</text>
     <line x1="0" y1="26" x2="440" y2="26" stroke="#E2E4ED" stroke-width="1"/>
   </g>
 
@@ -48,10 +48,10 @@
   <g transform="translate(20, 215)">
     <text x="0" y="12" font-family="Inter, sans-serif" font-size="12" fill="#6B7085" font-weight="400">Captions, labels, metadata, and small supporting text.</text>
     <rect x="330" y="-6" width="60" height="22" rx="6" fill="#3B3F8C" opacity="0.08"/>
-    <text x="360" y="9" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#3B3F8C" font-weight="600">12px</text>
-    <text x="430" y="9" text-anchor="end" font-family="Inter, sans-serif" font-size="9" fill="#9CA3B8">Regular 400</text>
+    <text x="360" y="9" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" fill="#3B3F8C" font-weight="600">12px</text>
+    <text x="430" y="9" text-anchor="end" font-family="Inter, sans-serif" font-size="14" fill="#9CA3B8">Regular 400</text>
   </g>
 
   <!-- Bottom note -->
-  <text x="240" y="268" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#9CA3B8">Default body is 14px. Hierarchy is created through weight variation, not size jumps.</text>
+  <text x="240" y="268" text-anchor="middle" font-family="Inter, sans-serif" font-size="13" fill="#9CA3B8">Default body is 14px. Hierarchy is created through weight variation, not size jumps.</text>
 </svg>
