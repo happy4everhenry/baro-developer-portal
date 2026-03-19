@@ -1,14 +1,28 @@
 const iconMap = {
-  'check': '✓',
-  'x': '✗',
-  'star': '★',
-  'heart': '♥',
-  'warning': '⚠',
-  'info': 'ℹ',
-  'arrow': '→',
-  'lock': '🔒',
-  'globe': '🌐',
-  'code': '</>',
+  // Common actions
+  'check': '✓', 'x': '✗', 'plus': '＋', 'minus': '−',
+  'arrow': '→', 'download': '⬇️', 'upload': '⬆️', 'refresh': '🔄',
+  // Objects
+  'book': '📖', 'user': '👤', 'star': '★', 'heart': '♥',
+  'warning': '⚠️', 'info': 'ℹ️', 'lock': '🔒', 'key': '🔑',
+  'globe': '🌐', 'code': '💻', 'shield': '🛡️', 'eye': '👁️',
+  'brain': '🧠', 'target': '🎯', 'light': '💡', 'fire': '🔥',
+  'link': '🔗', 'search': '🔍', 'phone': '📱', 'mail': '✉️',
+  'bell': '🔔', 'paint': '🎨', 'tool': '🔧', 'cloud': '☁️',
+  'money': '💰', 'clock': '⏱️', 'flag': '🏁', 'pen': '✏️',
+  'folder': '📁', 'layers': '📚', 'zap': '⚡', 'rocket': '🚀',
+  'chart': '📊', 'database': '🗄️', 'settings': '⚙️',
+  // Lucide/Feather icon names → emoji
+  'alert-circle': '⚠️', 'bar-chart': '📊', 'pie-chart': '📊',
+  'trending-up': '📈', 'dollar-sign': '💲', 'building': '🏢',
+  'layout': '📐', 'list': '📋', 'type': '🔤', 'heading': '📝',
+  'monitor': '🖥️', 'smartphone': '📱', 'image': '🖼️',
+  'file-text': '📄', 'map': '🗺️', 'hash': '#️⃣',
+  'align-left': '📝', 'crosshair': '🎯', 'award': '🏆',
+  'mic': '🎙️', 'minimize': '⊡', 'minus-circle': '⊖',
+  'moon': '🌙', 'sun': '☀️', 'palette': '🎨', 'pen-tool': '✏️',
+  'ruler': '📏', 'share-2': '🔗', 'square': '⬜', 'circle': '⭕',
+  'tag': '🏷️',
 }
 
 export function FeatureCard({ icon, title, description, href, tag, color = 'jade' }) {
