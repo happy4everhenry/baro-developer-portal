@@ -1233,7 +1233,7 @@ html[class~='dark'] .kl-compare-after { background: rgba(16,185,129,0.06); }
    ================================================================ */
 .kl-stat-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 16px;
   margin: 24px 0;
 }
@@ -1267,23 +1267,32 @@ html[class~='dark'] .kl-compare-after { background: rgba(16,185,129,0.06); }
 .kl-stat-card:hover::after { opacity: 1; }
 
 .kl-stat-value {
-  font-size: 44px;
+  font-size: 36px;
   font-weight: 900;
-  letter-spacing: -2px;
-  line-height: 1;
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
   background: linear-gradient(135deg, var(--kl-jade) 0%, #0EA5E9 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
+/* When stat value contains text (not just numbers), scale down */
+.kl-stat-value {
+  font-size: clamp(20px, 5vw, 36px);
+}
+
 .kl-stat-label {
-  font-size: 13px;
+  font-size: 11px;
   color: var(--kl-text-3);
-  margin-top: 10px;
+  margin-top: 8px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
+  line-height: 1.3;
 }
 
 /* ================================================================
@@ -1420,9 +1429,14 @@ html[class~='dark'] .kl-flow-node-vm { color: var(--kl-amber); }
    23. KOREAN LABEL
    ================================================================ */
 .kl-kr-label {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--kl-text-3);
-  font-weight: 400;
+  font-weight: 500;
+  font-family: 'Noto Sans KR', sans-serif;
+  display: inline-block;
+  margin-left: 8px;
+  vertical-align: baseline;
+  opacity: 0.5;
 }
 
 /* ================================================================
@@ -1729,12 +1743,23 @@ html[class~='dark'] .kl-screen-subregion-expanded { background: rgba(255,255,255
 .nextra-content h2 {
   margin-top: 56px !important;
   margin-bottom: 16px !important;
-  padding-bottom: 12px !important;
-  border-bottom: 1px solid var(--kl-border) !important;
+  padding-bottom: 0 !important;
+  border-bottom: none !important;
   font-size: 28px !important;
   font-weight: 800 !important;
   letter-spacing: -0.8px !important;
   color: var(--kl-text) !important;
+}
+
+/* Only show separator when h2 follows content (not after HR) */
+.nextra-content h2::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--kl-jade), transparent);
+  border-radius: 2px;
+  margin-top: 10px;
 }
 
 .nextra-content h3 {
@@ -1956,7 +1981,7 @@ article.nextra-content {
 
   /* Stats */
   .kl-stat-grid { grid-template-columns: repeat(2, 1fr); }
-  .kl-stat-value { font-size: 32px; }
+  .kl-stat-value { font-size: clamp(18px, 4.5vw, 32px); }
 
   /* Tabs */
   .kl-tabs-content { padding: 22px 20px; }
@@ -2011,7 +2036,7 @@ article.nextra-content {
   /* Stats */
   .kl-stat-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
   .kl-stat-card { padding: 18px; }
-  .kl-stat-value { font-size: 28px; }
+  .kl-stat-value { font-size: clamp(16px, 4vw, 28px); }
   .kl-stat-label { font-size: 11px; }
 
   /* Feature cards */
@@ -2117,34 +2142,13 @@ article.nextra-content {
   .kl-file-link { font-size: 12px; padding: 4px 10px; }
   .kl-file-link code { font-size: 11px; }
 
-  /* ====================================================================
-     CRITICAL: Force horizontal safe zone on ALL content areas.
-     Nextra 4.x uses various wrapper elements — target all possible ones.
-     Apple HIG: 16px min. Stripe: 24px. We use 20px.
-     ==================================================================== */
-  .nextra-content,
-  article,
-  [class*="nextra"] article,
-  main article,
-  main > div > div > article,
-  main > div > article {
-    padding-left: 20px !important;
-    padding-right: 20px !important;
-  }
-
-  /* Also target the main content wrapper directly */
-  main > div {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-  }
-
   /* Nextra heading overrides — mobile proportional scale */
   h1 { font-size: 28px !important; letter-spacing: -0.8px !important; }
   h2 { font-size: 22px !important; margin-top: 40px !important; padding-bottom: 10px !important; }
   h3 { font-size: 18px !important; margin-top: 28px !important; }
   h4 { font-size: 16px !important; margin-top: 20px !important; }
-  .nextra-content p, article p, main p { font-size: 15px !important; line-height: 1.75 !important; }
-  .nextra-content li, article li, main li { font-size: 15px !important; line-height: 1.75 !important; }
+  article p { font-size: 15px !important; line-height: 1.75 !important; }
+  article li { font-size: 15px !important; line-height: 1.75 !important; }
 
   /* Page meta: inline row, compact */
   .kl-page-meta { margin: 0 0 16px 0 !important; }
@@ -2188,7 +2192,7 @@ article.nextra-content {
   /* Stats */
   .kl-stat-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
   .kl-stat-card { padding: 14px; }
-  .kl-stat-value { font-size: 24px; }
+  .kl-stat-value { font-size: clamp(14px, 3.5vw, 24px); }
   .kl-stat-label { font-size: 10px; margin-top: 4px; }
 
   /* Feature */
@@ -2282,27 +2286,11 @@ article.nextra-content {
   /* Progress */
   .kl-progress-track { height: 5px; }
 
-  /* Force 16px safe zone (Apple HIG absolute minimum) */
-  .nextra-content,
-  article,
-  [class*="nextra"] article,
-  main article,
-  main > div > div > article,
-  main > div > article {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-  }
-
-  main > div {
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-  }
-
   /* Headings — small phone */
   h1 { font-size: 24px !important; letter-spacing: -0.5px !important; }
   h2 { font-size: 20px !important; margin-top: 32px !important; }
   h3 { font-size: 17px !important; margin-top: 24px !important; }
-  p, li { font-size: 14px !important; line-height: 1.7 !important; }
+  article p, article li { font-size: 14px !important; line-height: 1.7 !important; }
 
   /* Page meta even more compact */
   .kl-page-meta { margin: 0 0 12px 0 !important; gap: 4px !important; }
@@ -2359,81 +2347,47 @@ article.nextra-content {
 }
 
 /* ================================================================
-   36. MOBILE CONTENT SAFE ZONE — Nuclear Override
-   Nextra 4.x wraps content in deeply nested divs that resist
-   class-based selectors. This targets the DOM structure directly.
+   36. NEXTRA 4.x STRUCTURE-AWARE OVERRIDES
+   Nextra uses: article.x\:px-4.x\:md\:px-12 (16px mobile, 48px desktop)
+   We enhance this — increase mobile to 20px, add max-width containment.
+   CRITICAL: Do NOT set article padding to 0 — that removes Nextra's built-in safe zone.
    ================================================================ */
 @media (max-width: 768px) {
-  /* Target Nextra's main content area via structure */
-  body > div > div > main,
-  body main,
-  [class*="Layout"] main {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
-
-  /* The actual article/content wrapper — force padding */
-  body main article,
-  body main > div,
-  body main > div > div,
-  body main > div > div > article {
+  /* Increase Nextra's default 16px (px-4) to 20px on mobile */
+  article[class*="x:px"] {
     padding-left: 20px !important;
     padding-right: 20px !important;
-    box-sizing: border-box !important;
+  }
+
+  /* Contain overflow */
+  article {
     max-width: 100vw !important;
     overflow-x: hidden !important;
+    box-sizing: border-box !important;
   }
 
-  /* Nextra's own nav (breadcrumb, TOC toggle) */
-  body main nav,
-  body main > nav {
-    padding-left: 20px !important;
-    padding-right: 20px !important;
-  }
-
-  /* Ensure all direct children of the content area respect boundaries */
-  body main article > *,
-  body main > div > div > article > * {
+  /* All direct children must respect boundaries */
+  article > * {
     max-width: 100% !important;
     box-sizing: border-box !important;
   }
 
-  /* Tables need special handling — allow scroll but contain width */
-  body main article table,
-  body main article pre {
+  /* Tables and code blocks: contained scroll */
+  article table,
+  article pre {
     max-width: calc(100vw - 40px) !important;
-  }
-
-  /* Stat grid: ensure it doesn't overflow */
-  .kl-stat-grid {
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Quick nav: ensure it doesn't overflow */
-  .kl-quick-nav {
-    max-width: 100% !important;
-    box-sizing: border-box !important;
   }
 }
 
 @media (max-width: 480px) {
-  body main article,
-  body main > div,
-  body main > div > div,
-  body main > div > div > article {
+  /* On very small phones, Nextra's 16px is fine — keep it */
+  article[class*="x:px"] {
     padding-left: 16px !important;
     padding-right: 16px !important;
   }
 
-  body main nav,
-  body main > nav {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-  }
-
-  body main article table,
-  body main article pre {
+  article table,
+  article pre {
     max-width: calc(100vw - 32px) !important;
   }
 }
