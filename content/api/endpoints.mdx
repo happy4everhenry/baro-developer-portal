@@ -757,6 +757,301 @@ curl "http://localhost:8000/api/stocks/005930/orderbook?exchange=kospi&venue=krx
 </ApiEndpoint>
 
 </Tab>
+<Tab label="News" icon="📰">
+
+## News Endpoints
+
+News articles, analyst reports, and DART disclosures. Supports filtering by region, category, and content type. Prefix: `/api/news`
+
+<ApiEndpoint method="GET" path="/api/news" description="List news articles with filters">
+
+Fetch paginated news articles. Supports filtering by region, category, and content type.
+
+**Parameters**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `region` | `string` | Optional | `all`, `domestic`, `overseas`. Default: all |
+| `category` | `string` | Optional | `all`, `market`, `stocks`, `themes`, `economy`, `international` |
+| `content_type` | `string` | Optional | `all`, `news`, `report`, `disclosure` |
+| `offset` | `integer` | Optional | Number of items to skip. Default: `0` |
+| `limit` | `integer` | Optional | Max items to return (1--100). Default: `20` |
+
+**Request**
+
+```bash
+# Latest news
+curl https://baro-backend-production.up.railway.app/api/news
+
+# Domestic analyst reports only
+curl "https://baro-backend-production.up.railway.app/api/news?region=domestic&content_type=report"
+```
+
+**Response -- 200 OK**
+
+```json
+{
+  "items": [
+    {
+      "id": "news-1",
+      "title": "코스피, 외국인 매수세에 2,700선 돌파",
+      "source": "한국경제",
+      "time_ago": "10분 전",
+      "region": "domestic",
+      "category": "market",
+      "content_type": "news",
+      "tags": ["코스피", "외국인", "매수"],
+      "gradient_colors": ["#1A5276", "#2E86C1"],
+      "related_stock_codes": ["005930", "000660"],
+      "broker": null,
+      "ai_summary": "외국인 투자자들의 적극적인 매수세로..."
+    }
+  ],
+  "total": 36,
+  "offset": 0,
+  "limit": 20
+}
+```
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/news/stock/{stock_code}" description="News for a specific stock">
+
+Fetch news articles related to a specific stock code.
+
+**Path Parameters**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `stock_code` | `string` | Required | Stock code (e.g. `"005930"`) |
+
+**Request**
+
+```bash
+curl https://baro-backend-production.up.railway.app/api/news/stock/005930
+```
+
+**Response -- 200 OK**
+
+Same format as `/api/news`, filtered to articles with matching `related_stock_codes`.
+
+</ApiEndpoint>
+
+</Tab>
+<Tab label="Events" icon="🎉">
+
+## Event Endpoints
+
+Promotions, competitions, and reward programs. Prefix: `/api/events`
+
+<ApiEndpoint method="GET" path="/api/events" description="List events with filters">
+
+Fetch paginated events with optional category and status filters.
+
+**Parameters**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `category` | `string` | Optional | `trading`, `education`, `competition`, `reward` |
+| `status` | `string` | Optional | `upcoming`, `active`, `ended` |
+| `offset` | `integer` | Optional | Default: `0` |
+| `limit` | `integer` | Optional | Default: `20` |
+
+**Request**
+
+```bash
+# All active events
+curl "https://baro-backend-production.up.railway.app/api/events?status=active"
+```
+
+**Response -- 200 OK**
+
+```json
+{
+  "items": [
+    {
+      "id": "event-1",
+      "title": "여름맞이 거래 수수료 무료 이벤트",
+      "subtitle": "국내주식 거래 수수료 0원",
+      "description": "여름을 맞아 모든 국내주식...",
+      "icon": "🏖️",
+      "gradient_colors": ["#0077B6", "#023E8A"],
+      "category": "trading",
+      "status": "active",
+      "start_date": "2025-06-01",
+      "end_date": "2025-08-31",
+      "participants": 15234,
+      "reward": "거래 수수료 전액 무료",
+      "conditions": ["신규 및 기존 고객 모두 참여 가능"],
+      "details": "별도의 신청 없이...",
+      "related_stock_codes": [],
+      "banner_image_name": null
+    }
+  ],
+  "total": 4,
+  "offset": 0,
+  "limit": 20
+}
+```
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/events/{event_id}" description="Get a single event by ID">
+
+**Request**
+
+```bash
+curl https://baro-backend-production.up.railway.app/api/events/event-1
+```
+
+**Response -- 200 OK**
+
+Returns a single `EventItemResponse` object.
+
+**Error -- 404 Not Found**
+
+```json
+{ "detail": "이벤트를 찾을 수 없습니다" }
+```
+
+</ApiEndpoint>
+
+</Tab>
+<Tab label="Banners & Themes" icon="🎨">
+
+## Banner Endpoints
+
+Home screen promotional carousel banners. Prefix: `/api/banners`
+
+<ApiEndpoint method="GET" path="/api/banners" description="List all active banners">
+
+Returns all banners for the home screen carousel.
+
+**Request**
+
+```bash
+curl https://baro-backend-production.up.railway.app/api/banners
+```
+
+**Response -- 200 OK**
+
+```json
+[
+  {
+    "id": "banner-1",
+    "title": "여름맞이 수수료 무료",
+    "subtitle": "국내주식 거래 수수료 0원",
+    "icon": "☀️",
+    "gradient_colors": ["#0077B6", "#023E8A"],
+    "event_id": "event-1"
+  }
+]
+```
+
+</ApiEndpoint>
+
+## Theme Endpoints
+
+Market sector/trend themes for the bubble chart. Prefix: `/api/themes`
+
+<ApiEndpoint method="GET" path="/api/themes" description="List all market themes">
+
+Returns all market themes for the bubble chart visualization.
+
+**Request**
+
+```bash
+curl https://baro-backend-production.up.railway.app/api/themes
+```
+
+**Response -- 200 OK**
+
+```json
+[
+  {
+    "id": "theme-1",
+    "name": "AI/반도체",
+    "change_percent": 3.24,
+    "description": "AI 가속기 및 메모리 반도체",
+    "weight": 1.0,
+    "sentiment": "positive",
+    "category": "sector"
+  }
+]
+```
+
+</ApiEndpoint>
+
+</Tab>
+<Tab label="Favorites" icon="⭐">
+
+## Favorites Endpoints
+
+Per-user favorite stocks, themes, and bookmarked articles. All endpoints require JWT authentication. Prefix: `/api/favorites`
+
+<InfoBox type="info" title="Authentication required">
+All favorites endpoints require a valid `Authorization: Bearer {access_token}` header. Favorites are stored per-user in SQLite.
+</InfoBox>
+
+<ApiEndpoint method="GET" path="/api/favorites/stocks" description="List favorited stock IDs">
+
+**Request**
+
+```bash
+curl -H "Authorization: Bearer eyJ..." https://baro-backend-production.up.railway.app/api/favorites/stocks
+```
+
+**Response -- 200 OK**
+
+```json
+{ "items": ["005930", "000660", "AAPL"] }
+```
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/favorites/stocks" description="Toggle a stock favorite">
+
+Adds the stock to favorites if not already there; removes it if it is (toggle behavior).
+
+**Request Body**
+
+```json
+{ "item_id": "005930" }
+```
+
+**Response -- 200 OK**
+
+```json
+{ "item_id": "005930", "is_favorite": true }
+```
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/favorites/themes" description="List favorited theme IDs">
+
+Same format as stocks. Returns `{ "items": ["theme-1", "theme-3"] }`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/favorites/themes" description="Toggle a theme favorite">
+
+Same toggle behavior. Request: `{ "item_id": "theme-1" }`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/favorites/articles" description="List bookmarked article IDs">
+
+Same format. Returns `{ "items": ["news-1", "report-3"] }`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/favorites/articles" description="Toggle an article bookmark">
+
+Same toggle behavior. Request: `{ "item_id": "news-1" }`.
+
+</ApiEndpoint>
+
+</Tab>
 <Tab label="WebSocket Status" icon="🔌">
 
 ## WebSocket Status Endpoint
@@ -889,19 +1184,42 @@ Each `OrderBookEntry` has: `id` (string), `price` (integer), `quantity` (integer
 
 ---
 
-## Rate Limits & Notes
+## Rate Limits & Security
 
 <InfoBox type="warning" title="Important limits to know">
-The backend rate-limits KIS API calls using an asyncio semaphore (15 concurrent requests). KIS allows approximately 20 requests/second. All KIS API calls have a 15-second timeout.
+The backend enforces rate limiting at two levels: per-IP global limits (100 req/min) and stricter auth endpoint limits (10 attempts per 15 min). KIS API calls are rate-limited via asyncio semaphore (15 concurrent).
 </InfoBox>
 
 <StatGrid columns={3}>
-  <StatCard value="15" label="Max concurrent requests" />
-  <StatCard value="~20/s" label="KIS rate limit" />
+  <StatCard value="100/min" label="Global rate limit per IP" />
+  <StatCard value="10/15min" label="Auth endpoint limit" />
   <StatCard value="15s" label="Request timeout" />
 </StatGrid>
 
-- **KIS Upstream Limits:** 15 concurrent requests via asyncio semaphore. KIS allows ~20 req/sec.
-- **Timeout:** 15-second timeout on all KIS calls. If KIS is slow or unreachable, the backend returns `502 Bad Gateway`.
-- **CORS:** All origins allowed during development (`allow_origins=["*"]`). Will be restricted in production.
-- **WebSocket Subscription Limit:** KIS supports ~40 real-time subscriptions per WebSocket session. The `StreamManager` uses reference counting to share subscriptions across multiple iOS clients.
+### Rate Limiting
+
+- **Global:** 100 requests per minute per IP address. Returns `429 Too Many Requests` when exceeded.
+- **Auth endpoints:** `/api/auth/login`, `/api/auth/register`, `/api/auth/apple` limited to 10 attempts per 15 minutes per IP (brute force protection).
+- **KIS Upstream:** 15 concurrent requests via asyncio semaphore. KIS allows ~20 req/sec.
+- **WebSocket:** Max 50 stock codes per subscription request. Requires JWT authentication via `?token=` query parameter.
+
+### Security Headers
+
+All responses include security headers:
+
+| Header | Value |
+|--------|-------|
+| `X-Content-Type-Options` | `nosniff` |
+| `X-Frame-Options` | `DENY` |
+| `X-XSS-Protection` | `1; mode=block` |
+| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=()` |
+
+### CORS
+
+CORS origins are restricted via the `ALLOWED_ORIGINS` environment variable (comma-separated). Only configured origins can make cross-origin requests.
+
+### WebSocket Authentication
+
+The `/ws/stream` endpoint requires a valid JWT access token passed as a query parameter: `wss://host/ws/stream?token={access_token}`. Connections without a valid token are rejected with code 1008.

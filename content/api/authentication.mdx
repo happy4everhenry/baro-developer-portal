@@ -278,12 +278,23 @@ Create a `.env` file in the backend root directory. The `load_dotenv()` call in 
 # Obtain from https://apiportal.koreainvestment.com
 KIS_APP_KEY=your_app_key_here
 KIS_APP_SECRET=your_app_secret_here
+KIS_ACCOUNT_NO=your_account_number
+
+# JWT Authentication (REQUIRED - server won't start without this)
+# Generate with: python -c "import secrets; print(secrets.token_urlsafe(64))"
+JWT_SECRET_KEY=your_secret_key_here
+
+# CORS — comma-separated allowed origins
+ALLOWED_ORIGINS=https://baro-backend-production.up.railway.app
 ```
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `KIS_APP_KEY` | Required | Application key from the KIS developer portal. Used in REST headers and OAuth token requests. |
-| `KIS_APP_SECRET` | Required | Application secret from the KIS developer portal. Used in REST headers and OAuth token requests. |
+| `KIS_APP_KEY` | Required | Application key from the KIS developer portal. |
+| `KIS_APP_SECRET` | Required | Application secret from the KIS developer portal. |
+| `KIS_ACCOUNT_NO` | Required | KIS account number for trading API access. |
+| `JWT_SECRET_KEY` | Required | Secret key for signing JWT tokens. Server raises `RuntimeError` if not set. |
+| `ALLOWED_ORIGINS` | Optional | Comma-separated CORS origins. Default: Railway production URL. |
 
 ### Missing Credentials Error
 
@@ -315,25 +326,32 @@ KIS WebSocket uses unencrypted `ws://` (port 21000), not `wss://`. This is the o
 <Accordion>
 <AccordionItem title="Current Measures" icon="🛡️" badge="Active" defaultOpen={true}>
 
-- Credentials stored in `.env` file (not in source code)
-- `.env` excluded from version control via `.gitignore`
-- Token caching prevents unnecessary token requests
-- `asyncio.Lock` prevents race conditions in token refresh
-- HTTPS for all KIS REST API calls (`verify=True`)
-- iOS clients never handle KIS credentials
-- Rate limiting via semaphore (15 concurrent requests)
+- **JWT authentication** — All protected endpoints require `Authorization: Bearer` header
+- **JWT secret enforced** — Server refuses to start if `JWT_SECRET_KEY` env var is not set (no hardcoded default)
+- **Password hashing** — bcrypt with random salt (not plain text)
+- **CORS restricted** — Origins controlled via `ALLOWED_ORIGINS` environment variable
+- **Rate limiting** — 100 req/min global, 10 attempts/15min on auth endpoints (brute force protection)
+- **Security headers** — X-Content-Type-Options, X-Frame-Options, HSTS, Referrer-Policy, Permissions-Policy
+- **WebSocket auth** — `/ws/stream` requires JWT token via `?token=` query parameter
+- **WebSocket input limits** — Max 50 stock codes per subscription, venue whitelist validation
+- **Parameterized SQL** — All database queries use parameter binding (no string concatenation)
+- **Token rotation** — Refresh tokens are revoked on use; new pair issued
+- **Credentials in `.env`** — excluded from git via `.gitignore`; `.env.example` has no real values
+- **KIS API proxy** — iOS clients never handle KIS credentials
+- **HTTPS** — Deployed on Railway with TLS termination
+- **Keychain storage** — iOS stores tokens with `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`
 
 </AccordionItem>
-<AccordionItem title="Production Recommendations" icon="🚀" badge="Future">
+<AccordionItem title="Future Improvements" icon="🚀" badge="Planned">
 
 - Use a secrets manager (AWS Secrets Manager, Vault) instead of `.env`
-- Restrict CORS origins (currently `allow_origins=["*"]`)
-- Add API key authentication for iOS -> backend requests
-- Implement request signing or JWT for client authentication
-- Use TLS (wss://) for WebSocket connections if possible
-- Add IP allowlisting for the backend server
+- Implement email verification on signup
+- Add password reset flow with time-limited tokens
+- Implement audit logging for security events
+- Add account lockout after repeated failed logins
 - Monitor and alert on token refresh failures
 - Rotate KIS credentials periodically
+- Replace `print()` with structured logging
 
 </AccordionItem>
 </Accordion>

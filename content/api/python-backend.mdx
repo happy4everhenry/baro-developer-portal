@@ -48,26 +48,39 @@ FastAPI backend serving real-time market data via KIS Open API (Korean stocks, c
 backend/
 ├── app/
 │   ├── __init__.py
-│   ├── main.py                # FastAPI app + lifespan hooks + CORS
-│   ├── database.py            # SQLite (aiosqlite) init + connection helper
+│   ├── main.py                # FastAPI app + lifespan + CORS + security headers + rate limiting
+│   ├── database.py            # SQLite (aiosqlite) — users, refresh_tokens, favorites
 │   ├── models/
+│   │   ├── auth.py            # Auth request/response models
 │   │   ├── market.py          # Pydantic response models (indices, FX)
 │   │   ├── stock.py           # Pydantic stock models
-│   │   └── auth.py            # Auth request/response models
+│   │   ├── news.py            # News article response models
+│   │   ├── event.py           # Event/promotion response models
+│   │   ├── banner.py          # Banner carousel response models
+│   │   ├── theme.py           # Market theme response models
+│   │   ├── favorite.py        # Favorites toggle/list models
+│   │   └── venue.py           # KRX/NXT/Combined venue enums
 │   ├── routers/
 │   │   ├── auth.py            # /api/auth/* (register, login, refresh, me, logout, apple)
 │   │   ├── market.py          # /api/market/* (indices, FX)
 │   │   ├── stock.py           # /api/stocks/* (KIS quote, chart, orderbook)
-│   │   └── websocket.py       # /ws/stream (real-time streaming)
+│   │   ├── news.py            # /api/news/* (articles, reports, disclosures)
+│   │   ├── events.py          # /api/events/* (promotions, competitions)
+│   │   ├── banners.py         # /api/banners (home carousel)
+│   │   ├── themes.py          # /api/themes (market sector themes)
+│   │   ├── favorites.py       # /api/favorites/* (per-user bookmarks)
+│   │   └── websocket.py       # /ws/stream (real-time streaming, JWT-authenticated)
 │   └── services/
-│       ├── auth_service.py     # JWT token creation, password hashing, Apple ID verification
-│       ├── kis_market_service.py # Market indices & FX data fetching
+│       ├── auth_service.py     # JWT tokens, bcrypt hashing, Apple ID verification
+│       ├── content_service.py  # News, events, banners, themes seed data
 │       ├── kis_auth.py         # KIS OAuth token + WS approval_key
+│       ├── kis_market_service.py # Market indices & FX data fetching
 │       ├── kis_stock_service.py# KIS REST API (quote, chart, rankings)
 │       ├── kis_websocket.py    # KIS WebSocket client (persistent conn)
 │       └── stream_manager.py   # Client subscriptions + fan-out
-├── .env                        # KIS_APP_KEY, KIS_APP_SECRET, etc.
-├── .env.example                # Template with all KIS API placeholders
+├── Procfile                    # Railway deployment start command
+├── .env                        # KIS_APP_KEY, JWT_SECRET_KEY, etc.
+├── .env.example                # Template with all env var placeholders
 └── requirements.txt            # fastapi, uvicorn, httpx, websockets, ...
 ```
 
@@ -239,17 +252,42 @@ REST API client for Korean stock data. Handles OAuth headers, sign-based price d
 
 | Method | Path | Response | Source |
 |---|---|---|---|
-| <StatusBadge status="live">GET</StatusBadge> | `/api/stock/quote` | `StockQuote` | KIS REST |
-| <StatusBadge status="live">GET</StatusBadge> | `/api/stock/chart` | `ChartData` | KIS REST |
-| <StatusBadge status="live">GET</StatusBadge> | `/api/stock/orderbook` | `OrderBookData` | KIS REST |
-| <StatusBadge status="live">GET</StatusBadge> | `/api/stock/rankings` | `[Stock]` | KIS REST |
+| <StatusBadge status="live">GET</StatusBadge> | `/api/stocks` | `PaginatedStockResponse` | KIS REST |
+| <StatusBadge status="live">GET</StatusBadge> | `/api/stocks/search` | `SearchResponse` | Mock (KIS N/A) |
+| <StatusBadge status="live">GET</StatusBadge> | `/api/stocks/{code}/detail` | `StockDetailResponse` | KIS REST |
+| <StatusBadge status="live">GET</StatusBadge> | `/api/stocks/{code}/chart` | `ChartData` | KIS REST |
+| <StatusBadge status="live">GET</StatusBadge> | `/api/stocks/{code}/orderbook` | `OrderBookResponse` | KIS REST |
+
+  </AccordionItem>
+  <AccordionItem title="Content (News, Events, Banners, Themes)" icon="📰">
+
+| Method | Path | Response | Source |
+|---|---|---|---|
+| <StatusBadge status="live">GET</StatusBadge> | `/api/news` | `PaginatedNewsResponse` | Seed Data |
+| <StatusBadge status="live">GET</StatusBadge> | `/api/news/stock/{code}` | `PaginatedNewsResponse` | Seed Data |
+| <StatusBadge status="live">GET</StatusBadge> | `/api/events` | `PaginatedEventResponse` | Seed Data |
+| <StatusBadge status="live">GET</StatusBadge> | `/api/events/{id}` | `EventItemResponse` | Seed Data |
+| <StatusBadge status="live">GET</StatusBadge> | `/api/banners` | `list[BannerItemResponse]` | Seed Data |
+| <StatusBadge status="live">GET</StatusBadge> | `/api/themes` | `list[MarketThemeResponse]` | Seed Data |
+
+  </AccordionItem>
+  <AccordionItem title="Favorites (Per-User)" icon="⭐">
+
+| Method | Path | Response | Source |
+|---|---|---|---|
+| <StatusBadge status="live">GET</StatusBadge> | `/api/favorites/stocks` | `FavoriteListResponse` | SQLite |
+| <StatusBadge status="live">POST</StatusBadge> | `/api/favorites/stocks` | `FavoriteStatusResponse` | SQLite |
+| <StatusBadge status="live">GET</StatusBadge> | `/api/favorites/themes` | `FavoriteListResponse` | SQLite |
+| <StatusBadge status="live">POST</StatusBadge> | `/api/favorites/themes` | `FavoriteStatusResponse` | SQLite |
+| <StatusBadge status="live">GET</StatusBadge> | `/api/favorites/articles` | `FavoriteListResponse` | SQLite |
+| <StatusBadge status="live">POST</StatusBadge> | `/api/favorites/articles` | `FavoriteStatusResponse` | SQLite |
 
   </AccordionItem>
   <AccordionItem title="Real-Time Streaming" icon="⚡">
 
 | Method | Path | Response | Source |
 |---|---|---|---|
-| <StatusBadge status="wip">WS</StatusBadge> | `/ws/stream` | `PriceUpdate (stream)` | KIS WebSocket |
+| <StatusBadge status="live">WS</StatusBadge> | `/ws/stream` | `PriceUpdate (stream)` | KIS WebSocket |
 | <StatusBadge status="live">GET</StatusBadge> | `/ws/status` | `StreamStatus` | Internal |
 
   </AccordionItem>

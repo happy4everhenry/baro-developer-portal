@@ -12,19 +12,25 @@ The **Login** screen is where you sign in to BARO. You can use your email and pa
   <Step number={1} title="App Launch">
     The splash screen checks for a stored JWT token in Keychain.
   </Step>
-  <Step number={2} title="Login Screen">
-    If no valid token is found, the login screen appears with two options.
+  <Step number={2} title="Biometric Check">
+    If Face ID / Touch ID is enrolled, the app automatically prompts for biometric authentication. Stored credentials are used to call `POST /api/auth/login` behind the scenes.
   </Step>
-  <Step number={3} title="Email / Password">
+  <Step number={3} title="Login Screen">
+    If no valid token and no biometric enrollment, the login screen appears with multiple options.
+  </Step>
+  <Step number={4} title="Email / Password">
     Enter your email and password. The app sends `POST /api/auth/login` to the backend.
   </Step>
-  <Step number={4} title="Apple Sign In (Alternative)">
+  <Step number={5} title="Apple Sign In (Alternative)">
     Tap "Sign in with Apple" for one-tap authentication via Apple ID.
   </Step>
-  <Step number={5} title="Token Storage">
+  <Step number={6} title="Biometric Enrollment">
+    After first successful login, the app offers to enable Face ID / Touch ID for future logins. Credentials are stored in biometric-protected Keychain.
+  </Step>
+  <Step number={7} title="Token Storage">
     On success, JWT access and refresh tokens are stored in Keychain.
   </Step>
-  <Step number={6} title="Navigate to Home">
+  <Step number={8} title="Navigate to Home">
     The app fetches user profile (`GET /api/auth/me`) and transitions to MainTabView.
   </Step>
 </StepGuide>
@@ -42,6 +48,7 @@ The **Login** screen is where you sign in to BARO. You can use your email and pa
 │                             │
 │  ── or ──                   │
 │                             │
+│  [Face ID / Touch ID]       │  ← Biometric login (if enrolled)
 │  [Sign in with Apple]       │  ← Apple Sign In button
 │                             │
 │  Don't have an account?     │
@@ -71,9 +78,21 @@ The **Login** screen is where you sign in to BARO. You can use your email and pa
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | Email/Password | `POST /api/auth/login` | Standard email login |
+| Face ID / Touch ID | `POST /api/auth/login` | Biometric-stored credentials sent to same endpoint |
 | Registration | `POST /api/auth/register` | New account with name, email, password |
 | Apple Sign In | `POST /api/auth/apple` | Apple ID with identity token |
 | Token Refresh | `POST /api/auth/refresh` | Silent refresh using stored refresh token |
+
+## Biometric Authentication (Face ID / Touch ID)
+
+The app supports biometric login via the `BiometricAuthManager`. After a successful email/password login, users are prompted to enroll Face ID or Touch ID. Credentials are stored in a biometric-protected Keychain entry using `kSecAccessControlBiometryCurrentSet`, which requires the device's current biometric data to read. If biometrics change (e.g., a new face is enrolled), stored credentials are automatically invalidated.
+
+| Key | Storage | Protection |
+|-----|---------|------------|
+| `com.baro.biometric.email` | Keychain | Face ID / Touch ID required to read |
+| `com.baro.biometric.password` | Keychain | Face ID / Touch ID required to read |
+
+**Important:** The backend does not know about biometrics. The iOS app retrieves stored credentials via biometric prompt and sends a standard `POST /api/auth/login` request.
 
 ## Token Management
 
@@ -86,9 +105,10 @@ The **Login** screen is where you sign in to BARO. You can use your email and pa
 
 | File | Purpose |
 |------|---------|
-| `Features/Auth/LoginView.swift` | Login form + Apple Sign In |
+| `Features/Auth/LoginView.swift` | Login form + Apple Sign In + Biometric login |
 | `Features/Auth/RegisterView.swift` | Registration form with validation |
 | `Core/Auth/AuthManager.swift` | JWT token lifecycle management |
-| `Core/Auth/KeychainHelper.swift` | Secure credential storage |
+| `Core/Auth/BiometricAuthManager.swift` | Face ID / Touch ID enrollment and authentication |
+| `Core/Auth/KeychainHelper.swift` | Secure credential storage (standard + biometric-protected) |
 | `Models/AuthModels.swift` | Request/response types |
 | `Models/User.swift` | User profile model |

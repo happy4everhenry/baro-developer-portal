@@ -27,7 +27,7 @@ Our API is built with **FastAPI**, a super-fast Python framework. It supports tw
 ## By the Numbers
 
 <StatGrid columns={4}>
-  <StatCard value="25+" label="REST Endpoints" />
+  <StatCard value="33" label="REST Endpoints" />
   <StatCard value="4" label="WebSocket Channels" />
   <StatCard value="12" label="AI Agent Services" />
   <StatCard value="99.9%" label="Uptime Target" />
@@ -76,7 +76,7 @@ Our API is built with **FastAPI**, a super-fast Python framework. It supports tw
 </FeatureGrid>
 
 <InfoBox type="note" title="Live vs Mock endpoints">
-Most endpoints return **live data** from the KIS Open API. The `/api/stocks/search` endpoint currently returns **mock data** as KIS does not provide a search API. Authentication endpoints (`/api/auth/*`) are fully live with SQLite-backed user storage.
+Most endpoints return **live data** from the KIS Open API. The `/api/stocks/search` endpoint currently returns **mock data** as KIS does not provide a search API. Authentication endpoints (`/api/auth/*`) are fully live with SQLite-backed user storage. Content endpoints (`/api/news`, `/api/events`, `/api/banners`, `/api/themes`) serve curated seed data. Favorites (`/api/favorites/*`) are persisted per-user in SQLite.
 </InfoBox>
 
 <InfoBox type="info" title="All roads lead to KIS">
