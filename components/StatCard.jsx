@@ -2,6 +2,7 @@ export function StatGrid({ children, columns = 4 }) {
   return (
     <div
       className="kl-stat-grid"
+      data-columns={columns}
       style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
     >
       {children}

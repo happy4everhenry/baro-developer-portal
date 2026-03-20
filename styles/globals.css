@@ -1298,6 +1298,20 @@ html[class~='dark'] .kl-compare-after { background: rgba(16,185,129,0.06); }
 }
 
 /* ================================================================
+   19b. SIDE-BY-SIDE LAYOUT (stacks on mobile)
+   ================================================================ */
+.kl-side-by-side {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+.kl-side-by-side > img,
+.kl-side-by-side > picture {
+  flex-shrink: 0;
+}
+
+/* ================================================================
    20. FLOW DIAGRAM
    ================================================================ */
 .kl-flow-diagram {
@@ -1431,14 +1445,14 @@ html[class~='dark'] .kl-flow-node-vm { color: var(--kl-amber); }
    23. KOREAN LABEL
    ================================================================ */
 .kl-kr-label {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--kl-text-3);
-  font-weight: 500;
+  font-weight: 400;
   font-family: 'Noto Sans KR', sans-serif;
-  display: inline-block;
-  margin-left: 8px;
-  vertical-align: baseline;
+  display: block;
+  margin: 6px 0 0 0;
   opacity: 0.5;
+  letter-spacing: 0.3px;
 }
 
 /* ================================================================
@@ -1514,9 +1528,9 @@ html[class~='dark'] .kl-flow-node-vm { color: var(--kl-amber); }
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   flex-wrap: wrap;
-  margin: 0 0 20px 0;
+  margin: 12px 0 8px 0;
   padding: 0;
   background: transparent;
   border-radius: 0;
@@ -1527,9 +1541,9 @@ html[class~='dark'] .kl-flow-node-vm { color: var(--kl-amber); }
   align-items: center;
   font-size: 10px;
   font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 4px;
-  letter-spacing: 0.4px;
+  padding: 3px 10px;
+  border-radius: var(--kl-radius-sm);
+  letter-spacing: 0.5px;
   text-transform: uppercase;
 }
 
@@ -1928,7 +1942,7 @@ hr {
   border: none;
   height: 1px;
   background: linear-gradient(90deg, transparent 5%, var(--kl-border) 30%, var(--kl-border) 70%, transparent 95%);
-  margin: 56px 0;
+  margin: 56px 0 !important;
 }
 
 /* --- Links: animated underline --- */
@@ -1980,10 +1994,18 @@ nav[class*="nextra-sidebar"] > ul > li > a {
   font-size: 14px !important;
 }
 
-/* --- Nextra Breadcrumb: tighter --- */
-nav[class*="nextra-breadcrumb"] {
-  margin-bottom: 8px !important;
+/* --- Nextra Breadcrumb --- */
+nav[class*="nextra-breadcrumb"],
+div[class*="nextra-breadcrumb"] {
+  margin-bottom: 16px !important;
   font-size: 13px !important;
+}
+
+/* --- Page header: title + Korean label + meta spacing --- */
+article h1:first-of-type,
+main > h1:first-of-type {
+  margin-top: 8px !important;
+  margin-bottom: 4px !important;
 }
 
 /* --- Lists: better spacing --- */
@@ -2007,11 +2029,12 @@ article.nextra-content {
   /* Tables horizontal scroll */
   table {
     display: block;
-    overflow-x: auto;
+    overflow-x: auto !important;
     -webkit-overflow-scrolling: touch;
-    white-space: nowrap;
   }
   table thead, table tbody, table tr { display: table; width: 100%; table-layout: auto; }
+  td { white-space: normal; word-break: break-word; }
+  td:first-child { white-space: nowrap; word-break: normal; }
   th, td { font-size: 12px; padding: 10px 14px; }
 
   .kl-props-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -2027,9 +2050,20 @@ article.nextra-content {
   .kl-quick-nav { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
   .kl-quick-nav-card { padding: 22px; }
 
-  /* Stats */
-  .kl-stat-grid { grid-template-columns: repeat(2, 1fr); }
+  /* Stats: 3+ columns → 2 columns on tablet */
+  .kl-stat-grid[data-columns="3"],
+  .kl-stat-grid[data-columns="4"],
+  .kl-stat-grid[data-columns="5"],
+  .kl-stat-grid[data-columns="6"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
   .kl-stat-value { font-size: clamp(18px, 4.5vw, 32px); }
+
+  /* Feature grid: 3+ columns → 2 columns on tablet */
+  .kl-feature-grid[data-columns="3"],
+  .kl-feature-grid[data-columns="4"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
 
   /* Tabs */
   .kl-tabs-content { padding: 22px 20px; }
@@ -2081,13 +2115,19 @@ article.nextra-content {
   .kl-quick-nav-title { font-size: 14px; }
   .kl-quick-nav-desc { font-size: 12px; }
 
-  /* Stats */
-  .kl-stat-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  /* Stats: 3+ columns → 2 columns, 2-column stays 2 */
+  .kl-stat-grid[data-columns="3"],
+  .kl-stat-grid[data-columns="4"],
+  .kl-stat-grid[data-columns="5"],
+  .kl-stat-grid[data-columns="6"] {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px;
+  }
   .kl-stat-card { padding: 18px; }
   .kl-stat-value { font-size: clamp(16px, 4vw, 28px); }
   .kl-stat-label { font-size: 11px; }
 
-  /* Feature cards */
+  /* Feature cards: all go to 1 column */
   .kl-feature-grid { grid-template-columns: 1fr !important; }
   .kl-feature-card { gap: 12px; padding: 16px 18px; }
   .kl-feature-card-icon { font-size: 22px; width: 38px; height: 38px; }
@@ -2166,6 +2206,11 @@ article.nextra-content {
   .kl-meta-tag { font-size: 10px; padding: 2px 8px; }
   .kl-meta-detail { font-size: 10px; }
 
+  /* Hide Nextra "Copy page" button on mobile — it overlaps content */
+  div[class*="float-end"]:has(button) {
+    display: none !important;
+  }
+
   /* Screen map */
   .kl-screen-map-device { max-width: 100%; border-radius: 28px; }
   .kl-screen-map-body { min-height: 420px; }
@@ -2197,6 +2242,42 @@ article.nextra-content {
   h4 { font-size: 16px !important; margin-top: 20px !important; }
   article p { font-size: 15px !important; line-height: 1.75 !important; }
   article li { font-size: 15px !important; line-height: 1.75 !important; }
+
+  /* Side-by-side: stack vertically */
+  .kl-side-by-side {
+    flex-direction: column !important;
+  }
+  .kl-side-by-side > img,
+  .kl-side-by-side > picture {
+    max-width: 200px !important;
+    align-self: center;
+  }
+
+  /* Inline flex in MDX: force stack on mobile */
+  div[style*="display:flex"][style*="align-items:flex-start"] {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  div[style*="display:flex"][style*="align-items:flex-start"] > img {
+    max-width: 200px !important;
+    align-self: center !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Logo display flex-wrap: ensure wrapping */
+  div[style*="display:flex"][style*="justify-content:center"] {
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+
+  /* Images/SVGs: prevent overflow */
+  article img,
+  main img,
+  article svg,
+  main svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
 
   /* Page meta: inline row, compact */
   .kl-page-meta { margin: 0 0 16px 0 !important; }
@@ -2237,10 +2318,16 @@ article.nextra-content {
   .kl-quick-nav-title { font-size: 14px; }
   .kl-quick-nav-desc { display: none; }
 
-  /* Stats */
-  .kl-stat-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  /* Stats — single column on small mobile for 3+ column grids */
+  .kl-stat-grid[data-columns="3"],
+  .kl-stat-grid[data-columns="4"],
+  .kl-stat-grid[data-columns="5"],
+  .kl-stat-grid[data-columns="6"] {
+    grid-template-columns: 1fr !important;
+    gap: 8px;
+  }
   .kl-stat-card { padding: 14px; }
-  .kl-stat-value { font-size: clamp(14px, 3.5vw, 24px); }
+  .kl-stat-value { font-size: clamp(16px, 4vw, 24px); }
   .kl-stat-label { font-size: 10px; margin-top: 4px; }
 
   /* Feature */
@@ -2329,7 +2416,7 @@ article.nextra-content {
   th { font-size: 10px; padding: 8px 10px; }
   td { font-size: 11px; padding: 8px 10px; }
   blockquote { font-size: 13px !important; }
-  hr { margin: 32px 0; }
+  hr { margin: 40px 0 !important; }
 
   /* Progress */
   .kl-progress-track { height: 5px; }

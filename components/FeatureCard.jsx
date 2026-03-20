@@ -47,7 +47,7 @@ export function FeatureCard({ icon, title, description, href, tag, color = 'jade
 
 export function FeatureGrid({ children, columns = 2 }) {
   return (
-    <div className="kl-feature-grid" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
+    <div className="kl-feature-grid" data-columns={columns} style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
       {children}
     </div>
   )
